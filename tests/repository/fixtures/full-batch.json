@@ -1,0 +1,690 @@
+{
+  "contract_version": "1.0.0",
+  "catalog_id": "semantic-facts-20261025",
+  "sources": [
+    {
+      "source_id": "src-a",
+      "root": "/workspace/a",
+      "content_state": "content-a",
+      "status": "available",
+      "dirty": true,
+      "has_untracked": true,
+      "excludes": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_id": "fact-a",
+      "node": {
+        "source_id": "src-a",
+        "subject_id": "project-a",
+        "node_id": "unit-a"
+      },
+      "fact_type": "F16",
+      "granularities": [
+        "L4"
+      ],
+      "fields": {
+        "strategy": {
+          "origin": "observed",
+          "knowledge": "supported",
+          "context": {
+            "source_ids": [
+              "src-a"
+            ],
+            "conditions": [],
+            "environment": {
+              "profile": "debug",
+              "unicode": "ֵ"
+            },
+            "language_semantics": [
+              "Python: insertion order"
+            ]
+          },
+          "coverage": {
+            "domain": "unit-a direct boundary",
+            "checked": [
+              "src/main.py"
+            ],
+            "excluded": [
+              "vendor/**"
+            ],
+            "completeness": "complete",
+            "method": "bounded enumeration"
+          },
+          "basis": {
+            "evidence": [
+              {
+                "evidence_id": "ev-0",
+                "source_id": "src-a",
+                "content_state": "content-a",
+                "kind": "source",
+                "locator": "source:missing/location",
+                "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "relation": "supports"
+              },
+              {
+                "evidence_id": "ev-1",
+                "source_id": "src-a",
+                "content_state": "content-a",
+                "kind": "manifest",
+                "locator": "manifest:missing/location",
+                "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "relation": "supports"
+              },
+              {
+                "evidence_id": "ev-2",
+                "source_id": "src-a",
+                "content_state": "content-a",
+                "kind": "configuration",
+                "locator": "configuration:missing/location",
+                "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "relation": "supports"
+              },
+              {
+                "evidence_id": "ev-3",
+                "source_id": "src-a",
+                "content_state": "content-a",
+                "kind": "documentation",
+                "locator": "documentation:missing/location",
+                "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "relation": "supports"
+              },
+              {
+                "evidence_id": "ev-4",
+                "source_id": "src-a",
+                "content_state": "content-a",
+                "kind": "observation",
+                "locator": "observation:missing/location",
+                "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "relation": "refutes"
+              }
+            ],
+            "premises": [],
+            "method": "source inspection",
+            "limitations": [
+              "fixture validates storage only"
+            ]
+          },
+          "validity": {
+            "state": "current",
+            "sources": [
+              {
+                "source_id": "src-a",
+                "content_state": "content-a"
+              }
+            ]
+          },
+          "value": {
+            "kind": "text",
+            "text": "stable deduplication"
+          }
+        }
+      }
+    },
+    {
+      "fact_id": "fact-b",
+      "node": {
+        "source_id": "src-a",
+        "subject_id": "project-a",
+        "node_id": "unit-a"
+      },
+      "fact_type": "F16",
+      "granularities": [
+        "L4"
+      ],
+      "fields": {
+        "strategy": {
+          "origin": "derived",
+          "knowledge": "supported",
+          "context": {
+            "source_ids": [
+              "src-a"
+            ],
+            "conditions": [],
+            "environment": {
+              "profile": "debug",
+              "unicode": "ֵ"
+            },
+            "language_semantics": [
+              "Python: insertion order"
+            ]
+          },
+          "coverage": {
+            "domain": "unit-a direct boundary",
+            "checked": [
+              "src/main.py"
+            ],
+            "excluded": [
+              "vendor/**"
+            ],
+            "completeness": "complete",
+            "method": "bounded enumeration"
+          },
+          "basis": {
+            "evidence": [
+              {
+                "evidence_id": "ev-0",
+                "source_id": "src-a",
+                "content_state": "content-a",
+                "kind": "source",
+                "locator": "source:missing/location",
+                "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "relation": "refutes"
+              },
+              {
+                "evidence_id": "ev-1",
+                "source_id": "src-a",
+                "content_state": "content-a",
+                "kind": "manifest",
+                "locator": "manifest:missing/location",
+                "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "relation": "supports"
+              },
+              {
+                "evidence_id": "ev-2",
+                "source_id": "src-a",
+                "content_state": "content-a",
+                "kind": "configuration",
+                "locator": "configuration:missing/location",
+                "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "relation": "supports"
+              },
+              {
+                "evidence_id": "ev-3",
+                "source_id": "src-a",
+                "content_state": "content-a",
+                "kind": "documentation",
+                "locator": "documentation:missing/location",
+                "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "relation": "supports"
+              },
+              {
+                "evidence_id": "ev-4",
+                "source_id": "src-a",
+                "content_state": "content-a",
+                "kind": "observation",
+                "locator": "observation:missing/location",
+                "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "relation": "refutes"
+              }
+            ],
+            "premises": [
+              {
+                "node": {
+                  "source_id": "src-a",
+                  "subject_id": "project-a",
+                  "node_id": "unit-a"
+                },
+                "fact_id": "fact-a",
+                "field": "strategy",
+                "content_state": "content-a"
+              }
+            ],
+            "method": "source inspection",
+            "limitations": [
+              "fixture validates storage only"
+            ]
+          },
+          "validity": {
+            "state": "current",
+            "sources": [
+              {
+                "source_id": "src-a",
+                "content_state": "content-a"
+              }
+            ]
+          },
+          "value": {
+            "kind": "text",
+            "text": "alternate raw interpretation"
+          }
+        },
+        "open_items": {
+          "origin": "interpreted",
+          "knowledge": "absent",
+          "context": {
+            "source_ids": [
+              "src-a"
+            ],
+            "conditions": [],
+            "environment": {
+              "profile": "debug",
+              "unicode": "ֵ"
+            },
+            "language_semantics": [
+              "Python: insertion order"
+            ]
+          },
+          "coverage": {
+            "domain": "unit-a direct boundary",
+            "checked": [
+              "src/main.py"
+            ],
+            "excluded": [
+              "vendor/**"
+            ],
+            "completeness": "complete",
+            "method": "bounded enumeration"
+          },
+          "basis": {
+            "evidence": [
+              {
+                "evidence_id": "ev-0",
+                "source_id": "src-a",
+                "content_state": "content-a",
+                "kind": "source",
+                "locator": "source:missing/location",
+                "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "relation": "supports"
+              },
+              {
+                "evidence_id": "ev-1",
+                "source_id": "src-a",
+                "content_state": "content-a",
+                "kind": "manifest",
+                "locator": "manifest:missing/location",
+                "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "relation": "supports"
+              },
+              {
+                "evidence_id": "ev-2",
+                "source_id": "src-a",
+                "content_state": "content-a",
+                "kind": "configuration",
+                "locator": "configuration:missing/location",
+                "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "relation": "supports"
+              },
+              {
+                "evidence_id": "ev-3",
+                "source_id": "src-a",
+                "content_state": "content-a",
+                "kind": "documentation",
+                "locator": "documentation:missing/location",
+                "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "relation": "supports"
+              },
+              {
+                "evidence_id": "ev-4",
+                "source_id": "src-a",
+                "content_state": "content-a",
+                "kind": "observation",
+                "locator": "observation:missing/location",
+                "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "relation": "refutes"
+              }
+            ],
+            "premises": [],
+            "method": "source inspection",
+            "limitations": [
+              "fixture validates storage only"
+            ]
+          },
+          "validity": {
+            "state": "current",
+            "sources": [
+              {
+                "source_id": "src-a",
+                "content_state": "content-a"
+              }
+            ]
+          },
+          "negative": {
+            "domain": "unit-a direct boundary",
+            "claim": "no extra operation in checked domain",
+            "check_evidence_ids": [
+              "ev-0"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "fact_id": "fact-old",
+      "node": {
+        "source_id": "src-a",
+        "subject_id": "project-a",
+        "node_id": "unit-a"
+      },
+      "fact_type": "F16",
+      "granularities": [
+        "L4"
+      ],
+      "fields": {
+        "strategy": {
+          "origin": "observed",
+          "knowledge": "insufficient",
+          "context": {
+            "source_ids": [
+              "src-a"
+            ],
+            "conditions": [],
+            "environment": {
+              "profile": "debug",
+              "unicode": "ֵ"
+            },
+            "language_semantics": [
+              "Python: insertion order"
+            ]
+          },
+          "coverage": {
+            "domain": "unit-a direct boundary",
+            "checked": [
+              "src/main.py"
+            ],
+            "excluded": [
+              "vendor/**"
+            ],
+            "completeness": "complete",
+            "method": "bounded enumeration"
+          },
+          "basis": {
+            "evidence": [
+              {
+                "evidence_id": "ev-0",
+                "source_id": "src-a",
+                "content_state": "content-a",
+                "kind": "source",
+                "locator": "source:missing/location",
+                "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "relation": "supports"
+              },
+              {
+                "evidence_id": "ev-1",
+                "source_id": "src-a",
+                "content_state": "content-a",
+                "kind": "manifest",
+                "locator": "manifest:missing/location",
+                "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "relation": "supports"
+              },
+              {
+                "evidence_id": "ev-2",
+                "source_id": "src-a",
+                "content_state": "content-a",
+                "kind": "configuration",
+                "locator": "configuration:missing/location",
+                "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "relation": "supports"
+              },
+              {
+                "evidence_id": "ev-3",
+                "source_id": "src-a",
+                "content_state": "content-a",
+                "kind": "documentation",
+                "locator": "documentation:missing/location",
+                "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "relation": "supports"
+              },
+              {
+                "evidence_id": "ev-4",
+                "source_id": "src-a",
+                "content_state": "content-a",
+                "kind": "observation",
+                "locator": "observation:missing/location",
+                "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "relation": "refutes"
+              }
+            ],
+            "premises": [],
+            "method": "source inspection",
+            "limitations": [
+              "fixture validates storage only"
+            ]
+          },
+          "validity": {
+            "state": "modified",
+            "sources": [
+              {
+                "source_id": "src-a",
+                "content_state": "content-a"
+              }
+            ],
+            "reason": "source changed"
+          },
+          "value": {
+            "kind": "text",
+            "text": "stable deduplication"
+          },
+          "reason": "insufficient fixture evidence"
+        }
+      }
+    }
+  ],
+  "navigation": [
+    {
+      "edge_id": "member-a",
+      "source": {
+        "source_id": "src-a",
+        "subject_id": "project-a",
+        "node_id": "unit-a"
+      },
+      "target": {
+        "source_id": "src-a",
+        "subject_id": "project-a",
+        "node_id": "child-a"
+      },
+      "relation": "workspace_member",
+      "assertion": {
+        "origin": "observed",
+        "knowledge": "supported",
+        "context": {
+          "source_ids": [
+            "src-a"
+          ],
+          "conditions": [],
+          "environment": {
+            "profile": "debug",
+            "unicode": "ֵ"
+          },
+          "language_semantics": [
+            "Python: insertion order"
+          ]
+        },
+        "coverage": {
+          "domain": "unit-a direct boundary",
+          "checked": [
+            "src/main.py"
+          ],
+          "excluded": [
+            "vendor/**"
+          ],
+          "completeness": "complete",
+          "method": "bounded enumeration"
+        },
+        "basis": {
+          "evidence": [
+            {
+              "evidence_id": "ev-0",
+              "source_id": "src-a",
+              "content_state": "content-a",
+              "kind": "source",
+              "locator": "source:missing/location",
+              "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "relation": "supports"
+            },
+            {
+              "evidence_id": "ev-1",
+              "source_id": "src-a",
+              "content_state": "content-a",
+              "kind": "manifest",
+              "locator": "manifest:missing/location",
+              "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "relation": "supports"
+            },
+            {
+              "evidence_id": "ev-2",
+              "source_id": "src-a",
+              "content_state": "content-a",
+              "kind": "configuration",
+              "locator": "configuration:missing/location",
+              "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "relation": "supports"
+            },
+            {
+              "evidence_id": "ev-3",
+              "source_id": "src-a",
+              "content_state": "content-a",
+              "kind": "documentation",
+              "locator": "documentation:missing/location",
+              "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "relation": "supports"
+            },
+            {
+              "evidence_id": "ev-4",
+              "source_id": "src-a",
+              "content_state": "content-a",
+              "kind": "observation",
+              "locator": "observation:missing/location",
+              "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "relation": "refutes"
+            }
+          ],
+          "premises": [],
+          "method": "source inspection",
+          "limitations": [
+            "fixture validates storage only"
+          ]
+        },
+        "validity": {
+          "state": "current",
+          "sources": [
+            {
+              "source_id": "src-a",
+              "content_state": "content-a"
+            }
+          ]
+        },
+        "value": {
+          "kind": "text",
+          "text": "stable deduplication"
+        }
+      }
+    }
+  ],
+  "direct_nodes": [
+    {
+      "target": {
+        "kind": "node",
+        "node": {
+          "source_id": "src-a",
+          "subject_id": "project-a",
+          "node_id": "unit-a"
+        }
+      },
+      "granularity": "L4",
+      "boundary": "unit-a direct boundary",
+      "children": [
+        {
+          "source_id": "src-a",
+          "subject_id": "project-a",
+          "node_id": "child-a"
+        }
+      ],
+      "assertion": {
+        "origin": "observed",
+        "knowledge": "supported",
+        "context": {
+          "source_ids": [
+            "src-a"
+          ],
+          "conditions": [],
+          "environment": {},
+          "language_semantics": []
+        },
+        "coverage": {
+          "domain": "unit-a direct boundary",
+          "checked": [
+            "src/main.py"
+          ],
+          "excluded": [],
+          "completeness": "partial",
+          "method": "bounded enumeration"
+        },
+        "basis": {
+          "evidence": [
+            {
+              "evidence_id": "ev-a",
+              "source_id": "src-a",
+              "content_state": "content-a",
+              "kind": "source",
+              "locator": "src/main.py:1-8",
+              "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "relation": "supports"
+            }
+          ],
+          "premises": [],
+          "method": "source inspection",
+          "limitations": []
+        },
+        "validity": {
+          "state": "current",
+          "sources": [
+            {
+              "source_id": "src-a",
+              "content_state": "content-a"
+            }
+          ]
+        },
+        "value": {
+          "kind": "text",
+          "text": "stable deduplication"
+        }
+      }
+    }
+  ],
+  "conflicts": [
+    {
+      "conflict_id": "conflict-a",
+      "members": [
+        {
+          "node": {
+            "source_id": "src-a",
+            "subject_id": "project-a",
+            "node_id": "unit-a"
+          },
+          "fact_id": "fact-a",
+          "field": "strategy",
+          "content_state": "content-a"
+        },
+        {
+          "node": {
+            "source_id": "src-a",
+            "subject_id": "project-a",
+            "node_id": "unit-a"
+          },
+          "fact_id": "fact-b",
+          "field": "strategy",
+          "content_state": "content-a"
+        }
+      ],
+      "reason": "two supplied candidates",
+      "context": {
+        "source_ids": [
+          "src-a"
+        ],
+        "conditions": [],
+        "environment": {
+          "profile": "debug",
+          "unicode": "ֵ"
+        },
+        "language_semantics": [
+          "Python: insertion order"
+        ]
+      },
+      "evidence": [
+        {
+          "evidence_id": "ev-a",
+          "source_id": "src-a",
+          "content_state": "content-a",
+          "kind": "source",
+          "locator": "src/main.py:1-8",
+          "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "relation": "refutes"
+        }
+      ]
+    }
+  ]
+}
+
