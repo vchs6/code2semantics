@@ -1,0 +1,902 @@
+{
+  "contract_version": "1.0.0",
+  "catalog_id": "semantic-facts-20261025",
+  "research": {
+    "path": "openspec/changes/survey-semantic-fact-requirements/research/semantic-fact-requirements.md",
+    "sha256": "825143510a29e9ca9e34a2b50a40bdcfc776a657da963c13d174087054c906b8",
+    "sections": [
+      "2",
+      "3",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9"
+    ],
+    "hash_normalization": "UTF-8 text with LF newlines"
+  },
+  "observation_granularities": [
+    {
+      "id": "L1",
+      "name": "软件系统与协作全景",
+      "basis": "§5 L1"
+    },
+    {
+      "id": "L2",
+      "name": "职责组件与协作",
+      "basis": "§5 L2"
+    },
+    {
+      "id": "L3",
+      "name": "程序元素与契约",
+      "basis": "§5 L3"
+    },
+    {
+      "id": "L4",
+      "name": "内部行为与算法",
+      "basis": "§5 L4"
+    }
+  ],
+  "organization_axes": [
+    {
+      "id": "O1",
+      "name": "分析范围与入口",
+      "role": "entry",
+      "basis": "§5 O1"
+    },
+    {
+      "id": "O2",
+      "name": "软件组织",
+      "role": "relational_view",
+      "basis": "§5 O2"
+    },
+    {
+      "id": "O3",
+      "name": "依赖交互与行为",
+      "role": "crosscutting_view",
+      "basis": "§5 O3"
+    },
+    {
+      "id": "O4",
+      "name": "证据与知识状态",
+      "role": "assertion_envelope",
+      "basis": "§5 O4"
+    },
+    {
+      "id": "O5",
+      "name": "实现与细化导航",
+      "role": "navigation",
+      "basis": "§5 O5"
+    }
+  ],
+  "assertion_envelope": [
+    "origin",
+    "knowledge",
+    "context",
+    "coverage",
+    "basis"
+  ],
+  "fact_types": [
+    {
+      "id": "F1",
+      "name": "分析覆盖",
+      "requirement": "R1",
+      "organizations": [
+        "O1"
+      ],
+      "basis": [
+        "§3 R1",
+        "§6 F1",
+        "§7"
+      ],
+      "fields": {
+        "selection": {
+          "description": "入口定位与选择依据",
+          "value_shape": "semantic_value"
+        },
+        "included": {
+          "description": "包含对象",
+          "value_shape": "semantic_value"
+        },
+        "excluded": {
+          "description": "排除对象",
+          "value_shape": "semantic_value"
+        },
+        "observation": {
+          "description": "观察状态与时点",
+          "value_shape": "semantic_value"
+        },
+        "external": {
+          "description": "范围外标志",
+          "value_shape": "semantic_value"
+        },
+        "limitations": {
+          "description": "覆盖限制",
+          "value_shape": "semantic_value"
+        }
+      },
+      "production_status": "unverified"
+    },
+    {
+      "id": "F2",
+      "name": "软件单元身份与边界",
+      "requirement": "R2",
+      "organizations": [
+        "L1",
+        "O1",
+        "O2"
+      ],
+      "basis": [
+        "§3 R2",
+        "§6 F2",
+        "§7"
+      ],
+      "fields": {
+        "identity": {
+          "description": "身份指代与候选同一性",
+          "value_shape": "reference_value"
+        },
+        "roles": {
+          "description": "角色类别",
+          "value_shape": "semantic_value"
+        },
+        "names": {
+          "description": "名称与别名",
+          "value_shape": "semantic_value"
+        },
+        "boundary": {
+          "description": "边界描述与依据",
+          "value_shape": "semantic_value"
+        },
+        "locators": {
+          "description": "定位线索",
+          "value_shape": "semantic_value"
+        }
+      },
+      "production_status": "unverified"
+    },
+    {
+      "id": "F3",
+      "name": "用途与运行形态",
+      "requirement": "R3",
+      "organizations": [
+        "L1"
+      ],
+      "basis": [
+        "§3 R3",
+        "§6 F3",
+        "§7"
+      ],
+      "fields": {
+        "purpose": {
+          "description": "目的与受众",
+          "value_shape": "semantic_value"
+        },
+        "capabilities": {
+          "description": "提供能力",
+          "value_shape": "semantic_value"
+        },
+        "entries": {
+          "description": "入口关联",
+          "value_shape": "reference_list"
+        },
+        "runtime": {
+          "description": "运行角色",
+          "value_shape": "semantic_value"
+        },
+        "deployment": {
+          "description": "部署角色",
+          "value_shape": "semantic_value"
+        },
+        "environment": {
+          "description": "环境前提",
+          "value_shape": "semantic_value"
+        },
+        "actors": {
+          "description": "外部参与者",
+          "value_shape": "reference_list"
+        }
+      },
+      "production_status": "unverified"
+    },
+    {
+      "id": "F4",
+      "name": "组织",
+      "requirement": "R4",
+      "organizations": [
+        "O2"
+      ],
+      "basis": [
+        "§3 R4",
+        "§6 F4",
+        "§7"
+      ],
+      "fields": {
+        "source": {
+          "description": "被组织主体",
+          "value_shape": "reference_value"
+        },
+        "target": {
+          "description": "容器或逻辑主体",
+          "value_shape": "reference_value"
+        },
+        "kind": {
+          "description": "物理包含/工作空间成员/逻辑从属/内部组成",
+          "value_shape": "semantic_value"
+        },
+        "direction": {
+          "description": "关系方向",
+          "value_shape": "semantic_value"
+        },
+        "member_scope": {
+          "description": "成员与组成范围",
+          "value_shape": "semantic_value"
+        },
+        "enumeration": {
+          "description": "是否完整枚举",
+          "value_shape": "semantic_value"
+        }
+      },
+      "production_status": "unverified"
+    },
+    {
+      "id": "F5",
+      "name": "职责与架构约束",
+      "requirement": "R5",
+      "organizations": [
+        "L2"
+      ],
+      "basis": [
+        "§3 R5",
+        "§6 F5",
+        "§7"
+      ],
+      "fields": {
+        "responsibility": {
+          "description": "职责陈述",
+          "value_shape": "semantic_value"
+        },
+        "bearers": {
+          "description": "承担主体",
+          "value_shape": "reference_list"
+        },
+        "collaboration": {
+          "description": "协作角色",
+          "value_shape": "semantic_value"
+        },
+        "boundary": {
+          "description": "边界约束及理由",
+          "value_shape": "semantic_value"
+        },
+        "implementations": {
+          "description": "实现主体关联",
+          "value_shape": "reference_list"
+        },
+        "premises": {
+          "description": "解释前提",
+          "value_shape": "semantic_value"
+        }
+      },
+      "production_status": "unverified"
+    },
+    {
+      "id": "F6",
+      "name": "依赖",
+      "requirement": "R6",
+      "organizations": [
+        "L1",
+        "L2",
+        "L3",
+        "L4",
+        "O3"
+      ],
+      "basis": [
+        "§3 R6",
+        "§6 F6",
+        "§7"
+      ],
+      "fields": {
+        "source": {
+          "description": "依赖源",
+          "value_shape": "reference_value"
+        },
+        "target": {
+          "description": "依赖目标或占位",
+          "value_shape": "reference_value"
+        },
+        "kind": {
+          "description": "构建/代码接口/运行/数据/部署",
+          "value_shape": "semantic_value"
+        },
+        "direction": {
+          "description": "源到目标",
+          "value_shape": "semantic_value"
+        },
+        "scope": {
+          "description": "依赖作用域",
+          "value_shape": "semantic_value"
+        },
+        "necessity": {
+          "description": "必需或可选",
+          "value_shape": "semantic_value"
+        },
+        "resolution": {
+          "description": "目标解析状态",
+          "value_shape": "semantic_value"
+        },
+        "cycle": {
+          "description": "结构环/条件可满足环/观察循环及联合条件判定",
+          "value_shape": "semantic_value"
+        }
+      },
+      "production_status": "unverified"
+    },
+    {
+      "id": "F7",
+      "name": "交互",
+      "requirement": "R7",
+      "organizations": [
+        "L2",
+        "O3"
+      ],
+      "basis": [
+        "§3 R7",
+        "§6 F7",
+        "§7"
+      ],
+      "fields": {
+        "participants": {
+          "description": "参与者与各自角色",
+          "value_shape": "participant_set"
+        },
+        "kind": {
+          "description": "发送/接收/响应等交互种类",
+          "value_shape": "semantic_value"
+        },
+        "payload": {
+          "description": "载荷语义",
+          "value_shape": "semantic_value"
+        },
+        "trigger": {
+          "description": "触发与守卫",
+          "value_shape": "semantic_value"
+        },
+        "ordering": {
+          "description": "时序并发及因果关系",
+          "value_shape": "semantic_value"
+        },
+        "paths": {
+          "description": "成功与失败路径",
+          "value_shape": "semantic_value"
+        },
+        "mode": {
+          "description": "实际观察或静态可能",
+          "value_shape": "semantic_value"
+        }
+      },
+      "production_status": "unverified"
+    },
+    {
+      "id": "F8",
+      "name": "能力与接口契约",
+      "requirement": "R8",
+      "organizations": [
+        "L2",
+        "L3"
+      ],
+      "basis": [
+        "§3 R8",
+        "§6 F8",
+        "§7"
+      ],
+      "fields": {
+        "owner": {
+          "description": "所属主体",
+          "value_shape": "reference_value"
+        },
+        "capability": {
+          "description": "能力语义",
+          "value_shape": "semantic_value"
+        },
+        "inputs": {
+          "description": "输入类型与含义",
+          "value_shape": "semantic_value"
+        },
+        "outputs": {
+          "description": "输出类型与含义",
+          "value_shape": "semantic_value"
+        },
+        "constraints": {
+          "description": "前后条件及约束",
+          "value_shape": "semantic_value"
+        },
+        "visibility": {
+          "description": "可见性",
+          "value_shape": "semantic_value"
+        },
+        "effects": {
+          "description": "副作用",
+          "value_shape": "semantic_value"
+        },
+        "outcomes": {
+          "description": "错误与协议结果",
+          "value_shape": "semantic_value"
+        }
+      },
+      "production_status": "unverified"
+    },
+    {
+      "id": "F9",
+      "name": "程序元素与类型",
+      "requirement": "R9",
+      "organizations": [
+        "L3"
+      ],
+      "basis": [
+        "§3 R9",
+        "§6 F9",
+        "§7"
+      ],
+      "fields": {
+        "identity": {
+          "description": "元素身份与语义角色",
+          "value_shape": "reference_value"
+        },
+        "name": {
+          "description": "名称",
+          "value_shape": "semantic_value"
+        },
+        "declaration": {
+          "description": "声明或定义及位置",
+          "value_shape": "semantic_value"
+        },
+        "scope": {
+          "description": "所属作用域",
+          "value_shape": "reference_value"
+        },
+        "type": {
+          "description": "类型语义",
+          "value_shape": "semantic_value"
+        },
+        "type_relations": {
+          "description": "组合继承等类型关系",
+          "value_shape": "semantic_value"
+        },
+        "visibility": {
+          "description": "可见性",
+          "value_shape": "semantic_value"
+        },
+        "language_semantics": {
+          "description": "影响行为的语言特有信息与原始语义引用",
+          "value_shape": "semantic_value"
+        }
+      },
+      "production_status": "unverified"
+    },
+    {
+      "id": "F10",
+      "name": "引用与绑定",
+      "requirement": "R9",
+      "organizations": [
+        "L3"
+      ],
+      "basis": [
+        "§3 R9",
+        "§6 F10",
+        "§7"
+      ],
+      "fields": {
+        "site": {
+          "description": "引用主体与位置",
+          "value_shape": "reference_value"
+        },
+        "targets": {
+          "description": "目标或候选集合",
+          "value_shape": "candidate_set"
+        },
+        "scope": {
+          "description": "绑定作用域与环境",
+          "value_shape": "semantic_value"
+        },
+        "resolution": {
+          "description": "解析依据及状态",
+          "value_shape": "semantic_value"
+        },
+        "target_conditions": {
+          "description": "各候选成立条件",
+          "value_shape": "candidate_set"
+        },
+        "completeness": {
+          "description": "候选完整性与未知原因",
+          "value_shape": "semantic_value"
+        }
+      },
+      "production_status": "unverified"
+    },
+    {
+      "id": "F11",
+      "name": "调用与分派",
+      "requirement": "R10",
+      "organizations": [
+        "L3",
+        "L4",
+        "O3"
+      ],
+      "basis": [
+        "§3 R10",
+        "§6 F11",
+        "§7"
+      ],
+      "fields": {
+        "site": {
+          "description": "调用位置",
+          "value_shape": "reference_value"
+        },
+        "source": {
+          "description": "调用者",
+          "value_shape": "reference_value"
+        },
+        "targets": {
+          "description": "接收者或候选目标",
+          "value_shape": "candidate_set"
+        },
+        "arguments": {
+          "description": "参数与结果关联",
+          "value_shape": "binding_set"
+        },
+        "dispatch": {
+          "description": "分派语义与条件",
+          "value_shape": "semantic_value"
+        },
+        "continuations": {
+          "description": "正常与异常续接",
+          "value_shape": "edge_set"
+        },
+        "mode": {
+          "description": "静态可能或动态观察",
+          "value_shape": "semantic_value"
+        }
+      },
+      "production_status": "unverified"
+    },
+    {
+      "id": "F12",
+      "name": "数据流与效应",
+      "requirement": "R11",
+      "organizations": [
+        "L1",
+        "L2",
+        "L3",
+        "L4",
+        "O3"
+      ],
+      "basis": [
+        "§3 R11",
+        "§6 F12",
+        "§7"
+      ],
+      "fields": {
+        "source": {
+          "description": "来源",
+          "value_shape": "reference_value"
+        },
+        "target": {
+          "description": "去向",
+          "value_shape": "reference_value"
+        },
+        "data": {
+          "description": "数据资源身份",
+          "value_shape": "reference_list"
+        },
+        "operation": {
+          "description": "定义使用读写等操作语义",
+          "value_shape": "semantic_value"
+        },
+        "path": {
+          "description": "条件与路径",
+          "value_shape": "semantic_value"
+        },
+        "transformation": {
+          "description": "转换关系",
+          "value_shape": "semantic_value"
+        },
+        "aliasing": {
+          "description": "别名与共享状态",
+          "value_shape": "edge_set"
+        },
+        "effects": {
+          "description": "外部副作用",
+          "value_shape": "semantic_value"
+        },
+        "precision": {
+          "description": "分析精确性",
+          "value_shape": "semantic_value"
+        }
+      },
+      "production_status": "unverified"
+    },
+    {
+      "id": "F13",
+      "name": "状态与生命周期",
+      "requirement": "R12",
+      "organizations": [
+        "L1",
+        "L2",
+        "L3",
+        "L4",
+        "O3"
+      ],
+      "basis": [
+        "§3 R12",
+        "§6 F13",
+        "§7"
+      ],
+      "fields": {
+        "owner": {
+          "description": "状态主体",
+          "value_shape": "reference_value"
+        },
+        "before": {
+          "description": "前状态",
+          "value_shape": "semantic_value"
+        },
+        "after": {
+          "description": "后状态",
+          "value_shape": "semantic_value"
+        },
+        "trigger": {
+          "description": "触发事件",
+          "value_shape": "semantic_value"
+        },
+        "guard": {
+          "description": "守卫",
+          "value_shape": "semantic_value"
+        },
+        "action": {
+          "description": "转换动作",
+          "value_shape": "semantic_value"
+        },
+        "lifetime": {
+          "description": "起止与持有阶段",
+          "value_shape": "semantic_value"
+        },
+        "composition": {
+          "description": "并发或复合关系",
+          "value_shape": "semantic_value"
+        },
+        "cleanup": {
+          "description": "清理及恢复条件",
+          "value_shape": "semantic_value"
+        }
+      },
+      "production_status": "unverified"
+    },
+    {
+      "id": "F14",
+      "name": "约束与错误行为",
+      "requirement": "R13",
+      "organizations": [
+        "L2",
+        "L3",
+        "L4",
+        "O3"
+      ],
+      "basis": [
+        "§3 R13",
+        "§6 F14",
+        "§7"
+      ],
+      "fields": {
+        "constraint": {
+          "description": "约束陈述",
+          "value_shape": "semantic_value"
+        },
+        "scope": {
+          "description": "作用域",
+          "value_shape": "semantic_value"
+        },
+        "error_kind": {
+          "description": "违约或错误类别",
+          "value_shape": "semantic_value"
+        },
+        "origin": {
+          "description": "产生点",
+          "value_shape": "reference_value"
+        },
+        "propagation": {
+          "description": "传播路径",
+          "value_shape": "semantic_value"
+        },
+        "handling": {
+          "description": "捕获补偿重试与恢复",
+          "value_shape": "semantic_value"
+        },
+        "after": {
+          "description": "后续状态",
+          "value_shape": "semantic_value"
+        }
+      },
+      "production_status": "unverified"
+    },
+    {
+      "id": "F15",
+      "name": "内部控制与计算",
+      "requirement": "R14",
+      "organizations": [
+        "L4"
+      ],
+      "basis": [
+        "§3 R14",
+        "§6 F15",
+        "§7"
+      ],
+      "fields": {
+        "owner": {
+          "description": "所属元素",
+          "value_shape": "reference_value"
+        },
+        "operation": {
+          "description": "步骤身份与语义操作",
+          "value_shape": "semantic_value"
+        },
+        "inputs": {
+          "description": "输入值",
+          "value_shape": "reference_list"
+        },
+        "outputs": {
+          "description": "输出值",
+          "value_shape": "reference_list"
+        },
+        "successors": {
+          "description": "正常异常及恢复后继",
+          "value_shape": "edge_set"
+        },
+        "guards": {
+          "description": "守卫",
+          "value_shape": "semantic_value"
+        },
+        "back_edges": {
+          "description": "循环与递归回边",
+          "value_shape": "edge_set"
+        },
+        "effects": {
+          "description": "局部效应",
+          "value_shape": "semantic_value"
+        }
+      },
+      "production_status": "unverified"
+    },
+    {
+      "id": "F16",
+      "name": "算法解释",
+      "requirement": "R14",
+      "organizations": [
+        "L4"
+      ],
+      "basis": [
+        "§3 R14",
+        "§6 F16",
+        "§7"
+      ],
+      "fields": {
+        "steps": {
+          "description": "所解释步骤集合",
+          "value_shape": "reference_list"
+        },
+        "goal": {
+          "description": "目标与假设",
+          "value_shape": "semantic_value"
+        },
+        "strategy": {
+          "description": "计算策略",
+          "value_shape": "semantic_value"
+        },
+        "invariants": {
+          "description": "不变量",
+          "value_shape": "semantic_value"
+        },
+        "termination": {
+          "description": "终止陈述",
+          "value_shape": "semantic_value"
+        },
+        "complexity": {
+          "description": "复杂度陈述",
+          "value_shape": "semantic_value"
+        },
+        "argument": {
+          "description": "推导或证明理由",
+          "value_shape": "semantic_value"
+        },
+        "open_items": {
+          "description": "未决项",
+          "value_shape": "semantic_value"
+        }
+      },
+      "production_status": "unverified"
+    },
+    {
+      "id": "F17",
+      "name": "证据与知识状态",
+      "requirement": "R15",
+      "organizations": [
+        "O4"
+      ],
+      "basis": [
+        "§3 R15",
+        "§6 F17",
+        "§7"
+      ],
+      "fields": {
+        "assertion": {
+          "description": "断言指代",
+          "value_shape": "semantic_value"
+        },
+        "counterevidence": {
+          "description": "反证与冲突",
+          "value_shape": "semantic_value"
+        },
+        "process": {
+          "description": "推导过程",
+          "value_shape": "semantic_value"
+        },
+        "gaps": {
+          "description": "缺口说明",
+          "value_shape": "semantic_value"
+        }
+      },
+      "production_status": "unverified"
+    },
+    {
+      "id": "F18",
+      "name": "实现细化与摘要追踪",
+      "requirement": "R16",
+      "organizations": [
+        "L1",
+        "L2",
+        "L3",
+        "L4",
+        "O5"
+      ],
+      "basis": [
+        "§3 R16",
+        "§6 F18",
+        "§7"
+      ],
+      "fields": {
+        "source": {
+          "description": "起点",
+          "value_shape": "reference_value"
+        },
+        "target": {
+          "description": "终点",
+          "value_shape": "reference_value"
+        },
+        "kind": {
+          "description": "实现/细化/概括/对应",
+          "value_shape": "semantic_value"
+        },
+        "direction": {
+          "description": "关系方向",
+          "value_shape": "semantic_value"
+        },
+        "participants": {
+          "description": "参与对象集合",
+          "value_shape": "reference_list"
+        },
+        "covered": {
+          "description": "摘要覆盖对象",
+          "value_shape": "reference_list"
+        },
+        "uncovered": {
+          "description": "未覆盖对象",
+          "value_shape": "reference_list"
+        },
+        "limitations": {
+          "description": "解释限制",
+          "value_shape": "semantic_value"
+        }
+      },
+      "production_status": "unverified"
+    }
+  ]
+}

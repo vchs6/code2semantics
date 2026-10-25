@@ -1,0 +1,411 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://code2semantics.local/schema/pipeline.schema.json",
+  "$defs": {
+    "selector": {
+      "type": "object",
+      "properties": {
+        "fact_type": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "target": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/selection_target"
+        }
+      },
+      "required": [
+        "fact_type",
+        "fields",
+        "target"
+      ],
+      "additionalProperties": false
+    },
+    "observation": {
+      "type": "object",
+      "properties": {
+        "observation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "subject": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference"
+        },
+        "information_need_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "payload": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/evidence"
+          },
+          "minItems": 1
+        },
+        "context": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/context"
+        },
+        "coverage": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/coverage"
+        }
+      },
+      "required": [
+        "observation_id",
+        "subject",
+        "information_need_id",
+        "payload",
+        "evidence",
+        "context",
+        "coverage"
+      ],
+      "additionalProperties": false
+    },
+    "parse_result": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "parse_result"
+        },
+        "contract_version": {
+          "const": "1.0.0"
+        },
+        "catalog_id": {
+          "const": "semantic-facts-20261025"
+        },
+        "snapshot_set_id": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "snapshots": {
+          "type": "array",
+          "items": {
+            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/snapshot_record"
+          },
+          "minItems": 1
+        },
+        "observations": {
+          "type": "array",
+          "items": {
+            "$ref": "https://code2semantics.local/schema/pipeline.schema.json#/$defs/observation"
+          },
+          "minItems": 0
+        },
+        "unmet": {
+          "type": "array",
+          "items": {
+            "$ref": "https://code2semantics.local/schema/pipeline.schema.json#/$defs/selector"
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "kind",
+        "contract_version",
+        "catalog_id",
+        "snapshot_set_id",
+        "snapshots",
+        "observations",
+        "unmet"
+      ],
+      "additionalProperties": false
+    },
+    "navigation_edge": {
+      "type": "object",
+      "properties": {
+        "parent": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "scope"
+                },
+                "scope_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                }
+              },
+              "required": [
+                "kind",
+                "scope_id"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "node"
+                },
+                "node": {
+                  "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/node_ref"
+                }
+              },
+              "required": [
+                "kind",
+                "node"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "child": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/node_ref"
+        },
+        "relation": {
+          "enum": [
+            "property",
+            "composition",
+            "implementation",
+            "refinement",
+            "summary",
+            "view"
+          ]
+        },
+        "basis": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+        }
+      },
+      "required": [
+        "parent",
+        "child",
+        "relation",
+        "basis"
+      ],
+      "additionalProperties": false
+    },
+    "fact_batch": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "1.0.0"
+        },
+        "catalog_id": {
+          "const": "semantic-facts-20261025"
+        },
+        "snapshot_set_id": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "snapshots": {
+          "type": "array",
+          "items": {
+            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/snapshot_record"
+          },
+          "minItems": 1
+        },
+        "facts": {
+          "type": "array",
+          "items": {
+            "$ref": "https://code2semantics.local/schema/output-schema.schema.json#/$defs/fact_node"
+          },
+          "minItems": 0
+        },
+        "navigation": {
+          "type": "array",
+          "items": {
+            "$ref": "https://code2semantics.local/schema/pipeline.schema.json#/$defs/navigation_edge"
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "contract_version",
+        "catalog_id",
+        "snapshot_set_id",
+        "snapshots",
+        "facts",
+        "navigation"
+      ],
+      "additionalProperties": false
+    },
+    "construct_request": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "construct_request"
+        },
+        "query": {
+          "$ref": "https://code2semantics.local/schema/contract-format.schema.json"
+        },
+        "known": {
+          "$ref": "https://code2semantics.local/schema/pipeline.schema.json#/$defs/fact_batch"
+        },
+        "missing": {
+          "type": "array",
+          "items": {
+            "$ref": "https://code2semantics.local/schema/pipeline.schema.json#/$defs/selector"
+          },
+          "minItems": 0
+        },
+        "parsed": {
+          "$ref": "https://code2semantics.local/schema/pipeline.schema.json#/$defs/parse_result"
+        }
+      },
+      "required": [
+        "kind",
+        "query",
+        "known",
+        "missing",
+        "parsed"
+      ],
+      "additionalProperties": false
+    },
+    "induction_request": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "induction_request"
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "subject": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/node_ref"
+        },
+        "requested": {
+          "type": "array",
+          "items": {
+            "$ref": "https://code2semantics.local/schema/pipeline.schema.json#/$defs/selector"
+          },
+          "minItems": 1
+        },
+        "snapshot_set_id": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "context": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/context"
+        },
+        "observations": {
+          "type": "array",
+          "items": {
+            "$ref": "https://code2semantics.local/schema/pipeline.schema.json#/$defs/observation"
+          },
+          "minItems": 1
+        },
+        "known": {
+          "$ref": "https://code2semantics.local/schema/pipeline.schema.json#/$defs/fact_batch"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/evidence"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "kind",
+        "request_id",
+        "subject",
+        "requested",
+        "snapshot_set_id",
+        "context",
+        "observations",
+        "known",
+        "evidence"
+      ],
+      "additionalProperties": false
+    },
+    "construct_result": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "construct_result"
+        },
+        "batch": {
+          "$ref": "https://code2semantics.local/schema/pipeline.schema.json#/$defs/fact_batch"
+        },
+        "unmet": {
+          "type": "array",
+          "items": {
+            "$ref": "https://code2semantics.local/schema/pipeline.schema.json#/$defs/selector"
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "kind",
+        "batch",
+        "unmet"
+      ],
+      "additionalProperties": false
+    },
+    "stored_record": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "stored_record"
+        },
+        "batch": {
+          "$ref": "https://code2semantics.local/schema/pipeline.schema.json#/$defs/fact_batch"
+        },
+        "transaction_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        }
+      },
+      "required": [
+        "kind",
+        "batch",
+        "transaction_id"
+      ],
+      "additionalProperties": false
+    },
+    "read_result": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "read_result"
+        },
+        "known": {
+          "$ref": "https://code2semantics.local/schema/pipeline.schema.json#/$defs/fact_batch"
+        },
+        "rejected": {
+          "type": "array",
+          "items": {
+            "$ref": "https://code2semantics.local/schema/output-schema.schema.json#/properties/gaps/items"
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "known",
+        "rejected"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "https://code2semantics.local/schema/pipeline.schema.json#/$defs/parse_result"
+    },
+    {
+      "$ref": "https://code2semantics.local/schema/pipeline.schema.json#/$defs/construct_request"
+    },
+    {
+      "$ref": "https://code2semantics.local/schema/pipeline.schema.json#/$defs/induction_request"
+    },
+    {
+      "$ref": "https://code2semantics.local/schema/pipeline.schema.json#/$defs/construct_result"
+    },
+    {
+      "$ref": "https://code2semantics.local/schema/pipeline.schema.json#/$defs/stored_record"
+    },
+    {
+      "$ref": "#/$defs/read_result"
+    }
+  ]
+}

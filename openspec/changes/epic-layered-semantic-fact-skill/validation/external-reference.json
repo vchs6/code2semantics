@@ -1,0 +1,11 @@
+{
+  "kind": "unresolved",
+  "reference_id": "ext-store",
+  "label": "Store",
+  "reason": "only referenced by source-a",
+  "boundary": "outside_scope",
+  "observed_in": {
+    "namespace": "source-a",
+    "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  }
+}

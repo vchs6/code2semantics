@@ -1,0 +1,210 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://code2semantics.local/schema/fact-catalog.schema.json",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "1.0.0"
+    },
+    "catalog_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "research": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "hash_normalization": {
+          "const": "UTF-8 text with LF newlines"
+        }
+      },
+      "required": [
+        "path",
+        "sha256",
+        "sections",
+        "hash_normalization"
+      ],
+      "additionalProperties": false
+    },
+    "observation_granularities": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "basis": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "basis"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "organization_axes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "role": {
+            "enum": [
+              "entry",
+              "relational_view",
+              "crosscutting_view",
+              "assertion_envelope",
+              "navigation"
+            ]
+          },
+          "basis": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "role",
+          "basis"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "assertion_envelope": {
+      "const": [
+        "origin",
+        "knowledge",
+        "context",
+        "coverage",
+        "basis"
+      ]
+    },
+    "fact_types": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "requirement": {
+            "type": "string",
+            "minLength": 1
+          },
+          "organizations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "basis": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "fields": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "description": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "value_shape": {
+                  "enum": [
+                    "semantic_value",
+                    "reference_value",
+                    "reference_list",
+                    "candidate_set",
+                    "participant_set",
+                    "binding_set",
+                    "edge_set"
+                  ]
+                }
+              },
+              "required": [
+                "description",
+                "value_shape"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "production_status": {
+            "const": "unverified"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "requirement",
+          "organizations",
+          "basis",
+          "fields",
+          "production_status"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "contract_version",
+    "catalog_id",
+    "research",
+    "observation_granularities",
+    "organization_axes",
+    "assertion_envelope",
+    "fact_types"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,23 @@
+{
+  "contract_version": "1.0.0",
+  "catalog_id": "semantic-facts-20261025",
+  "request_id": "q1",
+  "snapshot": {
+    "mode": "current"
+  },
+  "target": {
+    "kind": "scope"
+  },
+  "selections": [
+    {
+      "fact_type": "F16",
+      "fields": [
+        "goal"
+      ]
+    }
+  ],
+  "budget": {
+    "max_rounds": 2,
+    "max_new_assertions": 20
+  }
+}

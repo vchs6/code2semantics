@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://code2semantics.local/schema/capability-matrix.schema.json",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "1.0.0"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "fact_type": {
+            "enum": [
+              "F1",
+              "F2",
+              "F3",
+              "F4",
+              "F5",
+              "F6",
+              "F7",
+              "F8",
+              "F9",
+              "F10",
+              "F11",
+              "F12",
+              "F13",
+              "F14",
+              "F15",
+              "F16",
+              "F17",
+              "F18"
+            ]
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
+          },
+          "language": {
+            "type": "string",
+            "minLength": 1
+          },
+          "environment": {
+            "type": "string",
+            "minLength": 1
+          },
+          "expression_supported": {
+            "type": "boolean"
+          },
+          "actual_production": {
+            "enum": [
+              "unverified",
+              "validated",
+              "unsupported"
+            ]
+          },
+          "execution_validation": {
+            "enum": [
+              "not_run",
+              "passed",
+              "failed"
+            ]
+          },
+          "evidence_mode": {
+            "enum": [
+              "deterministic",
+              "cognitive",
+              "hybrid"
+            ]
+          },
+          "test_evidence": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0
+          },
+          "limitations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0
+          }
+        },
+        "required": [
+          "fact_type",
+          "fields",
+          "language",
+          "environment",
+          "expression_supported",
+          "actual_production",
+          "execution_validation",
+          "evidence_mode",
+          "test_evidence",
+          "limitations"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "actual_production": {
+                  "const": "validated"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "execution_validation": {
+                  "const": "passed"
+                },
+                "test_evidence": {
+                  "minItems": 1
+                }
+              }
+            }
+          }
+        ]
+      },
+      "minItems": 0
+    }
+  },
+  "required": [
+    "contract_version",
+    "entries"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,206 @@
+[
+  {
+    "name": "nonexistent-subject",
+    "rule": "V2",
+    "fixture": "response.json",
+    "patches": [
+      {
+        "op": "set",
+        "path": "/results/0/node/subject_id",
+        "value": "not-registered"
+      }
+    ],
+    "expected": "invalid_reference"
+  },
+  {
+    "name": "cross-source-evidence-unbound",
+    "rule": "V3",
+    "fixture": "response.json",
+    "patches": [
+      {
+        "op": "set",
+        "path": "/results/0/fields/goal/basis/evidence/0/namespace",
+        "value": "source-c"
+      }
+    ],
+    "expected": "stale_snapshot"
+  },
+  {
+    "name": "same-snapshot-revision-missing",
+    "rule": "V6",
+    "fixture": "response.json",
+    "patches": [
+      {
+        "op": "set",
+        "path": "/results/0/fields/goal/basis/premises",
+        "value": [
+          {
+            "node": {
+              "namespace": "source-a",
+              "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "subject_id": "unit-a",
+              "node_id": "algorithm-a"
+            },
+            "fact_revision": 99,
+            "field": "goal"
+          }
+        ]
+      }
+    ],
+    "expected": "invalid_premise"
+  },
+  {
+    "name": "unrequested-field",
+    "rule": "V7",
+    "fixture": "response.json",
+    "patches": [
+      {
+        "op": "set",
+        "path": "/results/0/fields/complexity",
+        "value": {
+          "origin": "derived",
+          "knowledge": "supported",
+          "context": {
+            "bindings": [
+              {
+                "namespace": "source-a",
+                "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              },
+              {
+                "namespace": "source-b",
+                "snapshot": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+              }
+            ],
+            "conditions": [
+              {
+                "expression": "finite input",
+                "scope": "unique_ids",
+                "state": "true"
+              }
+            ],
+            "environment": [
+              "fixture-only"
+            ],
+            "language_semantics": [
+              "ordered append"
+            ]
+          },
+          "coverage": {
+            "domain": "unique_ids body at bound snapshots",
+            "checked": [
+              "unique.py:1-8"
+            ],
+            "excluded": [],
+            "completeness": "complete",
+            "method": "fixture exhaustive body inspection"
+          },
+          "basis": {
+            "evidence": [
+              {
+                "evidence_id": "e1",
+                "namespace": "source-a",
+                "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "kind": "source",
+                "locator": "unique.py:1-8",
+                "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "relation": "supports"
+              }
+            ],
+            "premises": [],
+            "method": "first occurrence appends only once",
+            "limitations": [
+              "constructed contract example; not production evidence"
+            ]
+          },
+          "value": {
+            "kind": "text",
+            "text": "稳定去重"
+          }
+        }
+      }
+    ],
+    "expected": "projection_reject"
+  },
+  {
+    "name": "negative-domain-mismatch",
+    "rule": "V5",
+    "fixture": "response.json",
+    "patches": [
+      {
+        "op": "set",
+        "path": "/results/0/fields/goal/knowledge",
+        "value": "absent"
+      },
+      {
+        "op": "delete",
+        "path": "/results/0/fields/goal/value"
+      },
+      {
+        "op": "set",
+        "path": "/results/0/fields/goal/negative",
+        "value": {
+          "domain": "entire world",
+          "claim": "no calls",
+          "check_evidence_ids": [
+            "e1"
+          ]
+        }
+      }
+    ],
+    "expected": "invalid_coverage"
+  },
+  {
+    "name": "negative-evidence-id-missing",
+    "rule": "V5",
+    "fixture": "response.json",
+    "patches": [
+      {
+        "op": "set",
+        "path": "/results/0/fields/goal/knowledge",
+        "value": "absent"
+      },
+      {
+        "op": "delete",
+        "path": "/results/0/fields/goal/value"
+      },
+      {
+        "op": "set",
+        "path": "/results/0/fields/goal/negative",
+        "value": {
+          "domain": "unique_ids body at bound snapshots",
+          "claim": "no calls",
+          "check_evidence_ids": [
+            "missing-evidence"
+          ]
+        }
+      }
+    ],
+    "expected": "invalid_evidence"
+  },
+  {
+    "name": "premise-content-leak",
+    "rule": "V7",
+    "fixture": "response.json",
+    "patches": [
+      {
+        "op": "set",
+        "path": "/results/0/node/node_id",
+        "value": "unrequested-premise-node"
+      }
+    ],
+    "expected": "projection_reject"
+  },
+  {
+    "name": "snapshot-set-digest-mismatch",
+    "rule": "V3",
+    "fixture": "response.json",
+    "patches": [
+      {
+        "op": "set",
+        "path": "/snapshot_set_id",
+        "value": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    ],
+    "expected": "stale_snapshot"
+  }
+]

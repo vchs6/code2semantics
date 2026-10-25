@@ -1,0 +1,1285 @@
+[
+  {
+    "name": "observed-supported",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/origin",
+        "value": "observed"
+      },
+      {
+        "op": "set",
+        "path": "/knowledge",
+        "value": "supported"
+      }
+    ]
+  },
+  {
+    "name": "observed-insufficient",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/origin",
+        "value": "observed"
+      },
+      {
+        "op": "set",
+        "path": "/knowledge",
+        "value": "insufficient"
+      },
+      {
+        "op": "set",
+        "path": "/reason",
+        "value": "explicit limitation"
+      }
+    ]
+  },
+  {
+    "name": "observed-unknown",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/origin",
+        "value": "observed"
+      },
+      {
+        "op": "set",
+        "path": "/knowledge",
+        "value": "unknown"
+      },
+      {
+        "op": "delete",
+        "path": "/value"
+      },
+      {
+        "op": "set",
+        "path": "/reason",
+        "value": "explicit limitation"
+      }
+    ]
+  },
+  {
+    "name": "observed-conflicting",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/origin",
+        "value": "observed"
+      },
+      {
+        "op": "set",
+        "path": "/knowledge",
+        "value": "conflicting"
+      },
+      {
+        "op": "set",
+        "path": "/reason",
+        "value": "explicit limitation"
+      }
+    ]
+  },
+  {
+    "name": "observed-not_applicable",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/origin",
+        "value": "observed"
+      },
+      {
+        "op": "set",
+        "path": "/knowledge",
+        "value": "not_applicable"
+      },
+      {
+        "op": "delete",
+        "path": "/value"
+      },
+      {
+        "op": "set",
+        "path": "/reason",
+        "value": "explicit limitation"
+      }
+    ]
+  },
+  {
+    "name": "observed-absent",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/origin",
+        "value": "observed"
+      },
+      {
+        "op": "set",
+        "path": "/knowledge",
+        "value": "absent"
+      },
+      {
+        "op": "delete",
+        "path": "/value"
+      },
+      {
+        "op": "set",
+        "path": "/negative",
+        "value": {
+          "domain": "unique_ids body at bound snapshots",
+          "claim": "no external call in inspected body",
+          "check_evidence_ids": [
+            "e1"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "derived-supported",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/origin",
+        "value": "derived"
+      },
+      {
+        "op": "set",
+        "path": "/knowledge",
+        "value": "supported"
+      }
+    ]
+  },
+  {
+    "name": "derived-insufficient",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/origin",
+        "value": "derived"
+      },
+      {
+        "op": "set",
+        "path": "/knowledge",
+        "value": "insufficient"
+      },
+      {
+        "op": "set",
+        "path": "/reason",
+        "value": "explicit limitation"
+      }
+    ]
+  },
+  {
+    "name": "derived-unknown",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/origin",
+        "value": "derived"
+      },
+      {
+        "op": "set",
+        "path": "/knowledge",
+        "value": "unknown"
+      },
+      {
+        "op": "delete",
+        "path": "/value"
+      },
+      {
+        "op": "set",
+        "path": "/reason",
+        "value": "explicit limitation"
+      }
+    ]
+  },
+  {
+    "name": "derived-conflicting",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/origin",
+        "value": "derived"
+      },
+      {
+        "op": "set",
+        "path": "/knowledge",
+        "value": "conflicting"
+      },
+      {
+        "op": "set",
+        "path": "/reason",
+        "value": "explicit limitation"
+      }
+    ]
+  },
+  {
+    "name": "derived-not_applicable",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/origin",
+        "value": "derived"
+      },
+      {
+        "op": "set",
+        "path": "/knowledge",
+        "value": "not_applicable"
+      },
+      {
+        "op": "delete",
+        "path": "/value"
+      },
+      {
+        "op": "set",
+        "path": "/reason",
+        "value": "explicit limitation"
+      }
+    ]
+  },
+  {
+    "name": "derived-absent",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/origin",
+        "value": "derived"
+      },
+      {
+        "op": "set",
+        "path": "/knowledge",
+        "value": "absent"
+      },
+      {
+        "op": "delete",
+        "path": "/value"
+      },
+      {
+        "op": "set",
+        "path": "/negative",
+        "value": {
+          "domain": "unique_ids body at bound snapshots",
+          "claim": "no external call in inspected body",
+          "check_evidence_ids": [
+            "e1"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "interpreted-supported",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/origin",
+        "value": "interpreted"
+      },
+      {
+        "op": "set",
+        "path": "/knowledge",
+        "value": "supported"
+      }
+    ]
+  },
+  {
+    "name": "interpreted-insufficient",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/origin",
+        "value": "interpreted"
+      },
+      {
+        "op": "set",
+        "path": "/knowledge",
+        "value": "insufficient"
+      },
+      {
+        "op": "set",
+        "path": "/reason",
+        "value": "explicit limitation"
+      }
+    ]
+  },
+  {
+    "name": "interpreted-unknown",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/origin",
+        "value": "interpreted"
+      },
+      {
+        "op": "set",
+        "path": "/knowledge",
+        "value": "unknown"
+      },
+      {
+        "op": "delete",
+        "path": "/value"
+      },
+      {
+        "op": "set",
+        "path": "/reason",
+        "value": "explicit limitation"
+      }
+    ]
+  },
+  {
+    "name": "interpreted-conflicting",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/origin",
+        "value": "interpreted"
+      },
+      {
+        "op": "set",
+        "path": "/knowledge",
+        "value": "conflicting"
+      },
+      {
+        "op": "set",
+        "path": "/reason",
+        "value": "explicit limitation"
+      }
+    ]
+  },
+  {
+    "name": "interpreted-not_applicable",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/origin",
+        "value": "interpreted"
+      },
+      {
+        "op": "set",
+        "path": "/knowledge",
+        "value": "not_applicable"
+      },
+      {
+        "op": "delete",
+        "path": "/value"
+      },
+      {
+        "op": "set",
+        "path": "/reason",
+        "value": "explicit limitation"
+      }
+    ]
+  },
+  {
+    "name": "interpreted-absent",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/origin",
+        "value": "interpreted"
+      },
+      {
+        "op": "set",
+        "path": "/knowledge",
+        "value": "absent"
+      },
+      {
+        "op": "delete",
+        "path": "/value"
+      },
+      {
+        "op": "set",
+        "path": "/negative",
+        "value": {
+          "domain": "unique_ids body at bound snapshots",
+          "claim": "no external call in inspected body",
+          "check_evidence_ids": [
+            "e1"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "query",
+    "fixture": "query.json",
+    "schema": "contract-format.schema.json",
+    "valid": true,
+    "patches": []
+  },
+  {
+    "name": "response",
+    "fixture": "response.json",
+    "schema": "output-schema.schema.json",
+    "valid": true,
+    "patches": []
+  },
+  {
+    "name": "external-reference",
+    "fixture": "external-reference.json",
+    "schema": "common.schema.json#/$defs/reference",
+    "valid": true,
+    "patches": []
+  },
+  {
+    "name": "parse-result",
+    "fixture": "parse-result.json",
+    "schema": "pipeline.schema.json",
+    "valid": true,
+    "patches": []
+  },
+  {
+    "name": "construct-request",
+    "fixture": "construct-request.json",
+    "schema": "pipeline.schema.json",
+    "valid": true,
+    "patches": []
+  },
+  {
+    "name": "induction-request",
+    "fixture": "induction-request.json",
+    "schema": "pipeline.schema.json",
+    "valid": true,
+    "patches": []
+  },
+  {
+    "name": "construct-result",
+    "fixture": "construct-result.json",
+    "schema": "pipeline.schema.json",
+    "valid": true,
+    "patches": []
+  },
+  {
+    "name": "read-result",
+    "fixture": "read-result.json",
+    "schema": "pipeline.schema.json",
+    "valid": true,
+    "patches": []
+  },
+  {
+    "name": "stored-record",
+    "fixture": "stored-record.json",
+    "schema": "pipeline.schema.json",
+    "valid": true,
+    "patches": []
+  },
+  {
+    "name": "historical-query",
+    "fixture": "query.json",
+    "schema": "contract-format.schema.json",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/scope",
+        "value": {
+          "kind": "saved",
+          "scope_id": "scope-a"
+        }
+      },
+      {
+        "op": "set",
+        "path": "/snapshot",
+        "value": {
+          "mode": "historical",
+          "snapshot_set_id": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "bindings": [
+            {
+              "namespace": "source-a",
+              "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            },
+            {
+              "namespace": "source-b",
+              "snapshot": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "invalid-origin",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/origin",
+        "value": "insufficient"
+      }
+    ]
+  },
+  {
+    "name": "invalid-knowledge",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/knowledge",
+        "value": "interpreted"
+      }
+    ]
+  },
+  {
+    "name": "projection-missing-context",
+    "fixture": "response.json",
+    "schema": "output-schema.schema.json",
+    "valid": false,
+    "patches": [
+      {
+        "op": "delete",
+        "path": "/results/0/fields/goal/context"
+      }
+    ]
+  },
+  {
+    "name": "projection-missing-coverage",
+    "fixture": "response.json",
+    "schema": "output-schema.schema.json",
+    "valid": false,
+    "patches": [
+      {
+        "op": "delete",
+        "path": "/results/0/fields/goal/coverage"
+      }
+    ]
+  },
+  {
+    "name": "projection-missing-basis",
+    "fixture": "response.json",
+    "schema": "output-schema.schema.json",
+    "valid": false,
+    "patches": [
+      {
+        "op": "delete",
+        "path": "/results/0/fields/goal/basis"
+      }
+    ]
+  },
+  {
+    "name": "absence-without-proof",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/knowledge",
+        "value": "absent"
+      },
+      {
+        "op": "delete",
+        "path": "/value"
+      }
+    ]
+  },
+  {
+    "name": "absence-partial-coverage",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/knowledge",
+        "value": "absent"
+      },
+      {
+        "op": "delete",
+        "path": "/value"
+      },
+      {
+        "op": "set",
+        "path": "/negative",
+        "value": {
+          "domain": "unique_ids body at bound snapshots",
+          "claim": "none",
+          "check_evidence_ids": [
+            "e1"
+          ]
+        }
+      },
+      {
+        "op": "set",
+        "path": "/coverage/completeness",
+        "value": "partial"
+      }
+    ]
+  },
+  {
+    "name": "absent-with-null",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/knowledge",
+        "value": "absent"
+      },
+      {
+        "op": "delete",
+        "path": "/value"
+      },
+      {
+        "op": "set",
+        "path": "/value",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "invalid-target",
+    "fixture": "query.json",
+    "schema": "contract-format.schema.json",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/target",
+        "value": {
+          "kind": "node",
+          "continuation": {
+            "node": {},
+            "snapshot_set_id": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "fact_revision": 1
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "historical-needs-bindings",
+    "fixture": "query.json",
+    "schema": "contract-format.schema.json",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/snapshot",
+        "value": {
+          "mode": "historical",
+          "snapshot_set_id": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "bindings": []
+        }
+      }
+    ]
+  },
+  {
+    "name": "external-needs-origin",
+    "fixture": "external-reference.json",
+    "schema": "common.schema.json#/$defs/reference",
+    "valid": false,
+    "patches": [
+      {
+        "op": "delete",
+        "path": "/observed_in"
+      }
+    ]
+  },
+  {
+    "name": "resolved-ref-needs-snapshot",
+    "fixture": "external-reference.json",
+    "schema": "common.schema.json#/$defs/reference",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "",
+        "value": {
+          "kind": "subject",
+          "namespace": "source-a",
+          "subject_id": "s"
+        }
+      }
+    ]
+  },
+  {
+    "name": "unknown-output-field",
+    "fixture": "response.json",
+    "schema": "output-schema.schema.json",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/results/0/fields/arbitrary",
+        "value": {
+          "origin": "derived",
+          "knowledge": "supported",
+          "context": {
+            "bindings": [
+              {
+                "namespace": "source-a",
+                "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              },
+              {
+                "namespace": "source-b",
+                "snapshot": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+              }
+            ],
+            "conditions": [
+              {
+                "expression": "finite input",
+                "scope": "unique_ids",
+                "state": "true"
+              }
+            ],
+            "environment": [
+              "fixture-only"
+            ],
+            "language_semantics": [
+              "ordered append"
+            ]
+          },
+          "coverage": {
+            "domain": "unique_ids body at bound snapshots",
+            "checked": [
+              "unique.py:1-8"
+            ],
+            "excluded": [],
+            "completeness": "complete",
+            "method": "fixture exhaustive body inspection"
+          },
+          "basis": {
+            "evidence": [
+              {
+                "evidence_id": "e1",
+                "namespace": "source-a",
+                "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "kind": "source",
+                "locator": "unique.py:1-8",
+                "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "relation": "supports"
+              }
+            ],
+            "premises": [],
+            "method": "first occurrence appends only once",
+            "limitations": [
+              "constructed contract example; not production evidence"
+            ]
+          },
+          "value": {
+            "kind": "text",
+            "text": "稳定去重"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "unsupported-version",
+    "fixture": "query.json",
+    "schema": "contract-format.schema.json",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/contract_version",
+        "value": "2.0.0"
+      }
+    ]
+  },
+  {
+    "name": "invalid-induction-no-evidence",
+    "fixture": "induction-request.json",
+    "schema": "pipeline.schema.json",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/evidence",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "invalid-known-required",
+    "fixture": "construct-request.json",
+    "schema": "pipeline.schema.json",
+    "valid": false,
+    "patches": [
+      {
+        "op": "delete",
+        "path": "/known"
+      }
+    ]
+  },
+  {
+    "name": "exact-revision-target",
+    "fixture": "query.json",
+    "schema": "contract-format.schema.json",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/target",
+        "value": {
+          "kind": "node",
+          "continuation": {
+            "node": {
+              "namespace": "source-a",
+              "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "subject_id": "unit-a",
+              "node_id": "algorithm-a"
+            },
+            "snapshot_set_id": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "fact_revision": 1
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "explicit-refresh-target",
+    "fixture": "query.json",
+    "schema": "contract-format.schema.json",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/target",
+        "value": {
+          "kind": "refresh",
+          "node": {
+            "namespace": "source-a",
+            "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "subject_id": "unit-a",
+            "node_id": "algorithm-a"
+          },
+          "snapshot_set_id": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        }
+      }
+    ]
+  },
+  {
+    "name": "historical-refresh-rejected",
+    "fixture": "query.json",
+    "schema": "contract-format.schema.json",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/target",
+        "value": {
+          "kind": "refresh",
+          "node": {
+            "namespace": "source-a",
+            "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "subject_id": "unit-a",
+            "node_id": "algorithm-a"
+          },
+          "snapshot_set_id": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        }
+      },
+      {
+        "op": "set",
+        "path": "/scope",
+        "value": {
+          "kind": "saved",
+          "scope_id": "scope-a"
+        }
+      },
+      {
+        "op": "set",
+        "path": "/snapshot",
+        "value": {
+          "mode": "historical",
+          "snapshot_set_id": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "bindings": [
+            {
+              "namespace": "source-a",
+              "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "typed-candidate-condition-pair",
+    "fixture": "response.json",
+    "schema": "output-schema.schema.json",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/results/0/fact_type",
+        "value": "F10"
+      },
+      {
+        "op": "set",
+        "path": "/results/0/fields",
+        "value": {
+          "targets": {
+            "origin": "derived",
+            "knowledge": "supported",
+            "context": {
+              "bindings": [
+                {
+                  "namespace": "source-a",
+                  "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                },
+                {
+                  "namespace": "source-b",
+                  "snapshot": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+                }
+              ],
+              "conditions": [
+                {
+                  "expression": "finite input",
+                  "scope": "unique_ids",
+                  "state": "true"
+                }
+              ],
+              "environment": [
+                "fixture-only"
+              ],
+              "language_semantics": [
+                "ordered append"
+              ]
+            },
+            "coverage": {
+              "domain": "unique_ids body at bound snapshots",
+              "checked": [
+                "unique.py:1-8"
+              ],
+              "excluded": [],
+              "completeness": "complete",
+              "method": "fixture exhaustive body inspection"
+            },
+            "basis": {
+              "evidence": [
+                {
+                  "evidence_id": "e1",
+                  "namespace": "source-a",
+                  "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "kind": "source",
+                  "locator": "unique.py:1-8",
+                  "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "relation": "supports"
+                }
+              ],
+              "premises": [],
+              "method": "first occurrence appends only once",
+              "limitations": [
+                "constructed contract example; not production evidence"
+              ]
+            },
+            "value": {
+              "kind": "candidates",
+              "candidates": [
+                {
+                  "target": {
+                    "kind": "subject",
+                    "namespace": "source-a",
+                    "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "subject_id": "unit-a"
+                  },
+                  "conditions": [],
+                  "mode": "possible"
+                }
+              ],
+              "complete": false
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "candidate-without-target-rejected",
+    "fixture": "response.json",
+    "schema": "output-schema.schema.json",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/results/0/fact_type",
+        "value": "F10"
+      },
+      {
+        "op": "set",
+        "path": "/results/0/fields",
+        "value": {
+          "targets": {
+            "origin": "derived",
+            "knowledge": "supported",
+            "context": {
+              "bindings": [
+                {
+                  "namespace": "source-a",
+                  "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                },
+                {
+                  "namespace": "source-b",
+                  "snapshot": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+                }
+              ],
+              "conditions": [
+                {
+                  "expression": "finite input",
+                  "scope": "unique_ids",
+                  "state": "true"
+                }
+              ],
+              "environment": [
+                "fixture-only"
+              ],
+              "language_semantics": [
+                "ordered append"
+              ]
+            },
+            "coverage": {
+              "domain": "unique_ids body at bound snapshots",
+              "checked": [
+                "unique.py:1-8"
+              ],
+              "excluded": [],
+              "completeness": "complete",
+              "method": "fixture exhaustive body inspection"
+            },
+            "basis": {
+              "evidence": [
+                {
+                  "evidence_id": "e1",
+                  "namespace": "source-a",
+                  "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "kind": "source",
+                  "locator": "unique.py:1-8",
+                  "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "relation": "supports"
+                }
+              ],
+              "premises": [],
+              "method": "first occurrence appends only once",
+              "limitations": [
+                "constructed contract example; not production evidence"
+              ]
+            },
+            "value": {
+              "kind": "candidates",
+              "candidates": [
+                {
+                  "target": {
+                    "kind": "subject",
+                    "namespace": "source-a",
+                    "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "subject_id": "unit-a"
+                  },
+                  "conditions": [],
+                  "mode": "possible"
+                }
+              ],
+              "complete": false
+            }
+          }
+        }
+      },
+      {
+        "op": "delete",
+        "path": "/results/0/fields/targets/value/candidates/0/target"
+      }
+    ]
+  },
+  {
+    "name": "selector-without-target-rejected",
+    "fixture": "induction-request.json",
+    "schema": "pipeline.schema.json",
+    "valid": false,
+    "patches": [
+      {
+        "op": "delete",
+        "path": "/requested/0/target"
+      }
+    ]
+  },
+  {
+    "name": "target-specific-gap",
+    "fixture": "response.json",
+    "schema": "output-schema.schema.json",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/gaps",
+        "value": [
+          {
+            "fact_type": "F16",
+            "fields": [
+              "goal"
+            ],
+            "target": {
+              "kind": "node",
+              "node": {
+                "namespace": "source-a",
+                "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "subject_id": "unit-a",
+                "node_id": "algorithm-a"
+              }
+            },
+            "reason": "insufficient_evidence",
+            "detail": "target-specific missing field",
+            "context": {
+              "bindings": [
+                {
+                  "namespace": "source-a",
+                  "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                },
+                {
+                  "namespace": "source-b",
+                  "snapshot": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+                }
+              ],
+              "conditions": [
+                {
+                  "expression": "finite input",
+                  "scope": "unique_ids",
+                  "state": "true"
+                }
+              ],
+              "environment": [
+                "fixture-only"
+              ],
+              "language_semantics": [
+                "ordered append"
+              ]
+            },
+            "coverage": {
+              "domain": "unique_ids body at bound snapshots",
+              "checked": [
+                "unique.py:1-8"
+              ],
+              "excluded": [],
+              "completeness": "complete",
+              "method": "fixture exhaustive body inspection"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "gap-without-target-rejected",
+    "fixture": "response.json",
+    "schema": "output-schema.schema.json",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/gaps",
+        "value": [
+          {
+            "fact_type": "F16",
+            "fields": [
+              "goal"
+            ],
+            "target": {
+              "kind": "node",
+              "node": {
+                "namespace": "source-a",
+                "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "subject_id": "unit-a",
+                "node_id": "algorithm-a"
+              }
+            },
+            "reason": "insufficient_evidence",
+            "detail": "target-specific missing field",
+            "context": {
+              "bindings": [
+                {
+                  "namespace": "source-a",
+                  "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                },
+                {
+                  "namespace": "source-b",
+                  "snapshot": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+                }
+              ],
+              "conditions": [
+                {
+                  "expression": "finite input",
+                  "scope": "unique_ids",
+                  "state": "true"
+                }
+              ],
+              "environment": [
+                "fixture-only"
+              ],
+              "language_semantics": [
+                "ordered append"
+              ]
+            },
+            "coverage": {
+              "domain": "unique_ids body at bound snapshots",
+              "checked": [
+                "unique.py:1-8"
+              ],
+              "excluded": [],
+              "completeness": "complete",
+              "method": "fixture exhaustive body inspection"
+            }
+          }
+        ]
+      },
+      {
+        "op": "delete",
+        "path": "/gaps/0/target"
+      }
+    ]
+  }
+]

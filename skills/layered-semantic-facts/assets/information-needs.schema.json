@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://code2semantics.local/schema/information-needs.schema.json",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "1.0.0"
+    },
+    "needs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "fact_type": {
+            "enum": [
+              "F1",
+              "F2",
+              "F3",
+              "F4",
+              "F5",
+              "F6",
+              "F7",
+              "F8",
+              "F9",
+              "F10",
+              "F11",
+              "F12",
+              "F13",
+              "F14",
+              "F15",
+              "F16",
+              "F17",
+              "F18"
+            ]
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
+          },
+          "subject_requirement": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence_kinds": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "source",
+                "manifest",
+                "configuration",
+                "documentation",
+                "observation"
+              ]
+            },
+            "minItems": 1
+          },
+          "context_requirement": {
+            "type": "string",
+            "minLength": 1
+          },
+          "snapshot_requirement": {
+            "type": "string",
+            "minLength": 1
+          },
+          "coverage_requirement": {
+            "type": "string",
+            "minLength": 1
+          },
+          "production_mode": {
+            "enum": [
+              "deterministic",
+              "cognitive",
+              "hybrid"
+            ]
+          },
+          "acceptance_fixture": {
+            "type": "string",
+            "minLength": 1
+          },
+          "research_basis": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
+          },
+          "need_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          }
+        },
+        "required": [
+          "fact_type",
+          "fields",
+          "subject_requirement",
+          "evidence_kinds",
+          "context_requirement",
+          "snapshot_requirement",
+          "coverage_requirement",
+          "production_mode",
+          "acceptance_fixture",
+          "research_basis",
+          "need_id"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "contract_version",
+    "needs"
+  ],
+  "additionalProperties": false
+}

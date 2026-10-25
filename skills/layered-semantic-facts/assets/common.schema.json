@@ -1,0 +1,1074 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://code2semantics.local/schema/common.schema.json",
+  "$defs": {
+    "binding": {
+      "type": "object",
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "snapshot": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "namespace",
+        "snapshot"
+      ],
+      "additionalProperties": false
+    },
+    "node_ref": {
+      "type": "object",
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "snapshot": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "subject_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "node_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        }
+      },
+      "required": [
+        "namespace",
+        "snapshot",
+        "subject_id",
+        "node_id"
+      ],
+      "additionalProperties": false
+    },
+    "subject_ref": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "subject"
+        },
+        "namespace": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "snapshot": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "subject_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        }
+      },
+      "required": [
+        "kind",
+        "namespace",
+        "snapshot",
+        "subject_id"
+      ],
+      "additionalProperties": false
+    },
+    "external_ref": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "unresolved"
+        },
+        "reference_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "boundary": {
+          "enum": [
+            "outside_scope",
+            "unresolved_in_scope"
+          ]
+        },
+        "observed_in": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/binding"
+        }
+      },
+      "required": [
+        "kind",
+        "reference_id",
+        "label",
+        "reason",
+        "boundary",
+        "observed_in"
+      ],
+      "additionalProperties": false
+    },
+    "reference": {
+      "oneOf": [
+        {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/subject_ref"
+        },
+        {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/external_ref"
+        }
+      ]
+    },
+    "condition": {
+      "type": "object",
+      "properties": {
+        "expression": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state": {
+          "enum": [
+            "true",
+            "false",
+            "unknown"
+          ]
+        }
+      },
+      "required": [
+        "expression",
+        "scope",
+        "state"
+      ],
+      "additionalProperties": false
+    },
+    "context": {
+      "type": "object",
+      "properties": {
+        "bindings": {
+          "type": "array",
+          "items": {
+            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/binding"
+          },
+          "minItems": 1
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/condition"
+          },
+          "minItems": 0
+        },
+        "environment": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "language_semantics": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "bindings",
+        "conditions",
+        "environment",
+        "language_semantics"
+      ],
+      "additionalProperties": false
+    },
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "evidence_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "namespace": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "snapshot": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "kind": {
+          "enum": [
+            "source",
+            "manifest",
+            "configuration",
+            "documentation",
+            "observation"
+          ]
+        },
+        "locator": {
+          "type": "string",
+          "minLength": 1
+        },
+        "content_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "relation": {
+          "enum": [
+            "supports",
+            "refutes"
+          ]
+        }
+      },
+      "required": [
+        "evidence_id",
+        "namespace",
+        "snapshot",
+        "kind",
+        "locator",
+        "content_digest",
+        "relation"
+      ],
+      "additionalProperties": false
+    },
+    "premise": {
+      "type": "object",
+      "properties": {
+        "node": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/node_ref"
+        },
+        "fact_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "field": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        }
+      },
+      "required": [
+        "node",
+        "fact_revision",
+        "field"
+      ],
+      "additionalProperties": false
+    },
+    "basis": {
+      "type": "object",
+      "properties": {
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/evidence"
+          },
+          "minItems": 0
+        },
+        "premises": {
+          "type": "array",
+          "items": {
+            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/premise"
+          },
+          "minItems": 0
+        },
+        "method": {
+          "type": "string",
+          "minLength": 1
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "evidence",
+        "premises",
+        "method",
+        "limitations"
+      ],
+      "additionalProperties": false
+    },
+    "coverage": {
+      "type": "object",
+      "properties": {
+        "domain": {
+          "type": "string",
+          "minLength": 1
+        },
+        "checked": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "excluded": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "completeness": {
+          "enum": [
+            "complete",
+            "partial",
+            "unknown"
+          ]
+        },
+        "method": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "domain",
+        "checked",
+        "excluded",
+        "completeness",
+        "method"
+      ],
+      "additionalProperties": false
+    },
+    "semantic_value": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "text"
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "kind",
+            "text"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "scalar"
+            },
+            "value": {
+              "type": [
+                "string",
+                "number",
+                "boolean"
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "reference"
+            },
+            "ref": {
+              "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference"
+            }
+          },
+          "required": [
+            "kind",
+            "ref"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "list"
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+              },
+              "minItems": 0
+            }
+          },
+          "required": [
+            "kind",
+            "items"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "record"
+            },
+            "entries": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "value": {
+                    "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                  }
+                },
+                "required": [
+                  "name",
+                  "value"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "kind",
+            "entries"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_list"
+        },
+        {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/candidate_set"
+        },
+        {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/participant_set"
+        },
+        {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/binding_set"
+        },
+        {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/edge_set"
+        }
+      ]
+    },
+    "assertion": {
+      "type": "object",
+      "properties": {
+        "origin": {
+          "enum": [
+            "observed",
+            "derived",
+            "interpreted"
+          ]
+        },
+        "knowledge": {
+          "enum": [
+            "supported",
+            "insufficient",
+            "unknown",
+            "conflicting",
+            "not_applicable",
+            "absent"
+          ]
+        },
+        "context": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/context"
+        },
+        "coverage": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/coverage"
+        },
+        "basis": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/basis"
+        },
+        "value": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "negative": {
+          "type": "object",
+          "properties": {
+            "domain": {
+              "type": "string",
+              "minLength": 1
+            },
+            "claim": {
+              "type": "string",
+              "minLength": 1
+            },
+            "check_evidence_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "domain",
+            "claim",
+            "check_evidence_ids"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "origin",
+        "knowledge",
+        "context",
+        "coverage",
+        "basis"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "knowledge": {
+                "const": "supported"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "value"
+            ],
+            "properties": {
+              "basis": {
+                "anyOf": [
+                  {
+                    "properties": {
+                      "evidence": {
+                        "minItems": 1
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "premises": {
+                        "minItems": 1
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "knowledge": {
+                "enum": [
+                  "unknown",
+                  "not_applicable",
+                  "absent"
+                ]
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "required": [
+                "value"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "knowledge": {
+                "enum": [
+                  "unknown",
+                  "insufficient",
+                  "conflicting",
+                  "not_applicable"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "reason"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "knowledge": {
+                "const": "absent"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "negative"
+            ],
+            "properties": {
+              "coverage": {
+                "properties": {
+                  "completeness": {
+                    "const": "complete"
+                  },
+                  "checked": {
+                    "minItems": 1
+                  }
+                }
+              },
+              "basis": {
+                "properties": {
+                  "evidence": {
+                    "minItems": 1
+                  }
+                }
+              }
+            }
+          },
+          "else": {
+            "not": {
+              "required": [
+                "negative"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "origin": {
+                "const": "derived"
+              },
+              "knowledge": {
+                "enum": [
+                  "supported",
+                  "absent"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "basis": {
+                "anyOf": [
+                  {
+                    "properties": {
+                      "premises": {
+                        "minItems": 1
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "evidence": {
+                        "minItems": 1
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "origin": {
+                "const": "observed"
+              },
+              "knowledge": {
+                "const": "supported"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "basis": {
+                "properties": {
+                  "evidence": {
+                    "minItems": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "snapshot_record": {
+      "type": "object",
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "snapshot": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "manifest_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "dirty": {
+          "type": "boolean"
+        },
+        "has_untracked": {
+          "type": "boolean"
+        },
+        "content_available": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "namespace",
+        "snapshot",
+        "manifest_digest",
+        "dirty",
+        "has_untracked",
+        "content_available"
+      ],
+      "additionalProperties": false
+    },
+    "scope": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "directories"
+            },
+            "directories": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            },
+            "excludes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            }
+          },
+          "required": [
+            "kind",
+            "directories",
+            "excludes"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "saved"
+            },
+            "scope_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            }
+          },
+          "required": [
+            "kind",
+            "scope_id"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "continuation": {
+      "type": "object",
+      "properties": {
+        "node": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/node_ref"
+        },
+        "snapshot_set_id": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "fact_revision": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "node",
+        "snapshot_set_id",
+        "fact_revision"
+      ],
+      "additionalProperties": false
+    },
+    "selection_target": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "scope"
+            },
+            "scope_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            }
+          },
+          "required": [
+            "kind",
+            "scope_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "node"
+            },
+            "node": {
+              "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/node_ref"
+            }
+          },
+          "required": [
+            "kind",
+            "node"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "reference_value": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "reference"
+        },
+        "ref": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference"
+        }
+      },
+      "required": [
+        "kind",
+        "ref"
+      ],
+      "additionalProperties": false
+    },
+    "reference_list": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "references"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference"
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "kind",
+        "items"
+      ],
+      "additionalProperties": false
+    },
+    "candidate_set": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "candidates"
+        },
+        "candidates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "target": {
+                "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference"
+              },
+              "conditions": {
+                "type": "array",
+                "items": {
+                  "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/condition"
+                },
+                "minItems": 0
+              },
+              "mode": {
+                "enum": [
+                  "possible",
+                  "observed",
+                  "excluded"
+                ]
+              }
+            },
+            "required": [
+              "target",
+              "conditions",
+              "mode"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        },
+        "complete": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "candidates",
+        "complete"
+      ],
+      "additionalProperties": false
+    },
+    "participant_set": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "participants"
+        },
+        "participants": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "participant": {
+                "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference"
+              },
+              "role": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "participant",
+              "role"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "kind",
+        "participants"
+      ],
+      "additionalProperties": false
+    },
+    "binding_set": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "bindings"
+        },
+        "bindings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "parameter": {
+                "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference"
+              },
+              "argument": {
+                "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+              },
+              "conditions": {
+                "type": "array",
+                "items": {
+                  "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/condition"
+                },
+                "minItems": 0
+              }
+            },
+            "required": [
+              "parameter",
+              "argument",
+              "conditions"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "kind",
+        "bindings"
+      ],
+      "additionalProperties": false
+    },
+    "edge_set": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "edges"
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "source": {
+                "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference"
+              },
+              "target": {
+                "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference"
+              },
+              "kind": {
+                "type": "string",
+                "minLength": 1
+              },
+              "conditions": {
+                "type": "array",
+                "items": {
+                  "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/condition"
+                },
+                "minItems": 0
+              }
+            },
+            "required": [
+              "source",
+              "target",
+              "kind",
+              "conditions"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "kind",
+        "edges"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "origin": "derived",
+  "knowledge": "supported",
+  "context": {
+    "bindings": [
+      {
+        "namespace": "source-a",
+        "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      {
+        "namespace": "source-b",
+        "snapshot": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      }
+    ],
+    "conditions": [
+      {
+        "expression": "finite input",
+        "scope": "unique_ids",
+        "state": "true"
+      }
+    ],
+    "environment": [
+      "fixture-only"
+    ],
+    "language_semantics": [
+      "ordered append"
+    ]
+  },
+  "coverage": {
+    "domain": "unique_ids body at bound snapshots",
+    "checked": [
+      "unique.py:1-8"
+    ],
+    "excluded": [],
+    "completeness": "complete",
+    "method": "fixture exhaustive body inspection"
+  },
+  "basis": {
+    "evidence": [
+      {
+        "evidence_id": "e1",
+        "namespace": "source-a",
+        "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "kind": "source",
+        "locator": "unique.py:1-8",
+        "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "relation": "supports"
+      }
+    ],
+    "premises": [],
+    "method": "first occurrence appends only once",
+    "limitations": [
+      "constructed contract example; not production evidence"
+    ]
+  },
+  "value": {
+    "kind": "text",
+    "text": "稳定去重"
+  }
+}
