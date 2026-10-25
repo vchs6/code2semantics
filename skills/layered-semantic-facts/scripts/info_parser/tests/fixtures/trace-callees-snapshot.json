@@ -1,1 +1,0 @@
-{"target": "helper", "edges": [{"from": "Widget::run", "to": "helper", "file": "sample_src/lib.rs", "lines": "7-7"}, {"from": "helper", "to": "cleanup", "file": "sample_src/lib.rs", "lines": "13-13"}]}

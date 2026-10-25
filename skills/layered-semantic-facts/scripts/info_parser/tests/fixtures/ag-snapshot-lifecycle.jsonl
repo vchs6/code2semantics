@@ -1,1 +1,0 @@
-{"text": "let conn = Connection::new();", "range": {"byteOffset": {"start": 257, "end": 286}, "start": {"line": 17, "column": 4}, "end": {"line": 17, "column": 33}}, "file": "sample_src/lib.rs", "metaVariables": {"single": {"TYPE": {"text": "Connection"}, "RESOURCE": {"text": "conn"}}, "multi": {"ARGS": []}, "transformed": {}}}
