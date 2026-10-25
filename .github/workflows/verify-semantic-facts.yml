@@ -37,5 +37,6 @@ jobs:
           set -e
           for change in openspec/changes/*; do
             [ -d "$change" ] || continue
+            [ "$(basename "$change")" = archive ] && continue
             openspec validate "$(basename "$change")" --strict --no-interactive
           done
