@@ -4,7 +4,9 @@
 
 ## 自动化测试（GitHub Actions）
 
-首轮运行：https://github.com/vchs6/code2semantics/actions/runs/40207357369
+首轮运行（CI 目录遍历错误）：https://github.com/vchs6/code2semantics/actions/runs/40207357369
+
+**修正后成功运行**：https://github.com/vchs6/code2semantics/actions/runs/40207444540（python-tests 与 openspec 两个作业均成功）
 
 | 检查 | 通过 | 失败 | 跳过 | 证据边界 |
 | --- | ---: | ---: | ---: | --- |
@@ -13,7 +15,7 @@
 | `validation/validate_contracts.py` | 7 schema, 64 shape, 30 semantic | 0 | - | 输出为 `design_assets_pass`，`runtime_verified=false` |
 | 全活动 OpenSpec strict | 前 6 个变更通过 | 1 个 CI 枚举错误 | - | 错把 `openspec/changes/archive` 当作活动变更；已修正脚本，复验见 Actions |
 
-首次 OpenSpec 作业失败属于 CI 遍历范围错误，不是已经完成校验的六个变更不合法。修正后结果需要以本分支最新 CI 运行为准。
+首次 OpenSpec 作业失败属于 CI 遍历范围错误，不是已经完成校验的六个变更不合法。修正后的严格 OpenSpec 验证作业已成功完成；CI 中没有运行真实工具→解析→归纳的端到端验收。
 
 ## 事实仓库 tasks.md 对照
 
