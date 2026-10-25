@@ -1,5 +1,0 @@
-{"_type": "tag", "name": "Widget", "path": "sample_src/lib.rs", "pattern": "/struct Widget { w: u32 }/", "kind": "struct", "line": 1, "end": 1}
-{"_type": "tag", "name": "w", "path": "sample_src/lib.rs", "pattern": "/struct Widget { w: u32 }/", "kind": "field", "scope": "Widget", "typeref": "typename:u32", "line": 1, "end": 1}
-{"_type": "tag", "name": "Runner", "path": "sample_src/lib.rs", "pattern": "/trait Runner { fn run(&self); }/", "kind": "interface", "line": 3, "end": 3}
-{"_type": "tag", "name": "run", "path": "sample_src/lib.rs", "pattern": "/    fn run(&self);/", "kind": "method", "signature": "fn run(&self)", "scope": "Runner", "line": 3, "end": 3}
-{"_type": "tag", "name": "helper", "path": "sample_src/lib.rs", "pattern": "/fn helper(n: u32) {/", "kind": "function", "signature": "fn helper(n: u32)", "line": 13, "end": 15}

@@ -1,6 +1,0 @@
-{
-  "title": "indicatif 语义分析报告",
-  "sections": [
-    { "heading": "概述", "body": "indicatif 是一个进度条库，本文详述其架构与用法……" }
-  ]
-}

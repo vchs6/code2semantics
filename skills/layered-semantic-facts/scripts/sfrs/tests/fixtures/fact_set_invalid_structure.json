@@ -1,9 +1,0 @@
-{
-  "project": "indicatif",
-  "version": "v1",
-  "facts": {
-    "项目层": [
-      { "type": "入口", "children": [ { "is_subtree": false, "value": "缺 name" } ] }
-    ]
-  }
-}

@@ -1,1 +1,0 @@
-{"text": "panic!(\"bad state\")", "range": {"byteOffset": {"start": 307, "end": 326}, "start": {"line": 19, "column": 4}, "end": {"line": 19, "column": 23}}, "file": "sample_src/lib.rs", "metaVariables": {"single": {"ERROR_EXPR": {"text": "\"bad state\""}}, "multi": {}, "transformed": {}}}
