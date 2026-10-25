@@ -1,0 +1,5 @@
+sample_src/lib.rs:250:mod draw_target;
+sample_src/lib.rs:251:mod format;
+sample_src/lib.rs:253:mod in_memory;
+sample_src/lib.rs:260:pub mod style;
+sample_src/lib.rs:261:mod term_like;

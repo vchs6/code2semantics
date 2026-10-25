@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "contract.schema.json",
+  "title": "查询契约（contract）",
+  "description": "查询契约是契约查询模式的输入（结构化 JSON），为机读权威（语言无关）。层级名以 fact-catalog.md 为准；契约引用的事实类型 MUST 属于 fact-catalog，目录外引用由覆盖比对/合成阶段判为 out_of_scope（本 schema 不枚举事实类型与层级名，封闭世界校验由消费方以 fact-catalog 为边界执行）。",
+  "type": "object",
+  "required": ["facts"],
+  "additionalProperties": false,
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "目标项目存储位置。缺省时以宿主当前工作目录补齐，并在输出中标注 project_defaulted: true。"
+    },
+    "repository": {
+      "type": "string",
+      "description": "事实仓库存储位置（SFRS）。缺省时以缺省来源（环境变量或固定路径）补齐，并在输出中标注 repository_defaulted: true。"
+    },
+    "version": {
+      "type": "string",
+      "description": "来源项目版本。缺省为当前版本（Git 仓库取当前 commit，非 Git 本地文件夹视为始终当前版本）。请求版本缺失时回退当前版本，输出标注真实版本与 version_fallback。"
+    },
+    "facts": {
+      "type": "object",
+      "description": "所需事实的节点定位：层级名 → 该层的请求列表。列表项为字符串（事实类型，定位该类型节点本身）或对象 {fact_type, path?}（节点定位 + 可选续查路径：path 为上一级返回的下一级节点引用序列）。未声明的层不提取、不输出（最小化）；返回粒度按查询节点下一级（每节点标注是否子树节点，子树内容由消费方续查）。",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "oneOf": [
+            { "type": "string", "minLength": 1,
+              "description": "事实类型：定位该类型节点本身（向后兼容形态）" },
+            {
+              "type": "object",
+              "required": ["fact_type"],
+              "additionalProperties": false,
+              "properties": {
+                "fact_type": {
+                  "type": "string", "minLength": 1,
+                  "description": "事实类型（须属 fact-catalog，封闭世界校验由消费方执行）"
+                },
+                "path": {
+                  "type": "array", "minItems": 1,
+                  "items": { "type": "string", "minLength": 1 },
+                  "description": "续查路径：自该类型节点出发的下一级节点引用序列（上一级返回的子树节点标注项的 name）"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,349 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "info-contract.schema.json",
+  "title": "项目信息数据项（信息契约）",
+  "description": "解析器输出的信息数据项 schema（语言无关权威）。每条信息数据项附源码证据定位（file:range），证据自工具输出可回溯、可在项目中定位。当前仅覆盖项目级工具（X-cargo_metadata）可产出的信息类型；随解析器落地按覆盖矩阵增量扩展。",
+  "oneOf": [
+    { "$ref": "#/definitions/cargo_package" },
+    { "$ref": "#/definitions/cargo_target" },
+    { "$ref": "#/definitions/cargo_dependency" },
+    { "$ref": "#/definitions/symbol_def" },
+    { "$ref": "#/definitions/symbol_intent" },
+    { "$ref": "#/definitions/usage_contract_clue" },
+    { "$ref": "#/definitions/symbol_relation" },
+    { "$ref": "#/definitions/call_condition" },
+    { "$ref": "#/definitions/error_handling" },
+    { "$ref": "#/definitions/lifecycle_event" },
+    { "$ref": "#/definitions/element_structure" },
+    { "$ref": "#/definitions/call_relation" },
+    { "$ref": "#/definitions/module_decl" },
+    { "$ref": "#/definitions/public_entry" },
+    { "$ref": "#/definitions/use_decl" }
+  ],
+  "definitions": {
+    "evidence": {
+      "type": "object",
+      "required": ["file", "range"],
+      "additionalProperties": false,
+      "properties": {
+        "file": { "type": "string", "description": "相对项目根的源码文件路径。" },
+        "range": { "type": "string", "description": "起止行号范围，格式如 12-18 或 1-1。" }
+      }
+    },
+    "cargo_package": {
+      "type": "object",
+      "required": ["info_type", "content", "evidence", "source_tool"],
+      "additionalProperties": false,
+      "properties": {
+        "info_type": { "const": "cargo_package" },
+        "content": {
+          "type": "object",
+          "required": ["name", "version", "edition"],
+          "additionalProperties": false,
+          "properties": {
+            "name": { "type": "string" },
+            "version": { "type": "string" },
+            "edition": { "type": "string" },
+            "rust_version": { "type": ["string", "null"] },
+            "description": { "type": ["string", "null"] },
+            "readme": { "type": ["string", "null"] },
+            "repository": { "type": ["string", "null"] }
+          }
+        },
+        "evidence": { "$ref": "#/definitions/evidence" },
+        "source_tool": { "const": "X-cargo_metadata" }
+      }
+    },
+    "cargo_target": {
+      "type": "object",
+      "required": ["info_type", "content", "evidence", "source_tool"],
+      "additionalProperties": false,
+      "properties": {
+        "info_type": { "const": "cargo_target" },
+        "content": {
+          "type": "object",
+          "required": ["name", "kind", "crate_types", "src_path"],
+          "additionalProperties": false,
+          "properties": {
+            "name": { "type": "string" },
+            "kind": { "type": "array", "items": { "type": "string" } },
+            "crate_types": { "type": "array", "items": { "type": "string" } },
+            "src_path": { "type": "string", "description": "相对项目根的源文件路径。" }
+          }
+        },
+        "evidence": { "$ref": "#/definitions/evidence" },
+        "source_tool": { "const": "X-cargo_metadata" }
+      }
+    },
+    "cargo_dependency": {
+      "type": "object",
+      "required": ["info_type", "content", "evidence", "source_tool"],
+      "additionalProperties": false,
+      "properties": {
+        "info_type": { "const": "cargo_dependency" },
+        "content": {
+          "type": "object",
+          "required": ["name", "kind", "optional"],
+          "additionalProperties": false,
+          "properties": {
+            "name": { "type": "string" },
+            "req": { "type": ["string", "null"] },
+            "kind": { "enum": ["normal", "dev", "build"] },
+            "optional": { "type": "boolean" }
+          }
+        },
+        "evidence": { "$ref": "#/definitions/evidence" },
+        "source_tool": { "const": "X-cargo_metadata" }
+      }
+    },
+    "symbol_def": {
+      "type": "object",
+      "required": ["info_type", "content", "evidence", "source_tool"],
+      "additionalProperties": false,
+      "properties": {
+        "info_type": { "const": "symbol_def" },
+        "content": {
+          "type": "object",
+          "required": ["name", "kind"],
+          "additionalProperties": false,
+          "properties": {
+            "name": { "type": "string" },
+            "kind": { "type": "string", "description": "语言无关符号种类：function/method/struct/class/enum/interface/module 等。" },
+            "signature": { "type": ["string", "null"] },
+            "visibility": { "type": ["string", "null"], "description": "public/private 等语言无关可见性。" },
+            "fields": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["name"],
+                "additionalProperties": false,
+                "properties": {
+                  "name": { "type": "string" },
+                  "type": { "type": ["string", "null"] }
+                }
+              }
+            }
+          }
+        },
+        "evidence": { "$ref": "#/definitions/evidence" },
+        "source_tool": { "const": "X-ctags" }
+      }
+    },
+    "symbol_intent": {
+      "type": "object",
+      "required": ["info_type", "content", "evidence", "source_tool"],
+      "additionalProperties": false,
+      "properties": {
+        "info_type": { "const": "symbol_intent" },
+        "content": {
+          "type": "object",
+          "required": ["symbol", "intent"],
+          "additionalProperties": false,
+          "properties": {
+            "symbol": { "type": "string" },
+            "intent": { "type": "string", "description": "文档注释承载的意图/用法说明原文。" }
+          }
+        },
+        "evidence": { "$ref": "#/definitions/evidence" },
+        "source_tool": { "const": "H-grep" }
+      }
+    },
+    "usage_contract_clue": {
+      "type": "object",
+      "required": ["info_type", "content", "evidence", "source_tool"],
+      "additionalProperties": false,
+      "properties": {
+        "info_type": { "const": "usage_contract_clue" },
+        "content": {
+          "type": "object",
+          "required": ["symbol", "clue_kind", "text"],
+          "additionalProperties": false,
+          "properties": {
+            "symbol": { "type": "string" },
+            "clue_kind": { "enum": ["precondition", "parameter_constraint", "guarantee", "panics"] },
+            "text": { "type": "string" }
+          }
+        },
+        "evidence": { "$ref": "#/definitions/evidence" },
+        "source_tool": { "const": "H-grep" }
+      }
+    },
+    "symbol_relation": {
+      "type": "object",
+      "required": ["info_type", "content", "evidence", "source_tool"],
+      "additionalProperties": false,
+      "properties": {
+        "info_type": { "const": "symbol_relation" },
+        "content": {
+          "type": "object",
+          "required": ["relation", "source", "target"],
+          "additionalProperties": false,
+          "properties": {
+            "relation": { "enum": ["inherit", "implement", "compose"] },
+            "source": { "type": "string" },
+            "target": { "type": "string" }
+          }
+        },
+        "evidence": { "$ref": "#/definitions/evidence" },
+        "source_tool": { "const": "H-ast_grep" }
+      }
+    },
+    "call_condition": {
+      "type": "object",
+      "required": ["info_type", "content", "evidence", "source_tool"],
+      "additionalProperties": false,
+      "properties": {
+        "info_type": { "const": "call_condition" },
+        "content": {
+          "type": "object",
+          "required": ["caller", "callee", "condition_kind", "condition_pattern"],
+          "additionalProperties": false,
+          "properties": {
+            "caller": { "type": ["string", "null"] },
+            "callee": { "type": "string" },
+            "condition_kind": { "enum": ["branch", "match", "guard"] },
+            "condition_pattern": { "type": "string", "description": "语言无关条件结构线索（AST 捕获文本）。" }
+          }
+        },
+        "evidence": { "$ref": "#/definitions/evidence" },
+        "source_tool": { "const": "H-ast_grep" }
+      }
+    },
+    "error_handling": {
+      "type": "object",
+      "required": ["info_type", "content", "evidence", "source_tool"],
+      "additionalProperties": false,
+      "properties": {
+        "info_type": { "const": "error_handling" },
+        "content": {
+          "type": "object",
+          "required": ["op", "error_expr"],
+          "additionalProperties": false,
+          "properties": {
+            "op": { "enum": ["throw", "catch", "propagate"] },
+            "error_expr": { "type": "string" }
+          }
+        },
+        "evidence": { "$ref": "#/definitions/evidence" },
+        "source_tool": { "const": "H-ast_grep" }
+      }
+    },
+    "lifecycle_event": {
+      "type": "object",
+      "required": ["info_type", "content", "evidence", "source_tool"],
+      "additionalProperties": false,
+      "properties": {
+        "info_type": { "const": "lifecycle_event" },
+        "content": {
+          "type": "object",
+          "required": ["resource", "op"],
+          "additionalProperties": false,
+          "properties": {
+            "resource": { "type": "string" },
+            "op": { "enum": ["create", "acquire", "release", "transition"] }
+          }
+        },
+        "evidence": { "$ref": "#/definitions/evidence" },
+        "source_tool": { "const": "H-ast_grep" }
+      }
+    },
+    "element_structure": {
+      "type": "object",
+      "required": ["info_type", "content", "evidence", "source_tool"],
+      "additionalProperties": false,
+      "properties": {
+        "info_type": { "const": "element_structure" },
+        "content": {
+          "type": "object",
+          "required": ["symbol", "control_flow_kind"],
+          "additionalProperties": false,
+          "properties": {
+            "symbol": { "type": "string" },
+            "control_flow_kind": { "enum": ["branch", "loop", "match", "recursion"] }
+          }
+        },
+        "evidence": { "$ref": "#/definitions/evidence" },
+        "source_tool": { "const": "H-ast_grep" }
+      }
+    },
+    "call_relation": {
+      "type": "object",
+      "required": ["info_type", "content", "evidence", "source_tool"],
+      "additionalProperties": false,
+      "properties": {
+        "info_type": { "const": "call_relation" },
+        "content": {
+          "type": "object",
+          "required": ["caller", "callee", "direction"],
+          "additionalProperties": false,
+          "properties": {
+            "caller": { "type": "string" },
+            "callee": { "type": "string" },
+            "direction": { "enum": ["outgoing", "incoming"] },
+            "condition": { "type": ["string", "null"] }
+          }
+        },
+        "evidence": { "$ref": "#/definitions/evidence" },
+        "source_tool": { "enum": ["H-trace_callees", "H-trace_callers"] }
+      }
+    },
+    "module_decl": {
+      "type": "object",
+      "required": ["info_type", "content", "evidence", "source_tool"],
+      "additionalProperties": false,
+      "properties": {
+        "info_type": { "const": "module_decl" },
+        "content": {
+          "type": "object",
+          "required": ["name", "visibility"],
+          "additionalProperties": false,
+          "properties": {
+            "name": { "type": "string", "description": "模块名（mod 声明的标识符）。" },
+            "visibility": { "enum": ["public", "private"] }
+          }
+        },
+        "evidence": { "$ref": "#/definitions/evidence" },
+        "source_tool": { "const": "H-grep" }
+      }
+    },
+    "public_entry": {
+      "type": "object",
+      "required": ["info_type", "content", "evidence", "source_tool"],
+      "additionalProperties": false,
+      "properties": {
+        "info_type": { "const": "public_entry" },
+        "content": {
+          "type": "object",
+          "required": ["name", "kind"],
+          "additionalProperties": false,
+          "properties": {
+            "name": { "type": "string" },
+            "kind": { "type": "string", "description": "语言无关符号种类：function/struct/enum/trait/type 等。" },
+            "signature": { "type": ["string", "null"], "description": "声明行原文（语言无关裁剪前的签名线索）。" }
+          }
+        },
+        "evidence": { "$ref": "#/definitions/evidence" },
+        "source_tool": { "const": "H-grep" }
+      }
+    },
+    "use_decl": {
+      "type": "object",
+      "required": ["info_type", "content", "evidence", "source_tool"],
+      "additionalProperties": false,
+      "properties": {
+        "info_type": { "const": "use_decl" },
+        "content": {
+          "type": "object",
+          "required": ["path"],
+          "additionalProperties": false,
+          "properties": {
+            "path": { "type": "string", "description": "use 目标路径（如 crate::state、std::io）。" },
+            "root": { "enum": ["crate", "super", "self", "external", "other"], "description": "路径根：模块间依赖方向判定的语言无关依据。" }
+          }
+        },
+        "evidence": { "$ref": "#/definitions/evidence" },
+        "source_tool": { "const": "H-grep" }
+      }
+    }
+  }
+}

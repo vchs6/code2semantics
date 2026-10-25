@@ -1,0 +1,10 @@
+{
+  "relations": [
+    { "relation_id": "r1", "from_entity": "ent_exists", "to_entity": "ent_missing", "relation_type": "调用" }
+  ],
+  "entities": [
+    { "entity_id": "ent_exists", "fact_type": "公共接口", "layer": "符号层",
+      "fields": { "signature": "fn draw()" },
+      "evidence": { "file": "src/lib.rs", "range": "10-20" } }
+  ]
+}

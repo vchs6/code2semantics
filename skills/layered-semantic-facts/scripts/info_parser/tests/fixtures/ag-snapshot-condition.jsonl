@@ -1,0 +1,1 @@
+{"text": "if self.w > 0 {\n            helper(self.w);\n        }", "range": {"byteOffset": {"start": 112, "end": 165}, "start": {"line": 6, "column": 8}, "end": {"line": 8, "column": 9}}, "file": "sample_src/lib.rs", "metaVariables": {"single": {"CONDITION": {"text": "self.w > 0"}, "CALLEE": {"text": "helper"}}, "multi": {"ARGS": [{"text": "self.w"}]}, "transformed": {}}}

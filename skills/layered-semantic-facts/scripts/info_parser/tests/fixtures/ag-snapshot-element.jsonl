@@ -1,0 +1,1 @@
+{"text": "match n { 0 => cleanup(), _ => {} }", "range": {"byteOffset": {"start": 199, "end": 234}, "start": {"line": 13, "column": 4}, "end": {"line": 13, "column": 39}}, "file": "sample_src/lib.rs", "metaVariables": {"single": {"SYMBOL": {"text": "n"}}, "multi": {"ARMS": [{"text": "0 => cleanup(),"}, {"text": "_ => {}"}]}, "transformed": {}}}

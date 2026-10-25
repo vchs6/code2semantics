@@ -1,0 +1,31 @@
+schema: spec-driven
+
+context: |
+  Language: zh
+  All artifacts must be written in zh.
+  Keep OpenSpec structural headings and SHALL/MUST keywords in English.
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+rules:
+  tasks:
+    - epic-layered-semantic-fact-skill 开始前，需要先完成语义事实集需求调研（survey-semantic-fact-requirements）
+    - 语义事实集需求调研的重入取决于调研报告（research/semantic-fact-requirements.md）不存在或有强制要求
+    - epic 的设计阶段顺序仅有：fact-catalog → 查询契约（contract-format）→ 响应契约（output-schema）
+    - 工件修订纪律（AGENTS.md 原则 8）：修订本工件前 MUST 先取得工件指令（openspec instructions tasks）并按其规则与模板生成修订，MUST NOT 凭对话记忆或即兴草案直接编辑；任务分解 MUST 派生自已定稿的 design/proposal，MUST NOT 先于上游引入新行为语义
+  proposal:
+    - 调研类变更以事实表达需求为起点（事实优先），禁止工具驱动的反序
+    - 提案不得预设设计结论（如事实集的层级数量与名称、契约字段结构、目录内容）；此类结构性决策必须声明为调研或设计阶段的产出，并指向其来源变更/报告
+    - 工件修订纪律（AGENTS.md 原则 8）：修订本工件前 MUST 先取得工件指令（openspec instructions proposal）并按其规则生成修订，MUST NOT 凭对话记忆或即兴草案直接编辑；提案是行为语义的唯一上游，下游工件（design/tasks）的修订 MUST 引用提案为据
+    - Skill 工件规范对齐（AGENTS.md 原则 9）：涉及 Skill 类工件（SKILL.md、目录布局、frontmatter）的提案 MUST 声明对齐 Agent Skills Specification（agentskills/agentskills）并声明符合性验收手段（skills-ref validate 或对照检查表）
+  design:
+    - design 只能固化已有调研产物支撑的结论，并逐条引用来源（清单/报告章节）；无调研支撑的结构性决策不得写入正文，应列为 Open Questions 待调研后回填
+    - 确定性实现优先（AGENTS.md 原则 7）：凡涉及可脚本化处理流程（校验、转换、存储、查询、批处理等）的设计，MUST 固化为脚本/程序实现形态（声明实现语言/引擎与验证方式，如 pytest 场景覆盖），MUST NOT 交由 AI 代理在运行时按文档描述执行
+    - 工件修订纪律（AGENTS.md 原则 8）：修订本工件前 MUST 先取得工件指令（openspec instructions design）并按其规则与模板生成修订，MUST NOT 凭对话记忆或即兴草案直接编辑；设计的实质修订 MUST 在 proposal 定稿后进行并逐条引用上游为据，每个决策含被否备选
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+operations:
+  apply:
+    guidance:
+      - 设计 fact-catalog、contract-format、output-schema 时必须引用事实集清单（`../../survey-semantic-fact-requirements/research/semantic-fact-requirements.md`）的对应章节作为依据，禁止脱离调研产物凭空定义

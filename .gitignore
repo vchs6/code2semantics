@@ -1,0 +1,5 @@
+# 本机数据，不入库
+.atomcode/local/
+
+# 本地测试用绝对路径符号链接（指向 skills/layered-semantic-facts，其他环境按各自技能机制接入）
+.atomcode/skills/layered-semantic-facts

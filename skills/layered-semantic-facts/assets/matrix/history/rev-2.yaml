@@ -1,0 +1,91 @@
+revision: 2
+timestamp: '2026-10-23T00:53:39'
+changed:
+- need_id: need.project.build_run
+  producer_id: X-cargo_metadata
+  before:
+    status: 未点亮
+    command: null
+  after:
+    status: 已点亮
+    command: cargo metadata --format-version 1 --no-deps
+- need_id: need.project.build_run
+  producer_id: X-rustdoc_json
+  before:
+    status: 未点亮
+    command: null
+  after:
+    status: 已点亮
+    command: cargo rustdoc --lib -- -Z unstable-options --output-format json
+- need_id: need.project.configs
+  producer_id: H-ast_grep
+  before:
+    status: 未点亮
+    command: null
+  after:
+    status: 已点亮
+    command: ast_grep
+- need_id: need.project.configs
+  producer_id: H-grep
+  before:
+    status: 未点亮
+    command: null
+  after:
+    status: 已点亮
+    command: grep
+- need_id: need.project.dependencies
+  producer_id: X-cargo_metadata
+  before:
+    status: 未点亮
+    command: null
+  after:
+    status: 已点亮
+    command: cargo metadata --format-version 1 --no-deps
+- need_id: need.project.dependencies
+  producer_id: X-crates_io_api
+  before:
+    status: 未点亮
+    command: null
+  after:
+    status: 已点亮
+    command: GET https://crates.io/api/v1/crates/{crate}
+- need_id: need.project.domain
+  producer_id: H-grep
+  before:
+    status: 未点亮
+    command: null
+  after:
+    status: 已点亮
+    command: grep
+- need_id: need.project.domain
+  producer_id: X-cargo_metadata
+  before:
+    status: 未点亮
+    command: null
+  after:
+    status: 已点亮
+    command: cargo metadata --format-version 1 --no-deps
+- need_id: need.project.entries
+  producer_id: X-cargo_metadata
+  before:
+    status: 未点亮
+    command: null
+  after:
+    status: 已点亮
+    command: cargo metadata --format-version 1 --no-deps
+- need_id: need.project.modules
+  producer_id: H-list_symbols
+  before:
+    status: 未点亮
+    command: null
+  after:
+    status: 已点亮
+    command: list_symbols
+- need_id: need.project.modules
+  producer_id: X-cargo_metadata
+  before:
+    status: 未点亮
+    command: null
+  after:
+    status: 已点亮
+    command: cargo metadata --format-version 1 --no-deps
