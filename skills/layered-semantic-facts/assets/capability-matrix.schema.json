@@ -11,29 +11,55 @@
       "items": {
         "type": "object",
         "properties": {
-          "fact_type": {
-            "enum": [
-              "F1",
-              "F2",
-              "F3",
-              "F4",
-              "F5",
-              "F6",
-              "F7",
-              "F8",
-              "F9",
-              "F10",
-              "F11",
-              "F12",
-              "F13",
-              "F14",
-              "F15",
-              "F16",
-              "F17",
-              "F18"
-            ]
+          "tool_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
           },
-          "fields": {
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "information_need_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "output_kinds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "platforms": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "environment": {
+            "type": "string",
+            "minLength": 1
+          },
+          "invocation": {
             "type": "array",
             "items": {
               "type": "string",
@@ -41,39 +67,7 @@
             },
             "minItems": 1
           },
-          "language": {
-            "type": "string",
-            "minLength": 1
-          },
-          "environment": {
-            "type": "string",
-            "minLength": 1
-          },
-          "expression_supported": {
-            "type": "boolean"
-          },
-          "actual_production": {
-            "enum": [
-              "unverified",
-              "validated",
-              "unsupported"
-            ]
-          },
-          "execution_validation": {
-            "enum": [
-              "not_run",
-              "passed",
-              "failed"
-            ]
-          },
-          "evidence_mode": {
-            "enum": [
-              "deterministic",
-              "cognitive",
-              "hybrid"
-            ]
-          },
-          "test_evidence": {
+          "combinations": {
             "type": "array",
             "items": {
               "type": "string",
@@ -88,38 +82,74 @@
               "minLength": 1
             },
             "minItems": 0
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "acceptance": {
+            "type": "object",
+            "properties": {
+              "actor": {
+                "const": "parser_development"
+              },
+              "evidence": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 1
+              }
+            },
+            "required": [
+              "actor",
+              "evidence"
+            ],
+            "additionalProperties": false
+          },
+          "research_basis": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
           }
         },
         "required": [
-          "fact_type",
-          "fields",
-          "language",
+          "tool_id",
+          "description",
+          "information_need_ids",
+          "output_kinds",
+          "languages",
+          "platforms",
           "environment",
-          "expression_supported",
-          "actual_production",
-          "execution_validation",
-          "evidence_mode",
-          "test_evidence",
-          "limitations"
+          "invocation",
+          "combinations",
+          "limitations",
+          "enabled",
+          "research_basis"
         ],
         "additionalProperties": false,
         "allOf": [
           {
             "if": {
               "properties": {
-                "actual_production": {
-                  "const": "validated"
+                "enabled": {
+                  "const": true
                 }
               }
             },
             "then": {
-              "properties": {
-                "execution_validation": {
-                  "const": "passed"
-                },
-                "test_evidence": {
-                  "minItems": 1
-                }
+              "required": [
+                "acceptance"
+              ]
+            },
+            "else": {
+              "not": {
+                "required": [
+                  "acceptance"
+                ]
               }
             }
           }

@@ -16,126 +16,24 @@
     "scope": {
       "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/scope"
     },
-    "snapshot": {
-      "oneOf": [
-        {
-          "type": "object",
-          "properties": {
-            "mode": {
-              "const": "current"
-            }
-          },
-          "required": [
-            "mode"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "mode": {
-              "const": "historical"
-            },
-            "snapshot_set_id": {
-              "type": "string",
-              "pattern": "^sha256:[0-9a-f]{64}$"
-            },
-            "bindings": {
-              "type": "array",
-              "items": {
-                "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/binding"
-              },
-              "minItems": 1
-            }
-          },
-          "required": [
-            "mode",
-            "snapshot_set_id",
-            "bindings"
-          ],
-          "additionalProperties": false
-        }
-      ]
-    },
     "target": {
-      "oneOf": [
-        {
-          "type": "object",
-          "properties": {
-            "kind": {
-              "const": "scope"
-            }
-          },
-          "required": [
-            "kind"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "kind": {
-              "const": "node"
-            },
-            "continuation": {
-              "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/continuation"
-            }
-          },
-          "required": [
-            "kind",
-            "continuation"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "kind": {
-              "const": "refresh"
-            },
-            "node": {
-              "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/node_ref"
-            },
-            "snapshot_set_id": {
-              "type": "string",
-              "pattern": "^sha256:[0-9a-f]{64}$"
-            }
-          },
-          "required": [
-            "kind",
-            "node",
-            "snapshot_set_id"
-          ],
-          "additionalProperties": false
-        }
+      "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/target"
+    },
+    "granularity": {
+      "enum": [
+        "L1",
+        "L2",
+        "L3",
+        "L4"
       ]
     },
     "selections": {
       "type": "array",
       "items": {
-        "type": "object",
-        "properties": {
-          "fact_type": {
-            "type": "string",
-            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
-          },
-          "fields": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "pattern": "^[a-z][a-z0-9_]*$"
-            },
-            "minItems": 1,
-            "uniqueItems": true
-          }
-        },
-        "required": [
-          "fact_type",
-          "fields"
-        ],
-        "additionalProperties": false
+        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/selection"
       },
-      "minItems": 1
+      "minItems": 1,
+      "uniqueItems": true
     },
     "budget": {
       "type": "object",
@@ -160,63 +58,11 @@
     "contract_version",
     "catalog_id",
     "request_id",
-    "snapshot",
+    "scope",
     "target",
+    "granularity",
     "selections",
     "budget"
   ],
-  "additionalProperties": false,
-  "allOf": [
-    {
-      "if": {
-        "properties": {
-          "snapshot": {
-            "properties": {
-              "mode": {
-                "const": "historical"
-              }
-            }
-          }
-        }
-      },
-      "then": {
-        "required": [
-          "scope"
-        ],
-        "properties": {
-          "scope": {
-            "properties": {
-              "kind": {
-                "const": "saved"
-              }
-            }
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "target": {
-            "properties": {
-              "kind": {
-                "const": "refresh"
-              }
-            }
-          }
-        }
-      },
-      "then": {
-        "properties": {
-          "snapshot": {
-            "properties": {
-              "mode": {
-                "const": "current"
-              }
-            }
-          }
-        }
-      }
-    }
-  ]
+  "additionalProperties": false
 }

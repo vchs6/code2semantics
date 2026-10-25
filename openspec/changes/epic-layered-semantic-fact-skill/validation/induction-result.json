@@ -1,0 +1,158 @@
+{
+  "kind": "induction_result",
+  "batch": {
+    "contract_version": "1.0.0",
+    "catalog_id": "semantic-facts-20261025",
+    "sources": [
+      {
+        "source_id": "src-a",
+        "root": "/workspace/a",
+        "content_state": "content-a",
+        "status": "available",
+        "dirty": true,
+        "has_untracked": true,
+        "excludes": []
+      }
+    ],
+    "facts": [
+      {
+        "fact_id": "fact-a",
+        "node": {
+          "source_id": "src-a",
+          "subject_id": "project-a",
+          "node_id": "unit-a"
+        },
+        "fact_type": "F16",
+        "granularities": [
+          "L4"
+        ],
+        "fields": {
+          "strategy": {
+            "origin": "observed",
+            "knowledge": "supported",
+            "context": {
+              "source_ids": [
+                "src-a"
+              ],
+              "conditions": [],
+              "environment": {},
+              "language_semantics": []
+            },
+            "coverage": {
+              "domain": "unit-a direct boundary",
+              "checked": [
+                "src/main.py"
+              ],
+              "excluded": [],
+              "completeness": "complete",
+              "method": "bounded enumeration"
+            },
+            "basis": {
+              "evidence": [
+                {
+                  "evidence_id": "ev-a",
+                  "source_id": "src-a",
+                  "content_state": "content-a",
+                  "kind": "source",
+                  "locator": "src/main.py:1-8",
+                  "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "relation": "supports"
+                }
+              ],
+              "premises": [],
+              "method": "source inspection",
+              "limitations": []
+            },
+            "validity": {
+              "state": "current",
+              "sources": [
+                {
+                  "source_id": "src-a",
+                  "content_state": "content-a"
+                }
+              ]
+            },
+            "value": {
+              "kind": "text",
+              "text": "stable deduplication"
+            }
+          }
+        }
+      }
+    ],
+    "navigation": [],
+    "direct_nodes": [
+      {
+        "target": {
+          "kind": "node",
+          "node": {
+            "source_id": "src-a",
+            "subject_id": "project-a",
+            "node_id": "unit-a"
+          }
+        },
+        "granularity": "L4",
+        "boundary": "unit-a direct boundary",
+        "children": [
+          {
+            "source_id": "src-a",
+            "subject_id": "project-a",
+            "node_id": "child-a"
+          }
+        ],
+        "assertion": {
+          "origin": "observed",
+          "knowledge": "supported",
+          "context": {
+            "source_ids": [
+              "src-a"
+            ],
+            "conditions": [],
+            "environment": {},
+            "language_semantics": []
+          },
+          "coverage": {
+            "domain": "unit-a direct boundary",
+            "checked": [
+              "src/main.py"
+            ],
+            "excluded": [],
+            "completeness": "complete",
+            "method": "bounded enumeration"
+          },
+          "basis": {
+            "evidence": [
+              {
+                "evidence_id": "ev-a",
+                "source_id": "src-a",
+                "content_state": "content-a",
+                "kind": "source",
+                "locator": "src/main.py:1-8",
+                "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "relation": "supports"
+              }
+            ],
+            "premises": [],
+            "method": "source inspection",
+            "limitations": []
+          },
+          "validity": {
+            "state": "current",
+            "sources": [
+              {
+                "source_id": "src-a",
+                "content_state": "content-a"
+              }
+            ]
+          },
+          "value": {
+            "kind": "text",
+            "text": "stable deduplication"
+          }
+        }
+      }
+    ],
+    "conflicts": []
+  },
+  "gaps": []
+}

@@ -1,556 +1,177 @@
 [
   {
-    "name": "observed-supported",
-    "fixture": "assertion.json",
-    "schema": "common.schema.json#/$defs/assertion",
-    "valid": true,
-    "patches": [
-      {
-        "op": "set",
-        "path": "/origin",
-        "value": "observed"
-      },
-      {
-        "op": "set",
-        "path": "/knowledge",
-        "value": "supported"
-      }
-    ]
-  },
-  {
-    "name": "observed-insufficient",
-    "fixture": "assertion.json",
-    "schema": "common.schema.json#/$defs/assertion",
-    "valid": true,
-    "patches": [
-      {
-        "op": "set",
-        "path": "/origin",
-        "value": "observed"
-      },
-      {
-        "op": "set",
-        "path": "/knowledge",
-        "value": "insufficient"
-      },
-      {
-        "op": "set",
-        "path": "/reason",
-        "value": "explicit limitation"
-      }
-    ]
-  },
-  {
-    "name": "observed-unknown",
-    "fixture": "assertion.json",
-    "schema": "common.schema.json#/$defs/assertion",
-    "valid": true,
-    "patches": [
-      {
-        "op": "set",
-        "path": "/origin",
-        "value": "observed"
-      },
-      {
-        "op": "set",
-        "path": "/knowledge",
-        "value": "unknown"
-      },
-      {
-        "op": "delete",
-        "path": "/value"
-      },
-      {
-        "op": "set",
-        "path": "/reason",
-        "value": "explicit limitation"
-      }
-    ]
-  },
-  {
-    "name": "observed-conflicting",
-    "fixture": "assertion.json",
-    "schema": "common.schema.json#/$defs/assertion",
-    "valid": true,
-    "patches": [
-      {
-        "op": "set",
-        "path": "/origin",
-        "value": "observed"
-      },
-      {
-        "op": "set",
-        "path": "/knowledge",
-        "value": "conflicting"
-      },
-      {
-        "op": "set",
-        "path": "/reason",
-        "value": "explicit limitation"
-      }
-    ]
-  },
-  {
-    "name": "observed-not_applicable",
-    "fixture": "assertion.json",
-    "schema": "common.schema.json#/$defs/assertion",
-    "valid": true,
-    "patches": [
-      {
-        "op": "set",
-        "path": "/origin",
-        "value": "observed"
-      },
-      {
-        "op": "set",
-        "path": "/knowledge",
-        "value": "not_applicable"
-      },
-      {
-        "op": "delete",
-        "path": "/value"
-      },
-      {
-        "op": "set",
-        "path": "/reason",
-        "value": "explicit limitation"
-      }
-    ]
-  },
-  {
-    "name": "observed-absent",
-    "fixture": "assertion.json",
-    "schema": "common.schema.json#/$defs/assertion",
-    "valid": true,
-    "patches": [
-      {
-        "op": "set",
-        "path": "/origin",
-        "value": "observed"
-      },
-      {
-        "op": "set",
-        "path": "/knowledge",
-        "value": "absent"
-      },
-      {
-        "op": "delete",
-        "path": "/value"
-      },
-      {
-        "op": "set",
-        "path": "/negative",
-        "value": {
-          "domain": "unique_ids body at bound snapshots",
-          "claim": "no external call in inspected body",
-          "check_evidence_ids": [
-            "e1"
-          ]
-        }
-      }
-    ]
-  },
-  {
-    "name": "derived-supported",
-    "fixture": "assertion.json",
-    "schema": "common.schema.json#/$defs/assertion",
-    "valid": true,
-    "patches": [
-      {
-        "op": "set",
-        "path": "/origin",
-        "value": "derived"
-      },
-      {
-        "op": "set",
-        "path": "/knowledge",
-        "value": "supported"
-      }
-    ]
-  },
-  {
-    "name": "derived-insufficient",
-    "fixture": "assertion.json",
-    "schema": "common.schema.json#/$defs/assertion",
-    "valid": true,
-    "patches": [
-      {
-        "op": "set",
-        "path": "/origin",
-        "value": "derived"
-      },
-      {
-        "op": "set",
-        "path": "/knowledge",
-        "value": "insufficient"
-      },
-      {
-        "op": "set",
-        "path": "/reason",
-        "value": "explicit limitation"
-      }
-    ]
-  },
-  {
-    "name": "derived-unknown",
-    "fixture": "assertion.json",
-    "schema": "common.schema.json#/$defs/assertion",
-    "valid": true,
-    "patches": [
-      {
-        "op": "set",
-        "path": "/origin",
-        "value": "derived"
-      },
-      {
-        "op": "set",
-        "path": "/knowledge",
-        "value": "unknown"
-      },
-      {
-        "op": "delete",
-        "path": "/value"
-      },
-      {
-        "op": "set",
-        "path": "/reason",
-        "value": "explicit limitation"
-      }
-    ]
-  },
-  {
-    "name": "derived-conflicting",
-    "fixture": "assertion.json",
-    "schema": "common.schema.json#/$defs/assertion",
-    "valid": true,
-    "patches": [
-      {
-        "op": "set",
-        "path": "/origin",
-        "value": "derived"
-      },
-      {
-        "op": "set",
-        "path": "/knowledge",
-        "value": "conflicting"
-      },
-      {
-        "op": "set",
-        "path": "/reason",
-        "value": "explicit limitation"
-      }
-    ]
-  },
-  {
-    "name": "derived-not_applicable",
-    "fixture": "assertion.json",
-    "schema": "common.schema.json#/$defs/assertion",
-    "valid": true,
-    "patches": [
-      {
-        "op": "set",
-        "path": "/origin",
-        "value": "derived"
-      },
-      {
-        "op": "set",
-        "path": "/knowledge",
-        "value": "not_applicable"
-      },
-      {
-        "op": "delete",
-        "path": "/value"
-      },
-      {
-        "op": "set",
-        "path": "/reason",
-        "value": "explicit limitation"
-      }
-    ]
-  },
-  {
-    "name": "derived-absent",
-    "fixture": "assertion.json",
-    "schema": "common.schema.json#/$defs/assertion",
-    "valid": true,
-    "patches": [
-      {
-        "op": "set",
-        "path": "/origin",
-        "value": "derived"
-      },
-      {
-        "op": "set",
-        "path": "/knowledge",
-        "value": "absent"
-      },
-      {
-        "op": "delete",
-        "path": "/value"
-      },
-      {
-        "op": "set",
-        "path": "/negative",
-        "value": {
-          "domain": "unique_ids body at bound snapshots",
-          "claim": "no external call in inspected body",
-          "check_evidence_ids": [
-            "e1"
-          ]
-        }
-      }
-    ]
-  },
-  {
-    "name": "interpreted-supported",
-    "fixture": "assertion.json",
-    "schema": "common.schema.json#/$defs/assertion",
-    "valid": true,
-    "patches": [
-      {
-        "op": "set",
-        "path": "/origin",
-        "value": "interpreted"
-      },
-      {
-        "op": "set",
-        "path": "/knowledge",
-        "value": "supported"
-      }
-    ]
-  },
-  {
-    "name": "interpreted-insufficient",
-    "fixture": "assertion.json",
-    "schema": "common.schema.json#/$defs/assertion",
-    "valid": true,
-    "patches": [
-      {
-        "op": "set",
-        "path": "/origin",
-        "value": "interpreted"
-      },
-      {
-        "op": "set",
-        "path": "/knowledge",
-        "value": "insufficient"
-      },
-      {
-        "op": "set",
-        "path": "/reason",
-        "value": "explicit limitation"
-      }
-    ]
-  },
-  {
-    "name": "interpreted-unknown",
-    "fixture": "assertion.json",
-    "schema": "common.schema.json#/$defs/assertion",
-    "valid": true,
-    "patches": [
-      {
-        "op": "set",
-        "path": "/origin",
-        "value": "interpreted"
-      },
-      {
-        "op": "set",
-        "path": "/knowledge",
-        "value": "unknown"
-      },
-      {
-        "op": "delete",
-        "path": "/value"
-      },
-      {
-        "op": "set",
-        "path": "/reason",
-        "value": "explicit limitation"
-      }
-    ]
-  },
-  {
-    "name": "interpreted-conflicting",
-    "fixture": "assertion.json",
-    "schema": "common.schema.json#/$defs/assertion",
-    "valid": true,
-    "patches": [
-      {
-        "op": "set",
-        "path": "/origin",
-        "value": "interpreted"
-      },
-      {
-        "op": "set",
-        "path": "/knowledge",
-        "value": "conflicting"
-      },
-      {
-        "op": "set",
-        "path": "/reason",
-        "value": "explicit limitation"
-      }
-    ]
-  },
-  {
-    "name": "interpreted-not_applicable",
-    "fixture": "assertion.json",
-    "schema": "common.schema.json#/$defs/assertion",
-    "valid": true,
-    "patches": [
-      {
-        "op": "set",
-        "path": "/origin",
-        "value": "interpreted"
-      },
-      {
-        "op": "set",
-        "path": "/knowledge",
-        "value": "not_applicable"
-      },
-      {
-        "op": "delete",
-        "path": "/value"
-      },
-      {
-        "op": "set",
-        "path": "/reason",
-        "value": "explicit limitation"
-      }
-    ]
-  },
-  {
-    "name": "interpreted-absent",
-    "fixture": "assertion.json",
-    "schema": "common.schema.json#/$defs/assertion",
-    "valid": true,
-    "patches": [
-      {
-        "op": "set",
-        "path": "/origin",
-        "value": "interpreted"
-      },
-      {
-        "op": "set",
-        "path": "/knowledge",
-        "value": "absent"
-      },
-      {
-        "op": "delete",
-        "path": "/value"
-      },
-      {
-        "op": "set",
-        "path": "/negative",
-        "value": {
-          "domain": "unique_ids body at bound snapshots",
-          "claim": "no external call in inspected body",
-          "check_evidence_ids": [
-            "e1"
-          ]
-        }
-      }
-    ]
-  },
-  {
-    "name": "query",
+    "name": "accept-query.json",
     "fixture": "query.json",
     "schema": "contract-format.schema.json",
     "valid": true,
     "patches": []
   },
   {
-    "name": "response",
+    "name": "accept-assertion.json",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": true,
+    "patches": []
+  },
+  {
+    "name": "accept-external-reference.json",
+    "fixture": "external-reference.json",
+    "schema": "common.schema.json#/$defs/external_ref",
+    "valid": true,
+    "patches": []
+  },
+  {
+    "name": "accept-parse-request.json",
+    "fixture": "parse-request.json",
+    "schema": "pipeline.schema.json#/$defs/parse_request",
+    "valid": true,
+    "patches": []
+  },
+  {
+    "name": "accept-parse-result.json",
+    "fixture": "parse-result.json",
+    "schema": "pipeline.schema.json#/$defs/parse_result",
+    "valid": true,
+    "patches": []
+  },
+  {
+    "name": "accept-construct-request.json",
+    "fixture": "construct-request.json",
+    "schema": "pipeline.schema.json#/$defs/construct_request",
+    "valid": true,
+    "patches": []
+  },
+  {
+    "name": "accept-construct-result.json",
+    "fixture": "construct-result.json",
+    "schema": "pipeline.schema.json#/$defs/construct_result",
+    "valid": true,
+    "patches": []
+  },
+  {
+    "name": "accept-induction-request.json",
+    "fixture": "induction-request.json",
+    "schema": "pipeline.schema.json#/$defs/induction_request",
+    "valid": true,
+    "patches": []
+  },
+  {
+    "name": "accept-induction-result.json",
+    "fixture": "induction-result.json",
+    "schema": "pipeline.schema.json#/$defs/induction_result",
+    "valid": true,
+    "patches": []
+  },
+  {
+    "name": "accept-stored-record.json",
+    "fixture": "stored-record.json",
+    "schema": "pipeline.schema.json#/$defs/stored_record",
+    "valid": true,
+    "patches": []
+  },
+  {
+    "name": "accept-read-result.json",
+    "fixture": "read-result.json",
+    "schema": "pipeline.schema.json#/$defs/read_result",
+    "valid": true,
+    "patches": []
+  },
+  {
+    "name": "accept-response.json",
     "fixture": "response.json",
     "schema": "output-schema.schema.json",
     "valid": true,
     "patches": []
   },
   {
-    "name": "external-reference",
-    "fixture": "external-reference.json",
-    "schema": "common.schema.json#/$defs/reference",
+    "name": "accept-information-needs.json",
+    "fixture": "information-needs.json",
+    "schema": "information-needs.schema.json",
     "valid": true,
     "patches": []
   },
   {
-    "name": "parse-result",
-    "fixture": "parse-result.json",
-    "schema": "pipeline.schema.json",
+    "name": "accept-capability-matrix.json",
+    "fixture": "capability-matrix.json",
+    "schema": "capability-matrix.schema.json",
     "valid": true,
     "patches": []
   },
   {
-    "name": "construct-request",
-    "fixture": "construct-request.json",
-    "schema": "pipeline.schema.json",
-    "valid": true,
-    "patches": []
-  },
-  {
-    "name": "induction-request",
-    "fixture": "induction-request.json",
-    "schema": "pipeline.schema.json",
-    "valid": true,
-    "patches": []
-  },
-  {
-    "name": "construct-result",
-    "fixture": "construct-result.json",
-    "schema": "pipeline.schema.json",
-    "valid": true,
-    "patches": []
-  },
-  {
-    "name": "read-result",
-    "fixture": "read-result.json",
-    "schema": "pipeline.schema.json",
-    "valid": true,
-    "patches": []
-  },
-  {
-    "name": "stored-record",
-    "fixture": "stored-record.json",
-    "schema": "pipeline.schema.json",
-    "valid": true,
-    "patches": []
-  },
-  {
-    "name": "historical-query",
+    "name": "reject-history",
     "fixture": "query.json",
     "schema": "contract-format.schema.json",
-    "valid": true,
+    "valid": false,
     "patches": [
-      {
-        "op": "set",
-        "path": "/scope",
-        "value": {
-          "kind": "saved",
-          "scope_id": "scope-a"
-        }
-      },
       {
         "op": "set",
         "path": "/snapshot",
         "value": {
-          "mode": "historical",
-          "snapshot_set_id": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-          "bindings": [
-            {
-              "namespace": "source-a",
-              "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-            },
-            {
-              "namespace": "source-b",
-              "snapshot": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
-            }
-          ]
+          "mode": "historical"
         }
       }
     ]
   },
   {
-    "name": "invalid-origin",
+    "name": "reject-revision",
+    "fixture": "query.json",
+    "schema": "contract-format.schema.json",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/revision",
+        "value": "old"
+      }
+    ]
+  },
+  {
+    "name": "reject-refresh",
+    "fixture": "query.json",
+    "schema": "contract-format.schema.json",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/target",
+        "value": {
+          "kind": "refresh",
+          "node": {
+            "source_id": "src-a",
+            "subject_id": "project-a",
+            "node_id": "unit-a"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "reject-missing-granularity",
+    "fixture": "query.json",
+    "schema": "contract-format.schema.json",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/granularity",
+        "value": "L5"
+      }
+    ]
+  },
+  {
+    "name": "reject-missing-scope",
+    "fixture": "query.json",
+    "schema": "contract-format.schema.json",
+    "valid": false,
+    "patches": [
+      {
+        "op": "delete",
+        "path": "/scope"
+      }
+    ]
+  },
+  {
+    "name": "reject-mixed-origin-knowledge",
     "fixture": "assertion.json",
     "schema": "common.schema.json#/$defs/assertion",
     "valid": false,
@@ -563,59 +184,55 @@
     ]
   },
   {
-    "name": "invalid-knowledge",
+    "name": "interpretation-insufficient",
     "fixture": "assertion.json",
     "schema": "common.schema.json#/$defs/assertion",
-    "valid": false,
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/origin",
+        "value": "interpreted"
+      },
+      {
+        "op": "set",
+        "path": "/knowledge",
+        "value": "insufficient"
+      },
+      {
+        "op": "set",
+        "path": "/reason",
+        "value": "missing proof"
+      }
+    ]
+  },
+  {
+    "name": "unknown",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": true,
     "patches": [
       {
         "op": "set",
         "path": "/knowledge",
-        "value": "interpreted"
-      }
-    ]
-  },
-  {
-    "name": "projection-missing-context",
-    "fixture": "response.json",
-    "schema": "output-schema.schema.json",
-    "valid": false,
-    "patches": [
+        "value": "unknown"
+      },
+      {
+        "op": "set",
+        "path": "/reason",
+        "value": "not observed"
+      },
       {
         "op": "delete",
-        "path": "/results/0/fields/goal/context"
+        "path": "/value"
       }
     ]
   },
   {
-    "name": "projection-missing-coverage",
-    "fixture": "response.json",
-    "schema": "output-schema.schema.json",
-    "valid": false,
-    "patches": [
-      {
-        "op": "delete",
-        "path": "/results/0/fields/goal/coverage"
-      }
-    ]
-  },
-  {
-    "name": "projection-missing-basis",
-    "fixture": "response.json",
-    "schema": "output-schema.schema.json",
-    "valid": false,
-    "patches": [
-      {
-        "op": "delete",
-        "path": "/results/0/fields/goal/basis"
-      }
-    ]
-  },
-  {
-    "name": "absence-without-proof",
+    "name": "qualified-absence",
     "fixture": "assertion.json",
     "schema": "common.schema.json#/$defs/assertion",
-    "valid": false,
+    "valid": true,
     "patches": [
       {
         "op": "set",
@@ -625,11 +242,22 @@
       {
         "op": "delete",
         "path": "/value"
+      },
+      {
+        "op": "set",
+        "path": "/negative",
+        "value": {
+          "domain": "unit-a direct boundary",
+          "claim": "no hidden callbacks",
+          "check_evidence_ids": [
+            "ev-a"
+          ]
+        }
       }
     ]
   },
   {
-    "name": "absence-partial-coverage",
+    "name": "reject-unqualified-absence",
     "fixture": "assertion.json",
     "schema": "common.schema.json#/$defs/assertion",
     "valid": false,
@@ -647,10 +275,42 @@
         "op": "set",
         "path": "/negative",
         "value": {
-          "domain": "unique_ids body at bound snapshots",
-          "claim": "none",
+          "domain": "unit-a direct boundary",
+          "claim": "no hidden callbacks",
           "check_evidence_ids": [
-            "e1"
+            "ev-a"
+          ]
+        }
+      },
+      {
+        "op": "delete",
+        "path": "/negative"
+      }
+    ]
+  },
+  {
+    "name": "reject-partial-absence",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/knowledge",
+        "value": "absent"
+      },
+      {
+        "op": "delete",
+        "path": "/value"
+      },
+      {
+        "op": "set",
+        "path": "/negative",
+        "value": {
+          "domain": "unit-a direct boundary",
+          "claim": "no hidden callbacks",
+          "check_evidence_ids": [
+            "ev-a"
           ]
         }
       },
@@ -662,20 +322,341 @@
     ]
   },
   {
-    "name": "absent-with-null",
+    "name": "reject-no-evidence",
     "fixture": "assertion.json",
     "schema": "common.schema.json#/$defs/assertion",
     "valid": false,
     "patches": [
       {
         "op": "set",
-        "path": "/knowledge",
-        "value": "absent"
-      },
+        "path": "/basis/evidence",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "reject-no-validity",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": false,
+    "patches": [
       {
         "op": "delete",
-        "path": "/value"
-      },
+        "path": "/validity"
+      }
+    ]
+  },
+  {
+    "name": "reject-parser-scope",
+    "fixture": "parse-request.json",
+    "schema": "pipeline.schema.json#/$defs/parse_request",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/scope",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "reject-parser-needs",
+    "fixture": "parse-request.json",
+    "schema": "pipeline.schema.json#/$defs/parse_request",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/needs",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "reject-parser-repository",
+    "fixture": "parse-request.json",
+    "schema": "pipeline.schema.json#/$defs/parse_request",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/repository",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "reject-parser-response",
+    "fixture": "parse-request.json",
+    "schema": "pipeline.schema.json#/$defs/parse_request",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/response",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "reject-construct-response",
+    "fixture": "construct-result.json",
+    "schema": "pipeline.schema.json#/$defs/construct_result",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/response",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "reject-store-response",
+    "fixture": "stored-record.json",
+    "schema": "pipeline.schema.json#/$defs/stored_record",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/batch",
+        "value": {
+          "contract_version": "1.0.0",
+          "catalog_id": "semantic-facts-20261025",
+          "query": {
+            "contract_version": "1.0.0",
+            "catalog_id": "semantic-facts-20261025",
+            "request_id": "q-a",
+            "scope": {
+              "scope_id": "scope-a",
+              "directories": [
+                "/workspace/a"
+              ],
+              "excludes": [],
+              "defaulted": false
+            },
+            "target": {
+              "kind": "node",
+              "node": {
+                "source_id": "src-a",
+                "subject_id": "project-a",
+                "node_id": "unit-a"
+              }
+            },
+            "granularity": "L4",
+            "selections": [
+              {
+                "fact_type": "F16",
+                "fields": [
+                  "strategy"
+                ]
+              }
+            ],
+            "budget": {
+              "max_rounds": 3,
+              "max_new_assertions": 12
+            }
+          },
+          "sources": [
+            {
+              "source_id": "src-a",
+              "root": "/workspace/a",
+              "content_state": "content-a",
+              "status": "available",
+              "dirty": true,
+              "has_untracked": true,
+              "excludes": []
+            }
+          ],
+          "results": [
+            {
+              "fact_id": "fact-a",
+              "node": {
+                "source_id": "src-a",
+                "subject_id": "project-a",
+                "node_id": "unit-a"
+              },
+              "fact_type": "F16",
+              "granularities": [
+                "L4"
+              ],
+              "fields": {
+                "strategy": {
+                  "origin": "observed",
+                  "knowledge": "supported",
+                  "context": {
+                    "source_ids": [
+                      "src-a"
+                    ],
+                    "conditions": [],
+                    "environment": {},
+                    "language_semantics": []
+                  },
+                  "coverage": {
+                    "domain": "unit-a direct boundary",
+                    "checked": [
+                      "src/main.py"
+                    ],
+                    "excluded": [],
+                    "completeness": "complete",
+                    "method": "bounded enumeration"
+                  },
+                  "basis": {
+                    "evidence": [
+                      {
+                        "evidence_id": "ev-a",
+                        "source_id": "src-a",
+                        "content_state": "content-a",
+                        "kind": "source",
+                        "locator": "src/main.py:1-8",
+                        "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                        "relation": "supports"
+                      }
+                    ],
+                    "premises": [],
+                    "method": "source inspection",
+                    "limitations": []
+                  },
+                  "validity": {
+                    "state": "current",
+                    "sources": [
+                      {
+                        "source_id": "src-a",
+                        "content_state": "content-a"
+                      }
+                    ]
+                  },
+                  "value": {
+                    "kind": "text",
+                    "text": "stable deduplication"
+                  }
+                }
+              }
+            }
+          ],
+          "direct_nodes": [
+            {
+              "target": {
+                "kind": "node",
+                "node": {
+                  "source_id": "src-a",
+                  "subject_id": "project-a",
+                  "node_id": "unit-a"
+                }
+              },
+              "granularity": "L4",
+              "boundary": "unit-a direct boundary",
+              "children": [
+                {
+                  "source_id": "src-a",
+                  "subject_id": "project-a",
+                  "node_id": "child-a"
+                }
+              ],
+              "assertion": {
+                "origin": "observed",
+                "knowledge": "supported",
+                "context": {
+                  "source_ids": [
+                    "src-a"
+                  ],
+                  "conditions": [],
+                  "environment": {},
+                  "language_semantics": []
+                },
+                "coverage": {
+                  "domain": "unit-a direct boundary",
+                  "checked": [
+                    "src/main.py"
+                  ],
+                  "excluded": [],
+                  "completeness": "complete",
+                  "method": "bounded enumeration"
+                },
+                "basis": {
+                  "evidence": [
+                    {
+                      "evidence_id": "ev-a",
+                      "source_id": "src-a",
+                      "content_state": "content-a",
+                      "kind": "source",
+                      "locator": "src/main.py:1-8",
+                      "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "relation": "supports"
+                    }
+                  ],
+                  "premises": [],
+                  "method": "source inspection",
+                  "limitations": []
+                },
+                "validity": {
+                  "state": "current",
+                  "sources": [
+                    {
+                      "source_id": "src-a",
+                      "content_state": "content-a"
+                    }
+                  ]
+                },
+                "value": {
+                  "kind": "text",
+                  "text": "stable deduplication"
+                }
+              }
+            }
+          ],
+          "conflicts": [],
+          "gaps": [],
+          "out_of_catalog": [],
+          "termination": "satisfied"
+        }
+      }
+    ]
+  },
+  {
+    "name": "reject-matrix-production-status",
+    "fixture": "capability-matrix.json",
+    "schema": "capability-matrix.schema.json",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/actual_production",
+        "value": "validated"
+      }
+    ]
+  },
+  {
+    "name": "reject-response-loss-basis",
+    "fixture": "response.json",
+    "schema": "output-schema.schema.json",
+    "valid": false,
+    "patches": [
+      {
+        "op": "delete",
+        "path": "/results/0/fields/strategy/basis"
+      }
+    ]
+  },
+  {
+    "name": "reject-recursive-children",
+    "fixture": "response.json",
+    "schema": "output-schema.schema.json",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/direct_nodes/0/children/0/children",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "reject-null-filled",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": false,
+    "patches": [
       {
         "op": "set",
         "path": "/value",
@@ -684,266 +665,536 @@
     ]
   },
   {
-    "name": "invalid-target",
-    "fixture": "query.json",
-    "schema": "contract-format.schema.json",
-    "valid": false,
-    "patches": [
-      {
-        "op": "set",
-        "path": "/target",
-        "value": {
-          "kind": "node",
-          "continuation": {
-            "node": {},
-            "snapshot_set_id": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-            "fact_revision": 1
-          }
-        }
-      }
-    ]
-  },
-  {
-    "name": "historical-needs-bindings",
-    "fixture": "query.json",
-    "schema": "contract-format.schema.json",
-    "valid": false,
-    "patches": [
-      {
-        "op": "set",
-        "path": "/snapshot",
-        "value": {
-          "mode": "historical",
-          "snapshot_set_id": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-          "bindings": []
-        }
-      }
-    ]
-  },
-  {
-    "name": "external-needs-origin",
-    "fixture": "external-reference.json",
-    "schema": "common.schema.json#/$defs/reference",
-    "valid": false,
-    "patches": [
-      {
-        "op": "delete",
-        "path": "/observed_in"
-      }
-    ]
-  },
-  {
-    "name": "resolved-ref-needs-snapshot",
-    "fixture": "external-reference.json",
-    "schema": "common.schema.json#/$defs/reference",
-    "valid": false,
-    "patches": [
-      {
-        "op": "set",
-        "path": "",
-        "value": {
-          "kind": "subject",
-          "namespace": "source-a",
-          "subject_id": "s"
-        }
-      }
-    ]
-  },
-  {
-    "name": "unknown-output-field",
+    "name": "duplicate-child-identities",
     "fixture": "response.json",
     "schema": "output-schema.schema.json",
     "valid": false,
     "patches": [
       {
         "op": "set",
-        "path": "/results/0/fields/arbitrary",
+        "path": "/direct_nodes/0/children",
+        "value": [
+          {
+            "source_id": "src-a",
+            "subject_id": "project-a",
+            "node_id": "child-a"
+          },
+          {
+            "source_id": "src-a",
+            "subject_id": "project-a",
+            "node_id": "child-a"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "unknown-catalog-field",
+    "fixture": "response.json",
+    "schema": "output-schema.schema.json",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/results/0/fields/not_in_catalog",
         "value": {
-          "origin": "derived",
+          "origin": "observed",
           "knowledge": "supported",
           "context": {
-            "bindings": [
-              {
-                "namespace": "source-a",
-                "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-              },
-              {
-                "namespace": "source-b",
-                "snapshot": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
-              }
+            "source_ids": [
+              "src-a"
             ],
-            "conditions": [
-              {
-                "expression": "finite input",
-                "scope": "unique_ids",
-                "state": "true"
-              }
-            ],
-            "environment": [
-              "fixture-only"
-            ],
-            "language_semantics": [
-              "ordered append"
-            ]
+            "conditions": [],
+            "environment": {},
+            "language_semantics": []
           },
           "coverage": {
-            "domain": "unique_ids body at bound snapshots",
+            "domain": "unit-a direct boundary",
             "checked": [
-              "unique.py:1-8"
+              "src/main.py"
             ],
             "excluded": [],
             "completeness": "complete",
-            "method": "fixture exhaustive body inspection"
+            "method": "bounded enumeration"
           },
           "basis": {
             "evidence": [
               {
-                "evidence_id": "e1",
-                "namespace": "source-a",
-                "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "evidence_id": "ev-a",
+                "source_id": "src-a",
+                "content_state": "content-a",
                 "kind": "source",
-                "locator": "unique.py:1-8",
+                "locator": "src/main.py:1-8",
                 "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                 "relation": "supports"
               }
             ],
             "premises": [],
-            "method": "first occurrence appends only once",
-            "limitations": [
-              "constructed contract example; not production evidence"
+            "method": "source inspection",
+            "limitations": []
+          },
+          "validity": {
+            "state": "current",
+            "sources": [
+              {
+                "source_id": "src-a",
+                "content_state": "content-a"
+              }
             ]
           },
           "value": {
             "kind": "text",
-            "text": "稳定去重"
+            "text": "stable deduplication"
           }
         }
       }
     ]
   },
   {
-    "name": "unsupported-version",
-    "fixture": "query.json",
-    "schema": "contract-format.schema.json",
-    "valid": false,
-    "patches": [
-      {
-        "op": "set",
-        "path": "/contract_version",
-        "value": "2.0.0"
-      }
-    ]
-  },
-  {
-    "name": "invalid-induction-no-evidence",
-    "fixture": "induction-request.json",
-    "schema": "pipeline.schema.json",
-    "valid": false,
-    "patches": [
-      {
-        "op": "set",
-        "path": "/evidence",
-        "value": []
-      }
-    ]
-  },
-  {
-    "name": "invalid-known-required",
-    "fixture": "construct-request.json",
-    "schema": "pipeline.schema.json",
-    "valid": false,
-    "patches": [
-      {
-        "op": "delete",
-        "path": "/known"
-      }
-    ]
-  },
-  {
-    "name": "exact-revision-target",
-    "fixture": "query.json",
-    "schema": "contract-format.schema.json",
+    "name": "matrix-research-unlit",
+    "fixture": "capability-matrix.json",
+    "schema": "capability-matrix.schema.json",
     "valid": true,
     "patches": [
       {
         "op": "set",
-        "path": "/target",
-        "value": {
-          "kind": "node",
-          "continuation": {
-            "node": {
-              "namespace": "source-a",
-              "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-              "subject_id": "unit-a",
-              "node_id": "algorithm-a"
+        "path": "/entries",
+        "value": [
+          {
+            "tool_id": "tool-a",
+            "description": "bounded source information",
+            "information_need_ids": [
+              "need-a"
+            ],
+            "output_kinds": [
+              "json"
+            ],
+            "languages": [
+              "python"
+            ],
+            "platforms": [
+              "windows",
+              "linux"
+            ],
+            "environment": "tool executable available",
+            "invocation": [
+              "tool-a",
+              "--json"
+            ],
+            "combinations": [
+              "manifest-reader"
+            ],
+            "limitations": [
+              "static only"
+            ],
+            "enabled": false,
+            "research_basis": [
+              "research/tooling.md#tool-a"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "matrix-accepted-lit",
+    "fixture": "capability-matrix.json",
+    "schema": "capability-matrix.schema.json",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/entries",
+        "value": [
+          {
+            "tool_id": "tool-a",
+            "description": "bounded source information",
+            "information_need_ids": [
+              "need-a"
+            ],
+            "output_kinds": [
+              "json"
+            ],
+            "languages": [
+              "python"
+            ],
+            "platforms": [
+              "windows",
+              "linux"
+            ],
+            "environment": "tool executable available",
+            "invocation": [
+              "tool-a",
+              "--json"
+            ],
+            "combinations": [
+              "manifest-reader"
+            ],
+            "limitations": [
+              "static only"
+            ],
+            "enabled": true,
+            "acceptance": {
+              "actor": "parser_development",
+              "evidence": [
+                "tests/test_parser.py::test_native"
+              ]
             },
-            "snapshot_set_id": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-            "fact_revision": 1
+            "research_basis": [
+              "research/tooling.md#tool-a"
+            ]
           }
-        }
+        ]
       }
     ]
   },
   {
-    "name": "explicit-refresh-target",
-    "fixture": "query.json",
-    "schema": "contract-format.schema.json",
-    "valid": true,
-    "patches": [
-      {
-        "op": "set",
-        "path": "/target",
-        "value": {
-          "kind": "refresh",
-          "node": {
-            "namespace": "source-a",
-            "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "subject_id": "unit-a",
-            "node_id": "algorithm-a"
-          },
-          "snapshot_set_id": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
-        }
-      }
-    ]
-  },
-  {
-    "name": "historical-refresh-rejected",
-    "fixture": "query.json",
-    "schema": "contract-format.schema.json",
+    "name": "reject-matrix-light-without-acceptance",
+    "fixture": "capability-matrix.json",
+    "schema": "capability-matrix.schema.json",
     "valid": false,
     "patches": [
       {
         "op": "set",
-        "path": "/target",
-        "value": {
-          "kind": "refresh",
-          "node": {
-            "namespace": "source-a",
-            "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "subject_id": "unit-a",
-            "node_id": "algorithm-a"
-          },
-          "snapshot_set_id": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
-        }
-      },
+        "path": "/entries",
+        "value": [
+          {
+            "tool_id": "tool-a",
+            "description": "bounded source information",
+            "information_need_ids": [
+              "need-a"
+            ],
+            "output_kinds": [
+              "json"
+            ],
+            "languages": [
+              "python"
+            ],
+            "platforms": [
+              "windows",
+              "linux"
+            ],
+            "environment": "tool executable available",
+            "invocation": [
+              "tool-a",
+              "--json"
+            ],
+            "combinations": [
+              "manifest-reader"
+            ],
+            "limitations": [
+              "static only"
+            ],
+            "enabled": true,
+            "research_basis": [
+              "research/tooling.md#tool-a"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "reject-research-light",
+    "fixture": "capability-matrix.json",
+    "schema": "capability-matrix.schema.json",
+    "valid": false,
+    "patches": [
       {
         "op": "set",
-        "path": "/scope",
-        "value": {
-          "kind": "saved",
-          "scope_id": "scope-a"
-        }
-      },
+        "path": "/entries",
+        "value": [
+          {
+            "tool_id": "tool-a",
+            "description": "bounded source information",
+            "information_need_ids": [
+              "need-a"
+            ],
+            "output_kinds": [
+              "json"
+            ],
+            "languages": [
+              "python"
+            ],
+            "platforms": [
+              "windows",
+              "linux"
+            ],
+            "environment": "tool executable available",
+            "invocation": [
+              "tool-a",
+              "--json"
+            ],
+            "combinations": [
+              "manifest-reader"
+            ],
+            "limitations": [
+              "static only"
+            ],
+            "enabled": true,
+            "acceptance": {
+              "actor": "research",
+              "evidence": [
+                "report"
+              ]
+            },
+            "research_basis": [
+              "research/tooling.md#tool-a"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "reject-matrix-actual_production",
+    "fixture": "capability-matrix.json",
+    "schema": "capability-matrix.schema.json",
+    "valid": false,
+    "patches": [
       {
         "op": "set",
-        "path": "/snapshot",
+        "path": "/entries",
+        "value": [
+          {
+            "tool_id": "tool-a",
+            "description": "bounded source information",
+            "information_need_ids": [
+              "need-a"
+            ],
+            "output_kinds": [
+              "json"
+            ],
+            "languages": [
+              "python"
+            ],
+            "platforms": [
+              "windows",
+              "linux"
+            ],
+            "environment": "tool executable available",
+            "invocation": [
+              "tool-a",
+              "--json"
+            ],
+            "combinations": [
+              "manifest-reader"
+            ],
+            "limitations": [
+              "static only"
+            ],
+            "enabled": false,
+            "actual_production": "validated",
+            "research_basis": [
+              "research/tooling.md#tool-a"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "reject-matrix-execution_validation",
+    "fixture": "capability-matrix.json",
+    "schema": "capability-matrix.schema.json",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/entries",
+        "value": [
+          {
+            "tool_id": "tool-a",
+            "description": "bounded source information",
+            "information_need_ids": [
+              "need-a"
+            ],
+            "output_kinds": [
+              "json"
+            ],
+            "languages": [
+              "python"
+            ],
+            "platforms": [
+              "windows",
+              "linux"
+            ],
+            "environment": "tool executable available",
+            "invocation": [
+              "tool-a",
+              "--json"
+            ],
+            "combinations": [
+              "manifest-reader"
+            ],
+            "limitations": [
+              "static only"
+            ],
+            "enabled": false,
+            "execution_validation": "validated",
+            "research_basis": [
+              "research/tooling.md#tool-a"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "reject-matrix-production_status",
+    "fixture": "capability-matrix.json",
+    "schema": "capability-matrix.schema.json",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/entries",
+        "value": [
+          {
+            "tool_id": "tool-a",
+            "description": "bounded source information",
+            "information_need_ids": [
+              "need-a"
+            ],
+            "output_kinds": [
+              "json"
+            ],
+            "languages": [
+              "python"
+            ],
+            "platforms": [
+              "windows",
+              "linux"
+            ],
+            "environment": "tool executable available",
+            "invocation": [
+              "tool-a",
+              "--json"
+            ],
+            "combinations": [
+              "manifest-reader"
+            ],
+            "limitations": [
+              "static only"
+            ],
+            "enabled": false,
+            "production_status": "validated",
+            "research_basis": [
+              "research/tooling.md#tool-a"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "mutually-exclusive-structural-cycle",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/value",
         "value": {
-          "mode": "historical",
-          "snapshot_set_id": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-          "bindings": [
+          "kind": "cycle",
+          "mode": "structural",
+          "joint_conditions": [
             {
-              "namespace": "source-a",
-              "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              "expression": "feature",
+              "scope": "build",
+              "state": "true"
+            },
+            {
+              "expression": "feature",
+              "scope": "build",
+              "state": "false"
+            }
+          ],
+          "joint_satisfiability": "unsatisfied",
+          "execution_evidence": []
+        }
+      }
+    ]
+  },
+  {
+    "name": "reject-actual-cycle-mutually-exclusive",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/value",
+        "value": {
+          "kind": "cycle",
+          "mode": "observed",
+          "joint_conditions": [
+            {
+              "expression": "feature",
+              "scope": "build",
+              "state": "true"
+            },
+            {
+              "expression": "feature",
+              "scope": "build",
+              "state": "false"
+            }
+          ],
+          "joint_satisfiability": "unsatisfied",
+          "execution_evidence": []
+        }
+      }
+    ]
+  },
+  {
+    "name": "reject-actual-cycle-no-execution-evidence",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/value",
+        "value": {
+          "kind": "cycle",
+          "mode": "observed",
+          "joint_conditions": [],
+          "joint_satisfiability": "satisfied",
+          "execution_evidence": []
+        }
+      }
+    ]
+  },
+  {
+    "name": "observed-cycle",
+    "fixture": "assertion.json",
+    "schema": "common.schema.json#/$defs/assertion",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/value",
+        "value": {
+          "kind": "cycle",
+          "mode": "observed",
+          "joint_conditions": [
+            {
+              "expression": "feature",
+              "scope": "build",
+              "state": "true"
+            }
+          ],
+          "joint_satisfiability": "satisfied",
+          "execution_evidence": [
+            {
+              "evidence_id": "ev-a",
+              "source_id": "src-a",
+              "content_state": "content-a",
+              "kind": "observation",
+              "locator": "src/main.py:1-8",
+              "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "relation": "supports"
             }
           ]
         }
@@ -951,207 +1202,79 @@
     ]
   },
   {
-    "name": "typed-candidate-condition-pair",
+    "name": "reject-old-response-snapshot_set_id",
     "fixture": "response.json",
     "schema": "output-schema.schema.json",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/snapshot_set_id",
+        "value": "legacy"
+      }
+    ]
+  },
+  {
+    "name": "reject-old-response-snapshots",
+    "fixture": "response.json",
+    "schema": "output-schema.schema.json",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/snapshots",
+        "value": "legacy"
+      }
+    ]
+  },
+  {
+    "name": "reject-old-response-revision",
+    "fixture": "response.json",
+    "schema": "output-schema.schema.json",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/revision",
+        "value": "legacy"
+      }
+    ]
+  },
+  {
+    "name": "reject-old-response-refresh",
+    "fixture": "response.json",
+    "schema": "output-schema.schema.json",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/refresh",
+        "value": "legacy"
+      }
+    ]
+  },
+  {
+    "name": "modified-record-preserved",
+    "fixture": "stored-record.json",
+    "schema": "pipeline.schema.json#/$defs/stored_record",
     "valid": true,
     "patches": [
       {
         "op": "set",
-        "path": "/results/0/fact_type",
-        "value": "F10"
+        "path": "/batch/facts/0/fields/strategy/validity/state",
+        "value": "modified"
       },
       {
         "op": "set",
-        "path": "/results/0/fields",
-        "value": {
-          "targets": {
-            "origin": "derived",
-            "knowledge": "supported",
-            "context": {
-              "bindings": [
-                {
-                  "namespace": "source-a",
-                  "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                },
-                {
-                  "namespace": "source-b",
-                  "snapshot": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
-                }
-              ],
-              "conditions": [
-                {
-                  "expression": "finite input",
-                  "scope": "unique_ids",
-                  "state": "true"
-                }
-              ],
-              "environment": [
-                "fixture-only"
-              ],
-              "language_semantics": [
-                "ordered append"
-              ]
-            },
-            "coverage": {
-              "domain": "unique_ids body at bound snapshots",
-              "checked": [
-                "unique.py:1-8"
-              ],
-              "excluded": [],
-              "completeness": "complete",
-              "method": "fixture exhaustive body inspection"
-            },
-            "basis": {
-              "evidence": [
-                {
-                  "evidence_id": "e1",
-                  "namespace": "source-a",
-                  "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                  "kind": "source",
-                  "locator": "unique.py:1-8",
-                  "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                  "relation": "supports"
-                }
-              ],
-              "premises": [],
-              "method": "first occurrence appends only once",
-              "limitations": [
-                "constructed contract example; not production evidence"
-              ]
-            },
-            "value": {
-              "kind": "candidates",
-              "candidates": [
-                {
-                  "target": {
-                    "kind": "subject",
-                    "namespace": "source-a",
-                    "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                    "subject_id": "unit-a"
-                  },
-                  "conditions": [],
-                  "mode": "possible"
-                }
-              ],
-              "complete": false
-            }
-          }
-        }
+        "path": "/batch/facts/0/fields/strategy/validity/reason",
+        "value": "source edited"
       }
     ]
   },
   {
-    "name": "candidate-without-target-rejected",
-    "fixture": "response.json",
-    "schema": "output-schema.schema.json",
-    "valid": false,
-    "patches": [
-      {
-        "op": "set",
-        "path": "/results/0/fact_type",
-        "value": "F10"
-      },
-      {
-        "op": "set",
-        "path": "/results/0/fields",
-        "value": {
-          "targets": {
-            "origin": "derived",
-            "knowledge": "supported",
-            "context": {
-              "bindings": [
-                {
-                  "namespace": "source-a",
-                  "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                },
-                {
-                  "namespace": "source-b",
-                  "snapshot": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
-                }
-              ],
-              "conditions": [
-                {
-                  "expression": "finite input",
-                  "scope": "unique_ids",
-                  "state": "true"
-                }
-              ],
-              "environment": [
-                "fixture-only"
-              ],
-              "language_semantics": [
-                "ordered append"
-              ]
-            },
-            "coverage": {
-              "domain": "unique_ids body at bound snapshots",
-              "checked": [
-                "unique.py:1-8"
-              ],
-              "excluded": [],
-              "completeness": "complete",
-              "method": "fixture exhaustive body inspection"
-            },
-            "basis": {
-              "evidence": [
-                {
-                  "evidence_id": "e1",
-                  "namespace": "source-a",
-                  "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                  "kind": "source",
-                  "locator": "unique.py:1-8",
-                  "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                  "relation": "supports"
-                }
-              ],
-              "premises": [],
-              "method": "first occurrence appends only once",
-              "limitations": [
-                "constructed contract example; not production evidence"
-              ]
-            },
-            "value": {
-              "kind": "candidates",
-              "candidates": [
-                {
-                  "target": {
-                    "kind": "subject",
-                    "namespace": "source-a",
-                    "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                    "subject_id": "unit-a"
-                  },
-                  "conditions": [],
-                  "mode": "possible"
-                }
-              ],
-              "complete": false
-            }
-          }
-        }
-      },
-      {
-        "op": "delete",
-        "path": "/results/0/fields/targets/value/candidates/0/target"
-      }
-    ]
-  },
-  {
-    "name": "selector-without-target-rejected",
-    "fixture": "induction-request.json",
-    "schema": "pipeline.schema.json",
-    "valid": false,
-    "patches": [
-      {
-        "op": "delete",
-        "path": "/requested/0/target"
-      }
-    ]
-  },
-  {
-    "name": "target-specific-gap",
-    "fixture": "response.json",
-    "schema": "output-schema.schema.json",
+    "name": "explicit-gap-source_modified",
+    "fixture": "construct-result.json",
+    "schema": "pipeline.schema.json#/$defs/construct_result",
     "valid": true,
     "patches": [
       {
@@ -1161,52 +1284,34 @@
           {
             "fact_type": "F16",
             "fields": [
-              "goal"
+              "strategy"
             ],
             "target": {
               "kind": "node",
               "node": {
-                "namespace": "source-a",
-                "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                "subject_id": "unit-a",
-                "node_id": "algorithm-a"
+                "source_id": "src-a",
+                "subject_id": "project-a",
+                "node_id": "unit-a"
               }
             },
-            "reason": "insufficient_evidence",
-            "detail": "target-specific missing field",
+            "reason": "source_modified",
+            "detail": "exception path remains unproved",
             "context": {
-              "bindings": [
-                {
-                  "namespace": "source-a",
-                  "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                },
-                {
-                  "namespace": "source-b",
-                  "snapshot": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
-                }
+              "source_ids": [
+                "src-a"
               ],
-              "conditions": [
-                {
-                  "expression": "finite input",
-                  "scope": "unique_ids",
-                  "state": "true"
-                }
-              ],
-              "environment": [
-                "fixture-only"
-              ],
-              "language_semantics": [
-                "ordered append"
-              ]
+              "conditions": [],
+              "environment": {},
+              "language_semantics": []
             },
             "coverage": {
-              "domain": "unique_ids body at bound snapshots",
+              "domain": "unit-a direct boundary",
               "checked": [
-                "unique.py:1-8"
+                "src/main.py"
               ],
               "excluded": [],
-              "completeness": "complete",
-              "method": "fixture exhaustive body inspection"
+              "completeness": "partial",
+              "method": "bounded enumeration"
             }
           }
         ]
@@ -1214,10 +1319,10 @@
     ]
   },
   {
-    "name": "gap-without-target-rejected",
-    "fixture": "response.json",
-    "schema": "output-schema.schema.json",
-    "valid": false,
+    "name": "explicit-gap-source_deleted",
+    "fixture": "construct-result.json",
+    "schema": "pipeline.schema.json#/$defs/construct_result",
+    "valid": true,
     "patches": [
       {
         "op": "set",
@@ -1226,59 +1331,373 @@
           {
             "fact_type": "F16",
             "fields": [
-              "goal"
+              "strategy"
             ],
             "target": {
               "kind": "node",
               "node": {
-                "namespace": "source-a",
-                "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                "subject_id": "unit-a",
-                "node_id": "algorithm-a"
+                "source_id": "src-a",
+                "subject_id": "project-a",
+                "node_id": "unit-a"
               }
             },
-            "reason": "insufficient_evidence",
-            "detail": "target-specific missing field",
+            "reason": "source_deleted",
+            "detail": "exception path remains unproved",
             "context": {
-              "bindings": [
-                {
-                  "namespace": "source-a",
-                  "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                },
-                {
-                  "namespace": "source-b",
-                  "snapshot": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
-                }
+              "source_ids": [
+                "src-a"
               ],
-              "conditions": [
-                {
-                  "expression": "finite input",
-                  "scope": "unique_ids",
-                  "state": "true"
-                }
-              ],
-              "environment": [
-                "fixture-only"
-              ],
-              "language_semantics": [
-                "ordered append"
-              ]
+              "conditions": [],
+              "environment": {},
+              "language_semantics": []
             },
             "coverage": {
-              "domain": "unique_ids body at bound snapshots",
+              "domain": "unit-a direct boundary",
               "checked": [
-                "unique.py:1-8"
+                "src/main.py"
               ],
               "excluded": [],
-              "completeness": "complete",
-              "method": "fixture exhaustive body inspection"
+              "completeness": "partial",
+              "method": "bounded enumeration"
             }
           }
         ]
+      }
+    ]
+  },
+  {
+    "name": "explicit-gap-invalid_premise",
+    "fixture": "construct-result.json",
+    "schema": "pipeline.schema.json#/$defs/construct_result",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/gaps",
+        "value": [
+          {
+            "fact_type": "F16",
+            "fields": [
+              "strategy"
+            ],
+            "target": {
+              "kind": "node",
+              "node": {
+                "source_id": "src-a",
+                "subject_id": "project-a",
+                "node_id": "unit-a"
+              }
+            },
+            "reason": "invalid_premise",
+            "detail": "exception path remains unproved",
+            "context": {
+              "source_ids": [
+                "src-a"
+              ],
+              "conditions": [],
+              "environment": {},
+              "language_semantics": []
+            },
+            "coverage": {
+              "domain": "unit-a direct boundary",
+              "checked": [
+                "src/main.py"
+              ],
+              "excluded": [],
+              "completeness": "partial",
+              "method": "bounded enumeration"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "explicit-gap-nonempty_insufficient",
+    "fixture": "construct-result.json",
+    "schema": "pipeline.schema.json#/$defs/construct_result",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/gaps",
+        "value": [
+          {
+            "fact_type": "F16",
+            "fields": [
+              "strategy"
+            ],
+            "target": {
+              "kind": "node",
+              "node": {
+                "source_id": "src-a",
+                "subject_id": "project-a",
+                "node_id": "unit-a"
+              }
+            },
+            "reason": "nonempty_insufficient",
+            "detail": "exception path remains unproved",
+            "context": {
+              "source_ids": [
+                "src-a"
+              ],
+              "conditions": [],
+              "environment": {},
+              "language_semantics": []
+            },
+            "coverage": {
+              "domain": "unit-a direct boundary",
+              "checked": [
+                "src/main.py"
+              ],
+              "excluded": [],
+              "completeness": "partial",
+              "method": "bounded enumeration"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "explicit-gap-uncovered_need",
+    "fixture": "construct-result.json",
+    "schema": "pipeline.schema.json#/$defs/construct_result",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/gaps",
+        "value": [
+          {
+            "fact_type": "F16",
+            "fields": [
+              "strategy"
+            ],
+            "target": {
+              "kind": "node",
+              "node": {
+                "source_id": "src-a",
+                "subject_id": "project-a",
+                "node_id": "unit-a"
+              }
+            },
+            "reason": "uncovered_need",
+            "detail": "exception path remains unproved",
+            "context": {
+              "source_ids": [
+                "src-a"
+              ],
+              "conditions": [],
+              "environment": {},
+              "language_semantics": []
+            },
+            "coverage": {
+              "domain": "unit-a direct boundary",
+              "checked": [
+                "src/main.py"
+              ],
+              "excluded": [],
+              "completeness": "partial",
+              "method": "bounded enumeration"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "explicit-gap-unavailable_tool",
+    "fixture": "construct-result.json",
+    "schema": "pipeline.schema.json#/$defs/construct_result",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/gaps",
+        "value": [
+          {
+            "fact_type": "F16",
+            "fields": [
+              "strategy"
+            ],
+            "target": {
+              "kind": "node",
+              "node": {
+                "source_id": "src-a",
+                "subject_id": "project-a",
+                "node_id": "unit-a"
+              }
+            },
+            "reason": "unavailable_tool",
+            "detail": "exception path remains unproved",
+            "context": {
+              "source_ids": [
+                "src-a"
+              ],
+              "conditions": [],
+              "environment": {},
+              "language_semantics": []
+            },
+            "coverage": {
+              "domain": "unit-a direct boundary",
+              "checked": [
+                "src/main.py"
+              ],
+              "excluded": [],
+              "completeness": "partial",
+              "method": "bounded enumeration"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "constructor-current-change-input",
+    "fixture": "construct-request.json",
+    "schema": "pipeline.schema.json#/$defs/construct_request",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/current_source_context",
+        "value": {
+          "sources": [
+            {
+              "source_id": "src-a",
+              "root": "/workspace/a",
+              "content_state": "content-a",
+              "status": "available",
+              "dirty": true,
+              "has_untracked": true,
+              "excludes": []
+            }
+          ],
+          "changes": [
+            {
+              "source_id": "src-a",
+              "kind": "modified",
+              "affected_subjects": [
+                {
+                  "kind": "subject",
+                  "source_id": "src-a",
+                  "subject_id": "project-a"
+                }
+              ]
+            }
+          ],
+          "necessary_ancestors": [],
+          "obligations": [
+            {
+              "kind": "direct_nodes",
+              "target": {
+                "kind": "node",
+                "node": {
+                  "source_id": "src-a",
+                  "subject_id": "project-a",
+                  "node_id": "unit-a"
+                }
+              },
+              "detail": "identify every direct child"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "parser-missing-evidence-gap",
+    "fixture": "parse-result.json",
+    "schema": "pipeline.schema.json#/$defs/parse_result",
+    "valid": true,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/observations",
+        "value": []
       },
       {
-        "op": "delete",
-        "path": "/gaps/0/target"
+        "op": "set",
+        "path": "/gaps",
+        "value": [
+          {
+            "fact_type": "F16",
+            "fields": [
+              "strategy"
+            ],
+            "target": {
+              "kind": "node",
+              "node": {
+                "source_id": "src-a",
+                "subject_id": "project-a",
+                "node_id": "unit-a"
+              }
+            },
+            "reason": "insufficient_evidence",
+            "detail": "exception path remains unproved",
+            "context": {
+              "source_ids": [
+                "src-a"
+              ],
+              "conditions": [],
+              "environment": {},
+              "language_semantics": []
+            },
+            "coverage": {
+              "domain": "unit-a direct boundary",
+              "checked": [
+                "src/main.py"
+              ],
+              "excluded": [],
+              "completeness": "partial",
+              "method": "bounded enumeration"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "reject-matrix-missing-research-basis",
+    "fixture": "capability-matrix.json",
+    "schema": "capability-matrix.schema.json",
+    "valid": false,
+    "patches": [
+      {
+        "op": "set",
+        "path": "/entries",
+        "value": [
+          {
+            "tool_id": "tool-a",
+            "description": "bounded source information",
+            "information_need_ids": [
+              "need-a"
+            ],
+            "output_kinds": [
+              "json"
+            ],
+            "languages": [
+              "python"
+            ],
+            "platforms": [
+              "windows",
+              "linux"
+            ],
+            "environment": "tool executable available",
+            "invocation": [
+              "tool-a",
+              "--json"
+            ],
+            "combinations": [
+              "manifest-reader"
+            ],
+            "limitations": [
+              "static only"
+            ],
+            "enabled": false
+          }
+        ]
       }
     ]
   }

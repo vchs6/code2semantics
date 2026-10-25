@@ -112,7 +112,8 @@
         "knowledge",
         "context",
         "coverage",
-        "basis"
+        "basis",
+        "validity"
       ]
     },
     "fact_types": {
@@ -169,19 +170,27 @@
                     "candidate_set",
                     "participant_set",
                     "binding_set",
-                    "edge_set"
+                    "edge_set",
+                    "cycle_value"
                   ]
+                },
+                "basis": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "minItems": 1,
+                  "uniqueItems": true
                 }
               },
               "required": [
                 "description",
-                "value_shape"
+                "value_shape",
+                "basis"
               ],
               "additionalProperties": false
             }
-          },
-          "production_status": {
-            "const": "unverified"
           }
         },
         "required": [
@@ -190,8 +199,7 @@
           "requirement",
           "organizations",
           "basis",
-          "fields",
-          "production_status"
+          "fields"
         ],
         "additionalProperties": false
       }

@@ -2,127 +2,6 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://code2semantics.local/schema/common.schema.json",
   "$defs": {
-    "binding": {
-      "type": "object",
-      "properties": {
-        "namespace": {
-          "type": "string",
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
-        },
-        "snapshot": {
-          "type": "string",
-          "pattern": "^sha256:[0-9a-f]{64}$"
-        }
-      },
-      "required": [
-        "namespace",
-        "snapshot"
-      ],
-      "additionalProperties": false
-    },
-    "node_ref": {
-      "type": "object",
-      "properties": {
-        "namespace": {
-          "type": "string",
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
-        },
-        "snapshot": {
-          "type": "string",
-          "pattern": "^sha256:[0-9a-f]{64}$"
-        },
-        "subject_id": {
-          "type": "string",
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
-        },
-        "node_id": {
-          "type": "string",
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
-        }
-      },
-      "required": [
-        "namespace",
-        "snapshot",
-        "subject_id",
-        "node_id"
-      ],
-      "additionalProperties": false
-    },
-    "subject_ref": {
-      "type": "object",
-      "properties": {
-        "kind": {
-          "const": "subject"
-        },
-        "namespace": {
-          "type": "string",
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
-        },
-        "snapshot": {
-          "type": "string",
-          "pattern": "^sha256:[0-9a-f]{64}$"
-        },
-        "subject_id": {
-          "type": "string",
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
-        }
-      },
-      "required": [
-        "kind",
-        "namespace",
-        "snapshot",
-        "subject_id"
-      ],
-      "additionalProperties": false
-    },
-    "external_ref": {
-      "type": "object",
-      "properties": {
-        "kind": {
-          "const": "unresolved"
-        },
-        "reference_id": {
-          "type": "string",
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
-        },
-        "label": {
-          "type": "string",
-          "minLength": 1
-        },
-        "reason": {
-          "type": "string",
-          "minLength": 1
-        },
-        "boundary": {
-          "enum": [
-            "outside_scope",
-            "unresolved_in_scope"
-          ]
-        },
-        "observed_in": {
-          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/binding"
-        }
-      },
-      "required": [
-        "kind",
-        "reference_id",
-        "label",
-        "reason",
-        "boundary",
-        "observed_in"
-      ],
-      "additionalProperties": false
-    },
-    "reference": {
-      "oneOf": [
-        {
-          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/subject_ref"
-        },
-        {
-          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/external_ref"
-        }
-      ]
-    },
     "condition": {
       "type": "object",
       "properties": {
@@ -146,158 +25,6 @@
         "expression",
         "scope",
         "state"
-      ],
-      "additionalProperties": false
-    },
-    "context": {
-      "type": "object",
-      "properties": {
-        "bindings": {
-          "type": "array",
-          "items": {
-            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/binding"
-          },
-          "minItems": 1
-        },
-        "conditions": {
-          "type": "array",
-          "items": {
-            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/condition"
-          },
-          "minItems": 0
-        },
-        "environment": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "minLength": 1
-          },
-          "minItems": 0
-        },
-        "language_semantics": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "minLength": 1
-          },
-          "minItems": 0
-        }
-      },
-      "required": [
-        "bindings",
-        "conditions",
-        "environment",
-        "language_semantics"
-      ],
-      "additionalProperties": false
-    },
-    "evidence": {
-      "type": "object",
-      "properties": {
-        "evidence_id": {
-          "type": "string",
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
-        },
-        "namespace": {
-          "type": "string",
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
-        },
-        "snapshot": {
-          "type": "string",
-          "pattern": "^sha256:[0-9a-f]{64}$"
-        },
-        "kind": {
-          "enum": [
-            "source",
-            "manifest",
-            "configuration",
-            "documentation",
-            "observation"
-          ]
-        },
-        "locator": {
-          "type": "string",
-          "minLength": 1
-        },
-        "content_digest": {
-          "type": "string",
-          "pattern": "^sha256:[0-9a-f]{64}$"
-        },
-        "relation": {
-          "enum": [
-            "supports",
-            "refutes"
-          ]
-        }
-      },
-      "required": [
-        "evidence_id",
-        "namespace",
-        "snapshot",
-        "kind",
-        "locator",
-        "content_digest",
-        "relation"
-      ],
-      "additionalProperties": false
-    },
-    "premise": {
-      "type": "object",
-      "properties": {
-        "node": {
-          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/node_ref"
-        },
-        "fact_revision": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "field": {
-          "type": "string",
-          "pattern": "^[a-z][a-z0-9_]*$"
-        }
-      },
-      "required": [
-        "node",
-        "fact_revision",
-        "field"
-      ],
-      "additionalProperties": false
-    },
-    "basis": {
-      "type": "object",
-      "properties": {
-        "evidence": {
-          "type": "array",
-          "items": {
-            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/evidence"
-          },
-          "minItems": 0
-        },
-        "premises": {
-          "type": "array",
-          "items": {
-            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/premise"
-          },
-          "minItems": 0
-        },
-        "method": {
-          "type": "string",
-          "minLength": 1
-        },
-        "limitations": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "minLength": 1
-          },
-          "minItems": 0
-        }
-      },
-      "required": [
-        "evidence",
-        "premises",
-        "method",
-        "limitations"
       ],
       "additionalProperties": false
     },
@@ -342,6 +69,44 @@
         "excluded",
         "completeness",
         "method"
+      ],
+      "additionalProperties": false
+    },
+    "basis": {
+      "type": "object",
+      "properties": {
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/evidence"
+          },
+          "minItems": 0
+        },
+        "premises": {
+          "type": "array",
+          "items": {
+            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/premise"
+          },
+          "minItems": 0
+        },
+        "method": {
+          "type": "string",
+          "minLength": 1
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "evidence",
+        "premises",
+        "method",
+        "limitations"
       ],
       "additionalProperties": false
     },
@@ -468,6 +233,9 @@
         },
         {
           "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/edge_set"
+        },
+        {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/cycle_value"
         }
       ]
     },
@@ -533,6 +301,9 @@
             "check_evidence_ids"
           ],
           "additionalProperties": false
+        },
+        "validity": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/validity"
         }
       },
       "required": [
@@ -540,7 +311,8 @@
         "knowledge",
         "context",
         "coverage",
-        "basis"
+        "basis",
+        "validity"
       ],
       "additionalProperties": false,
       "allOf": [
@@ -716,151 +488,6 @@
               }
             }
           }
-        }
-      ]
-    },
-    "snapshot_record": {
-      "type": "object",
-      "properties": {
-        "namespace": {
-          "type": "string",
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
-        },
-        "snapshot": {
-          "type": "string",
-          "pattern": "^sha256:[0-9a-f]{64}$"
-        },
-        "manifest_digest": {
-          "type": "string",
-          "pattern": "^sha256:[0-9a-f]{64}$"
-        },
-        "dirty": {
-          "type": "boolean"
-        },
-        "has_untracked": {
-          "type": "boolean"
-        },
-        "content_available": {
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "namespace",
-        "snapshot",
-        "manifest_digest",
-        "dirty",
-        "has_untracked",
-        "content_available"
-      ],
-      "additionalProperties": false
-    },
-    "scope": {
-      "oneOf": [
-        {
-          "type": "object",
-          "properties": {
-            "kind": {
-              "const": "directories"
-            },
-            "directories": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "minLength": 1
-              },
-              "minItems": 1
-            },
-            "excludes": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "minLength": 1
-              },
-              "minItems": 0
-            }
-          },
-          "required": [
-            "kind",
-            "directories",
-            "excludes"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "kind": {
-              "const": "saved"
-            },
-            "scope_id": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
-            }
-          },
-          "required": [
-            "kind",
-            "scope_id"
-          ],
-          "additionalProperties": false
-        }
-      ]
-    },
-    "continuation": {
-      "type": "object",
-      "properties": {
-        "node": {
-          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/node_ref"
-        },
-        "snapshot_set_id": {
-          "type": "string",
-          "pattern": "^sha256:[0-9a-f]{64}$"
-        },
-        "fact_revision": {
-          "type": "integer",
-          "minimum": 1
-        }
-      },
-      "required": [
-        "node",
-        "snapshot_set_id",
-        "fact_revision"
-      ],
-      "additionalProperties": false
-    },
-    "selection_target": {
-      "oneOf": [
-        {
-          "type": "object",
-          "properties": {
-            "kind": {
-              "const": "scope"
-            },
-            "scope_id": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
-            }
-          },
-          "required": [
-            "kind",
-            "scope_id"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "kind": {
-              "const": "node"
-            },
-            "node": {
-              "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/node_ref"
-            }
-          },
-          "required": [
-            "kind",
-            "node"
-          ],
-          "additionalProperties": false
         }
       ]
     },
@@ -1069,6 +696,2928 @@
         "edges"
       ],
       "additionalProperties": false
+    },
+    "node_ref": {
+      "type": "object",
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "subject_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "node_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        }
+      },
+      "required": [
+        "source_id",
+        "subject_id",
+        "node_id"
+      ],
+      "additionalProperties": false
+    },
+    "subject_ref": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "subject"
+        },
+        "source_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "subject_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        }
+      },
+      "required": [
+        "kind",
+        "source_id",
+        "subject_id"
+      ],
+      "additionalProperties": false
+    },
+    "external_ref": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "external"
+        },
+        "reference_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "enum": [
+            "outside_authorized_scope",
+            "unresolved"
+          ]
+        },
+        "boundary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "observed_in": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/subject_ref"
+        }
+      },
+      "required": [
+        "kind",
+        "reference_id",
+        "label",
+        "reason",
+        "boundary",
+        "observed_in"
+      ],
+      "additionalProperties": false
+    },
+    "reference": {
+      "oneOf": [
+        {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/node_ref"
+        },
+        {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/subject_ref"
+        },
+        {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/external_ref"
+        }
+      ]
+    },
+    "source_state": {
+      "type": "object",
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "content_state": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "source_id",
+        "content_state"
+      ],
+      "additionalProperties": false
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "root": {
+          "type": "string",
+          "minLength": 1
+        },
+        "content_state": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "available",
+            "deleted",
+            "unavailable"
+          ]
+        },
+        "dirty": {
+          "type": "boolean"
+        },
+        "has_untracked": {
+          "type": "boolean"
+        },
+        "excludes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "source_id",
+        "root",
+        "content_state",
+        "status",
+        "dirty",
+        "has_untracked",
+        "excludes"
+      ],
+      "additionalProperties": false
+    },
+    "context": {
+      "type": "object",
+      "properties": {
+        "source_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/condition"
+          },
+          "minItems": 0
+        },
+        "environment": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "language_semantics": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "source_ids",
+        "conditions",
+        "environment",
+        "language_semantics"
+      ],
+      "additionalProperties": false
+    },
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "evidence_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "source_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "content_state": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": [
+            "source",
+            "manifest",
+            "configuration",
+            "documentation",
+            "observation"
+          ]
+        },
+        "locator": {
+          "type": "string",
+          "minLength": 1
+        },
+        "content_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "relation": {
+          "enum": [
+            "supports",
+            "refutes"
+          ]
+        }
+      },
+      "required": [
+        "evidence_id",
+        "source_id",
+        "content_state",
+        "kind",
+        "locator",
+        "content_digest",
+        "relation"
+      ],
+      "additionalProperties": false
+    },
+    "premise": {
+      "type": "object",
+      "properties": {
+        "node": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/node_ref"
+        },
+        "fact_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "field": {
+          "type": "string",
+          "minLength": 1
+        },
+        "content_state": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "node",
+        "fact_id",
+        "field",
+        "content_state"
+      ],
+      "additionalProperties": false
+    },
+    "validity": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "enum": [
+            "current",
+            "modified",
+            "deleted",
+            "premise_invalid",
+            "unknown"
+          ]
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/source_state"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "state",
+        "sources"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "not": {
+                  "const": "current"
+                }
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "reason"
+            ]
+          }
+        }
+      ]
+    },
+    "scope": {
+      "type": "object",
+      "properties": {
+        "scope_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "directories": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "excludes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "defaulted": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "scope_id",
+        "directories",
+        "excludes",
+        "defaulted"
+      ],
+      "additionalProperties": false
+    },
+    "target": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "scope"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "node"
+            },
+            "node": {
+              "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/node_ref"
+            }
+          },
+          "required": [
+            "kind",
+            "node"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "selection": {
+      "type": "object",
+      "properties": {
+        "fact_type": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "fact_type",
+        "fields"
+      ],
+      "additionalProperties": false
+    },
+    "gap": {
+      "type": "object",
+      "properties": {
+        "fact_type": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "target": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/target"
+        },
+        "reason": {
+          "enum": [
+            "missing",
+            "unknown",
+            "insufficient_evidence",
+            "nonempty_insufficient",
+            "conflict",
+            "not_applicable",
+            "invalid_reference",
+            "source_modified",
+            "source_deleted",
+            "invalid_premise",
+            "coverage_incomplete",
+            "unavailable_tool",
+            "uncovered_need",
+            "budget_exhausted",
+            "no_progress",
+            "unparseable",
+            "incomplete_output",
+            "unsupported_profile",
+            "contract_mismatch",
+            "construction_failed",
+            "constructor_unavailable",
+            "source_unavailable",
+            "repository_unavailable"
+          ]
+        },
+        "detail": {
+          "type": "string",
+          "minLength": 1
+        },
+        "context": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/context"
+        },
+        "coverage": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/coverage"
+        }
+      },
+      "required": [
+        "fact_type",
+        "fields",
+        "target",
+        "reason",
+        "detail",
+        "context",
+        "coverage"
+      ],
+      "additionalProperties": false
+    },
+    "out_of_catalog": {
+      "type": "object",
+      "properties": {
+        "fact_type": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "fact_type",
+        "fields",
+        "reason"
+      ],
+      "additionalProperties": false
+    },
+    "fact_node": {
+      "type": "object",
+      "properties": {
+        "fact_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "node": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/node_ref"
+        },
+        "fact_type": {
+          "enum": [
+            "F1",
+            "F2",
+            "F3",
+            "F4",
+            "F5",
+            "F6",
+            "F7",
+            "F8",
+            "F9",
+            "F10",
+            "F11",
+            "F12",
+            "F13",
+            "F14",
+            "F15",
+            "F16",
+            "F17",
+            "F18"
+          ]
+        },
+        "granularities": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "L1",
+              "L2",
+              "L3",
+              "L4"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "fields": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+          }
+        }
+      },
+      "required": [
+        "fact_id",
+        "node",
+        "fact_type",
+        "granularities",
+        "fields"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "fact_type": {
+                "const": "F1"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "fields": {
+                "properties": {
+                  "selection": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "included": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "excluded": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "observation": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "external": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "limitations": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "fact_type": {
+                "const": "F2"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "fields": {
+                "properties": {
+                  "identity": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "roles": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "names": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "boundary": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "locators": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "fact_type": {
+                "const": "F3"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "fields": {
+                "properties": {
+                  "purpose": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "capabilities": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "entries": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_list"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "runtime": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "deployment": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "environment": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "actors": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_list"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "fact_type": {
+                "const": "F4"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "fields": {
+                "properties": {
+                  "source": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "target": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "kind": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "direction": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "member_scope": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "enumeration": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "fact_type": {
+                "const": "F5"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "fields": {
+                "properties": {
+                  "responsibility": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "bearers": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_list"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "collaboration": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "boundary": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "implementations": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_list"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "premises": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "fact_type": {
+                "const": "F6"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "fields": {
+                "properties": {
+                  "source": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "target": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "kind": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "direction": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "scope": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "necessity": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "resolution": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "cycle": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/cycle_value"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "fact_type": {
+                "const": "F7"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "fields": {
+                "properties": {
+                  "participants": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/participant_set"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "kind": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "payload": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "trigger": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "ordering": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "paths": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "mode": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "fact_type": {
+                "const": "F8"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "fields": {
+                "properties": {
+                  "owner": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "capability": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "inputs": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "outputs": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "constraints": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "visibility": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "effects": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "outcomes": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "fact_type": {
+                "const": "F9"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "fields": {
+                "properties": {
+                  "identity": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "name": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "declaration": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "scope": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "type": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "type_relations": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "visibility": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "language_semantics": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "fact_type": {
+                "const": "F10"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "fields": {
+                "properties": {
+                  "site": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "targets": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/candidate_set"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "scope": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "resolution": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "target_conditions": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/candidate_set"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "completeness": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "fact_type": {
+                "const": "F11"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "fields": {
+                "properties": {
+                  "site": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "source": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "targets": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/candidate_set"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "arguments": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/binding_set"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "dispatch": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "continuations": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/edge_set"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "mode": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "fact_type": {
+                "const": "F12"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "fields": {
+                "properties": {
+                  "source": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "target": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "data": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_list"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "operation": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "path": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "transformation": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "aliasing": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/edge_set"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "effects": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "precision": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "fact_type": {
+                "const": "F13"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "fields": {
+                "properties": {
+                  "owner": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "before": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "after": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "trigger": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "guard": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "action": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "lifetime": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "composition": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "cleanup": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "fact_type": {
+                "const": "F14"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "fields": {
+                "properties": {
+                  "constraint": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "scope": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "error_kind": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "origin": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "propagation": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "handling": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "after": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "fact_type": {
+                "const": "F15"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "fields": {
+                "properties": {
+                  "owner": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "operation": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "inputs": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_list"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "outputs": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_list"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "successors": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/edge_set"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "guards": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "back_edges": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/edge_set"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "effects": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "fact_type": {
+                "const": "F16"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "fields": {
+                "properties": {
+                  "steps": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_list"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "goal": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "strategy": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "invariants": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "termination": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "complexity": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "argument": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "open_items": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "fact_type": {
+                "const": "F17"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "fields": {
+                "properties": {
+                  "assertion": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "counterevidence": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "process": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "gaps": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "fact_type": {
+                "const": "F18"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "fields": {
+                "properties": {
+                  "source": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "target": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "kind": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "direction": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "participants": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_list"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "covered": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_list"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "uncovered": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference_list"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "limitations": {
+                    "allOf": [
+                      {
+                        "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+                      },
+                      {
+                        "properties": {
+                          "value": {
+                            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/semantic_value"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    "navigation_edge": {
+      "type": "object",
+      "properties": {
+        "edge_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "source": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference"
+        },
+        "target": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/reference"
+        },
+        "relation": {
+          "enum": [
+            "physical_contains",
+            "workspace_member",
+            "logical_belongs",
+            "composition",
+            "implementation",
+            "refinement",
+            "summary",
+            "view",
+            "call",
+            "interface",
+            "runtime",
+            "data",
+            "deployment",
+            "dependency"
+          ]
+        },
+        "assertion": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+        }
+      },
+      "required": [
+        "edge_id",
+        "source",
+        "target",
+        "relation",
+        "assertion"
+      ],
+      "additionalProperties": false
+    },
+    "direct_inventory": {
+      "type": "object",
+      "properties": {
+        "target": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/target"
+        },
+        "granularity": {
+          "enum": [
+            "L1",
+            "L2",
+            "L3",
+            "L4"
+          ]
+        },
+        "boundary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/node_ref"
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "assertion": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/assertion"
+        }
+      },
+      "required": [
+        "target",
+        "granularity",
+        "boundary",
+        "children",
+        "assertion"
+      ],
+      "additionalProperties": false
+    },
+    "conflict": {
+      "type": "object",
+      "properties": {
+        "conflict_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/premise"
+          },
+          "minItems": 2,
+          "uniqueItems": true
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "context": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/context"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/evidence"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "conflict_id",
+        "members",
+        "reason",
+        "context",
+        "evidence"
+      ],
+      "additionalProperties": false
+    },
+    "premise_check": {
+      "type": "object",
+      "properties": {
+        "premise": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/premise"
+        },
+        "knowledge": {
+          "enum": [
+            "supported",
+            "insufficient",
+            "unknown",
+            "conflicting",
+            "not_applicable",
+            "absent"
+          ]
+        },
+        "validity": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/validity"
+        },
+        "context": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/context"
+        },
+        "basis": {
+          "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/basis"
+        }
+      },
+      "required": [
+        "premise",
+        "knowledge",
+        "validity",
+        "context",
+        "basis"
+      ],
+      "additionalProperties": false
+    },
+    "cycle_value": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "cycle"
+        },
+        "mode": {
+          "enum": [
+            "structural",
+            "conditional",
+            "observed"
+          ]
+        },
+        "joint_conditions": {
+          "type": "array",
+          "items": {
+            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/condition"
+          },
+          "minItems": 0
+        },
+        "joint_satisfiability": {
+          "enum": [
+            "satisfied",
+            "unsatisfied",
+            "unknown"
+          ]
+        },
+        "execution_evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "https://code2semantics.local/schema/common.schema.json#/$defs/evidence"
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "kind",
+        "mode",
+        "joint_conditions",
+        "joint_satisfiability",
+        "execution_evidence"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "observed"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "joint_satisfiability": {
+                "const": "satisfied"
+              },
+              "joint_conditions": {
+                "items": {
+                  "properties": {
+                    "state": {
+                      "const": "true"
+                    }
+                  }
+                }
+              },
+              "execution_evidence": {
+                "minItems": 1,
+                "items": {
+                  "properties": {
+                    "kind": {
+                      "const": "observation"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }

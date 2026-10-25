@@ -1,0 +1,47 @@
+{
+  "kind": "parse_request",
+  "tool_native_output": {
+    "encoding": "utf-8",
+    "text": "{\"loop\":true}"
+  },
+  "invocation_profile": {
+    "tool_id": "tool-a",
+    "tool_version": "1",
+    "command": [
+      "tool-a",
+      "--json"
+    ],
+    "environment": {},
+    "sources": [
+      {
+        "source_id": "src-a",
+        "root": "/workspace/a",
+        "content_state": "content-a",
+        "status": "available",
+        "dirty": true,
+        "has_untracked": true,
+        "excludes": []
+      }
+    ],
+    "coverage": {
+      "domain": "unit-a direct boundary",
+      "checked": [
+        "src/main.py"
+      ],
+      "excluded": [],
+      "completeness": "complete",
+      "method": "bounded enumeration"
+    },
+    "evidence": [
+      {
+        "evidence_id": "ev-a",
+        "source_id": "src-a",
+        "content_state": "content-a",
+        "kind": "source",
+        "locator": "src/main.py:1-8",
+        "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "relation": "supports"
+      }
+    ]
+  }
+}

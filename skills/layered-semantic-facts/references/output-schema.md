@@ -1,17 +1,17 @@
-# 响应契约
+# 最小事实响应
 
-依据报告§3 R15/R16、§5 O4/O5、§6 F1–F18，响应在查询契约之后派生。机读权威是 output-schema.schema.json；其中每个事实的 fields 与目录同步封闭。value 节点是直接属性叶子（按所属事实合并元数据），subtree 节点仅含可续查引用与必要可靠性元数据，不带后代值；运行时以导航索引核验其确是请求目标直接下一级。粒度标签不用于推算导航步数。
+响应使用 `../assets/output-schema.schema.json`，事实本体唯一位于 `common#/$defs/fact_node`，与 FactBatch 共用；响应不作为仓库存储接口。依据：研究 R1/R2/R15/R16、S8–S12，主设计 D2/D3/D5/D8。
 
-每个被投影字段都是 assertion，必须保留 origin、knowledge、context、coverage、basis。origin 的 observed/derived/interpreted 回答如何得到，knowledge 的 supported/insufficient/unknown/conflicting/not_applicable/absent 回答支持程度与适用性；两个轴独立，解释可以证据不足，观察可以冲突。supported 必须带 value 与证据/前提；unknown/not_applicable/absent 不携带虚构值；insufficient/conflicting 可携带明确未证实/冲突候选值且必须给 reason。
+响应回显已固定的 query，并携带 sources、results、direct_nodes、premise_checks、conflicts、gaps、out_of_catalog、termination。termination 为 satisfied、no_progress、budget_exhausted、invalid_reference 或 unavailable。目录外类型/字段在 out_of_catalog；目录内 missing/unknown/非空不足/冲突/来源变化/前提失效/完整性不足在 gaps，二者不能合并。
 
-absent 必须有限定 negative.domain、claim、检查证据 IDs，coverage.complete 和非空 checked，basis.evidence 非空，不能仅由空数组/null/未发现生成。结构条件仅为必要条件；检查证据的真实性、否定域等于声明域、覆盖穷尽性、联合条件和检查方法适用性必须由生产/入库验证器验证。无法证明时保留 unknown/insufficient 或 gap。
+results 仅携带请求节点及直接节点的请求字段；fact_id、node 和 granularities 提供身份与观察信息，fields 中每个值保留完整 assertion。direct_nodes 是请求边界的完整直接身份清单和该清单的 assertion；children 只有 node_ref，无递归 children，不能由清单生成每个 child 的完整事实集。必要上级不会因构造过而全部输出。后续深入使用 node_ref 发起新的当前查询。
 
-语义值使用显式 kind（text/scalar/reference/list/record）。关键引用字段由目录value_shape映射到common共享定义：reference_value/reference_list、candidate_set（target+conditions+mode）、participant_set（participant+role）、binding_set（parameter+argument+conditions）、edge_set（source+target+kind+conditions）。schema逐字段强制形状；record只用于其余描述性字段细化，不能替代关键引用结构。引用必须使用reference，禁止把应解析引用藏在text。来源/客体的解析和字段所要求的语义值类型由目录语义校验器进一步核验；任意文本并不证明关系表达合格。语言特有行为通过 context.language_semantics 和 F9.language_semantics 保留。
+origin 的 observed/derived/interpreted 与 knowledge 的 supported/insufficient/unknown/conflicting/not_applicable/absent 是正交维度，解释可以同时证据不足。unknown、不适用及限定不存在无 value；不足/未知/冲突/不适用须有 reason。basis 保存有定位和当前内容标记的支持/反驳证据、必要前提、方法与限制。最小投影不能丢弃必要的 context、coverage、basis、validity。
 
-basis.premises 仅返回确切字段引用及修订，不返回未请求前提内容。查询读取 derived/interpreted 时在仓库内验证完整前提闭包的身份、快照、修订、支持状态和上下文适用性；不可获取/失效的闭包使该断言失效并形成 gap。最终投影仅发布请求字段与必要信封，不能顺带泄漏前提事实。冲突分支并存且显式标注；不采用最后写入覆盖作为消解规则。
+absent 必须有 negative.domain、claim、check_evidence_ids；检查域与 coverage.domain 一致，coverage 完整且 checked 非空，检查证据解析到 basis 中的支持证据。未发现、空值或工具不可用均不构成不存在。冲突保留不同 fact_id 的候选及 conflict.members，不以最后写入覆盖。
 
-gaps每项的target是精确node引用或明确scope_id；同F/field在多个主体上分别比较覆盖，A命中不能掩盖B缺口。pipeline.selector使用同一selection_target，归纳与构造不得跨目标借用覆盖。resolved_target返回实际采用的scope或节点continuation，精确node保持原revision，refresh显式返回新revision。
+premise_checks 只投影必要前提的引用、knowledge、validity、context、basis，不含 value。引用包括 node、fact_id、field 与内部 content_state；查询运行时必须在仓库校验完整传递闭包。当前结果不能引用缺失、失效、删除、冲突、证据不足或上下文不兼容的前提。主设计资产校验只检查提供的样例闭包，不替代真实仓库重读或源码有效性核验。
 
-同快照知识修订是新 fact_revision，旧 revision 不变；snapshots 是所有响应断言/证据/前提依赖来源的绑定集合，分别携带 dirty/has_untracked 与内容清单摘要。跨来源事实不得只绑定一个源码版本。外部未解析引用含 observed_in，表示名称来自哪个已观察快照，不伪造目标身份或目标源码快照。
+satisfied 要求本次目标的全部目录内请求字段有当前充分事实、直接节点清单已证实完整，且没有剩余 gap 或目录外项；不能因存在非空结果就成功。预算/无进展终止保留有效已有结果及精确剩余 gap。部分直接清单必须携带 coverage_incomplete。每个主体和上下文独立比较覆盖，不能借其它主体命中抵消缺口。
 
-JSONSchema验证局部形状；跨记录等值、ID唯一、引用闭合、当前/历史匹配、目录语义、字段投影最小性、条件可满足性和证据真实性另由确定性运行校验承担。测试资产中将结构反例与这些语义拒绝要求分别登记。
+样例：`openspec/changes/epic-layered-semantic-fact-skill/validation/response.json`。shape 反例验证字段保真与非法字段拒绝，semantic 反例验证投影、来源一致性、完整性和前提等跨字段条件。`validate_contracts.py` 的通过仅表示这些设计资产通过，真实工具、SQLite 重开重读和跨组件生产仍由后续任务验收。

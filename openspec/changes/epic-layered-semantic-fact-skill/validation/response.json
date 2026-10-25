@@ -1,121 +1,191 @@
 {
   "contract_version": "1.0.0",
   "catalog_id": "semantic-facts-20261025",
-  "request_id": "q1",
-  "scope": {
-    "scope_id": "scope-a",
-    "directories": [
-      "/fixtures/a",
-      "/fixtures/b"
-    ],
-    "excludes": [],
-    "defaulted": false
-  },
-  "snapshot_set_id": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-  "snapshots": [
-    {
-      "namespace": "source-a",
-      "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "manifest_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "dirty": true,
-      "has_untracked": true,
-      "content_available": true
+  "query": {
+    "contract_version": "1.0.0",
+    "catalog_id": "semantic-facts-20261025",
+    "request_id": "q-a",
+    "scope": {
+      "scope_id": "scope-a",
+      "directories": [
+        "/workspace/a"
+      ],
+      "excludes": [],
+      "defaulted": false
     },
+    "target": {
+      "kind": "node",
+      "node": {
+        "source_id": "src-a",
+        "subject_id": "project-a",
+        "node_id": "unit-a"
+      }
+    },
+    "granularity": "L4",
+    "selections": [
+      {
+        "fact_type": "F16",
+        "fields": [
+          "strategy"
+        ]
+      }
+    ],
+    "budget": {
+      "max_rounds": 3,
+      "max_new_assertions": 12
+    }
+  },
+  "sources": [
     {
-      "namespace": "source-b",
-      "snapshot": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-      "manifest_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "source_id": "src-a",
+      "root": "/workspace/a",
+      "content_state": "content-a",
+      "status": "available",
       "dirty": true,
       "has_untracked": true,
-      "content_available": true
+      "excludes": []
     }
   ],
-  "target": {
-    "kind": "scope"
-  },
   "results": [
     {
-      "kind": "value",
+      "fact_id": "fact-a",
       "node": {
-        "namespace": "source-a",
-        "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "subject_id": "unit-a",
-        "node_id": "algorithm-a"
+        "source_id": "src-a",
+        "subject_id": "project-a",
+        "node_id": "unit-a"
       },
       "fact_type": "F16",
-      "fact_revision": 1,
       "granularities": [
         "L4"
       ],
       "fields": {
-        "goal": {
-          "origin": "derived",
+        "strategy": {
+          "origin": "observed",
           "knowledge": "supported",
           "context": {
-            "bindings": [
-              {
-                "namespace": "source-a",
-                "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-              },
-              {
-                "namespace": "source-b",
-                "snapshot": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
-              }
+            "source_ids": [
+              "src-a"
             ],
-            "conditions": [
-              {
-                "expression": "finite input",
-                "scope": "unique_ids",
-                "state": "true"
-              }
-            ],
-            "environment": [
-              "fixture-only"
-            ],
-            "language_semantics": [
-              "ordered append"
-            ]
+            "conditions": [],
+            "environment": {},
+            "language_semantics": []
           },
           "coverage": {
-            "domain": "unique_ids body at bound snapshots",
+            "domain": "unit-a direct boundary",
             "checked": [
-              "unique.py:1-8"
+              "src/main.py"
             ],
             "excluded": [],
             "completeness": "complete",
-            "method": "fixture exhaustive body inspection"
+            "method": "bounded enumeration"
           },
           "basis": {
             "evidence": [
               {
-                "evidence_id": "e1",
-                "namespace": "source-a",
-                "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "evidence_id": "ev-a",
+                "source_id": "src-a",
+                "content_state": "content-a",
                 "kind": "source",
-                "locator": "unique.py:1-8",
+                "locator": "src/main.py:1-8",
                 "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                 "relation": "supports"
               }
             ],
             "premises": [],
-            "method": "first occurrence appends only once",
-            "limitations": [
-              "constructed contract example; not production evidence"
+            "method": "source inspection",
+            "limitations": []
+          },
+          "validity": {
+            "state": "current",
+            "sources": [
+              {
+                "source_id": "src-a",
+                "content_state": "content-a"
+              }
             ]
           },
           "value": {
             "kind": "text",
-            "text": "稳定去重"
+            "text": "stable deduplication"
           }
         }
       }
     }
   ],
-  "out_of_catalog": [],
+  "direct_nodes": [
+    {
+      "target": {
+        "kind": "node",
+        "node": {
+          "source_id": "src-a",
+          "subject_id": "project-a",
+          "node_id": "unit-a"
+        }
+      },
+      "granularity": "L4",
+      "boundary": "unit-a direct boundary",
+      "children": [
+        {
+          "source_id": "src-a",
+          "subject_id": "project-a",
+          "node_id": "child-a"
+        }
+      ],
+      "assertion": {
+        "origin": "observed",
+        "knowledge": "supported",
+        "context": {
+          "source_ids": [
+            "src-a"
+          ],
+          "conditions": [],
+          "environment": {},
+          "language_semantics": []
+        },
+        "coverage": {
+          "domain": "unit-a direct boundary",
+          "checked": [
+            "src/main.py"
+          ],
+          "excluded": [],
+          "completeness": "complete",
+          "method": "bounded enumeration"
+        },
+        "basis": {
+          "evidence": [
+            {
+              "evidence_id": "ev-a",
+              "source_id": "src-a",
+              "content_state": "content-a",
+              "kind": "source",
+              "locator": "src/main.py:1-8",
+              "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "relation": "supports"
+            }
+          ],
+          "premises": [],
+          "method": "source inspection",
+          "limitations": []
+        },
+        "validity": {
+          "state": "current",
+          "sources": [
+            {
+              "source_id": "src-a",
+              "content_state": "content-a"
+            }
+          ]
+        },
+        "value": {
+          "kind": "text",
+          "text": "stable deduplication"
+        }
+      }
+    }
+  ],
+  "conflicts": [],
   "gaps": [],
+  "out_of_catalog": [],
   "termination": "satisfied",
-  "resolved_target": {
-    "kind": "scope",
-    "scope_id": "scope-a"
-  }
+  "premise_checks": []
 }

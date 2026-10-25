@@ -11,6 +11,10 @@
       "items": {
         "type": "object",
         "properties": {
+          "need_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
           "fact_type": {
             "enum": [
               "F1",
@@ -39,7 +43,8 @@
               "type": "string",
               "minLength": 1
             },
-            "minItems": 1
+            "minItems": 1,
+            "uniqueItems": true
           },
           "subject_requirement": {
             "type": "string",
@@ -56,13 +61,14 @@
                 "observation"
               ]
             },
-            "minItems": 1
+            "minItems": 1,
+            "uniqueItems": true
           },
           "context_requirement": {
             "type": "string",
             "minLength": 1
           },
-          "snapshot_requirement": {
+          "current_source_requirement": {
             "type": "string",
             "minLength": 1
           },
@@ -87,25 +93,22 @@
               "type": "string",
               "minLength": 1
             },
-            "minItems": 1
-          },
-          "need_id": {
-            "type": "string",
-            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            "minItems": 1,
+            "uniqueItems": true
           }
         },
         "required": [
+          "need_id",
           "fact_type",
           "fields",
           "subject_requirement",
           "evidence_kinds",
           "context_requirement",
-          "snapshot_requirement",
+          "current_source_requirement",
           "coverage_requirement",
           "production_mode",
           "acceptance_fixture",
-          "research_basis",
-          "need_id"
+          "research_basis"
         ],
         "additionalProperties": false
       },

@@ -1,11 +1,12 @@
 {
-  "kind": "unresolved",
-  "reference_id": "ext-store",
-  "label": "Store",
-  "reason": "only referenced by source-a",
-  "boundary": "outside_scope",
+  "kind": "external",
+  "reference_id": "ext-a",
+  "label": "vendor-api",
+  "reason": "outside_authorized_scope",
+  "boundary": "vendor source not authorized",
   "observed_in": {
-    "namespace": "source-a",
-    "snapshot": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    "kind": "subject",
+    "source_id": "src-a",
+    "subject_id": "project-a"
   }
 }

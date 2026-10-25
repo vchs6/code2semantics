@@ -1,6 +1,6 @@
 # Traceability
 
-本表追踪当前权威 [proposal.md](proposal.md)、两个 [spec delta](specs/) 与 [design.md](design.md)；既有[研究报告](../survey-semantic-fact-requirements/research/semantic-fact-requirements.md)保持依据，不重做研究。映射是规划和验收义务，不是组件或测试已经存在的声明。旧 `assets/`、`references/` 和 `validation/` 尚未按本设计替换，不能据既有校验通过勾选完成。
+本表追踪当前权威 [proposal.md](proposal.md)、两个 [spec delta](specs/) 与 [design.md](design.md)；既有[研究报告](../survey-semantic-fact-requirements/research/semantic-fact-requirements.md)保持依据，不重做研究。映射是规划和验收义务，不是组件或测试已经存在的声明。本次 apply 已直接替换公共 `assets/`、四份 `references/` 和设计资产校验/样例；任务 2–4 的证据见下表及 validation.md。组件与真实集成仍未交付，不能据契约校验勾选组件任务。
 
 | 需求与保留依据 | 主设计 / 公共任务 | 组件实施归属 | 主集成验收与可检查输出 |
 | --- | --- | --- | --- |
@@ -23,3 +23,16 @@
 | 真实集成与子交付非重复拥有 | D7/D8；5–8 | 八子变更局部实施，主编排接收 | 触发/推进子apply→交付→接收；S1–S12+新边界真实工具非空事实→入库重读→最小响应；接入验收与集成证据分别记录，不变成矩阵两套状态 |
 
 主公开定义交付路径与阶段见 tasks 2–4；八子入口、前置门槛和预期局部输出见 design D7 与 tasks 5–7。子 design/tasks 缺失时先进入子规划流程，不假定交付存在；本轮不新建缺失子工件。主未来集成入口和证据见 tasks 8；任何尚无可执行命令/实物的交付保持 pending。
+
+## 公共机读契约交付（2026-10-25）
+
+| 主任务 / 决定 | 本次实际公共定义与证据 | 下游归属 / 状态 |
+| --- | --- | --- |
+| 1.2 / D7 | 已复核八子现有 proposal/specs：公共权威只在主 assets，运行期不扩展开发需求清单、研究或点亮；无重复组件实现 | repository 已有 design/tasks，另七子尚缺其 design/tasks；本次不创建或实施 |
+| 2.1–2.2 / D1 | fact-catalog.json/schema：F1–F18、L1–L4、O1–O5、逐字段研究 basis、含 validity 的完整 assertion_envelope；研究 LF 指纹一致；无生产状态 | 目录公共交付完成；事实实际生产覆盖待子组件 |
+| 3.1 / D2/D3 | common 的 source/subject/node/外部引用、current validity、必要前提、直接节点清单；contract-format 固定当前 scope/target/granularity/selections | constructor/repository/query 按同源定义实施；不接受旧用户版本协议 |
+| 3.2 / D4/D5 | pipeline 中 ParseRequest/Result、ConstructRequest/Result、InductionRequest/Result、FactBatch、StoredRecord、ReadResult；needs/matrix Schema | 仅公共数据契约完成；没有实现解析/构造/归纳/仓库组件 |
+| 3.3 / D2/D5 | 当前来源修改/删除、非空不足、未知、前提失效、外部引用、纯解析边界的正反样例；来源上下文交叉核对和必要闭包代表性检查 | 实际源码核验、接入权限、数据库事务/重开均待子组件 |
+| 4.1–4.2 / D3/D8 | output-schema：最小字段、完整直接身份清单、必要 context/coverage/basis/validity、最小 premise_checks、冲突、内外缺口、终止原因；64 shape + 30 semantic cases | 公共响应资产完成；查询运行时与主集成 tasks 8 保持 pending |
+
+所有 JSON Pointer、字段语义和验证命令见 `skills/layered-semantic-facts/references/runtime-contracts.md`。验证入口为本变更 `validation/validate_contracts.py`，本轮未调用组件运行时。旧定义、旧说明、旧正例和旧校验已直接替换，不留双轨或适配入口；测试只保留旧字段必须拒绝的反例。

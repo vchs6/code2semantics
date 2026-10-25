@@ -74,7 +74,8 @@
     "knowledge",
     "context",
     "coverage",
-    "basis"
+    "basis",
+    "validity"
   ],
   "fact_types": [
     {
@@ -92,30 +93,59 @@
       "fields": {
         "selection": {
           "description": "入口定位与选择依据",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F1",
+            "§3 R1",
+            "design D1/D3/D8"
+          ]
         },
         "included": {
           "description": "包含对象",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F1",
+            "§3 R1",
+            "design D1/D3/D8"
+          ]
         },
         "excluded": {
           "description": "排除对象",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F1",
+            "§3 R1",
+            "design D1/D3/D8"
+          ]
         },
         "observation": {
           "description": "观察状态与时点",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F1",
+            "§3 R1",
+            "design D1/D3/D8"
+          ]
         },
         "external": {
           "description": "范围外标志",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F1",
+            "§3 R1",
+            "design D1/D3/D8"
+          ]
         },
         "limitations": {
           "description": "覆盖限制",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F1",
+            "§3 R1",
+            "design D1/D3/D8"
+          ]
         }
-      },
-      "production_status": "unverified"
+      }
     },
     {
       "id": "F2",
@@ -134,26 +164,50 @@
       "fields": {
         "identity": {
           "description": "身份指代与候选同一性",
-          "value_shape": "reference_value"
+          "value_shape": "reference_value",
+          "basis": [
+            "§6 F2",
+            "§3 R2",
+            "design D1/D3/D8"
+          ]
         },
         "roles": {
           "description": "角色类别",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F2",
+            "§3 R2",
+            "design D1/D3/D8"
+          ]
         },
         "names": {
           "description": "名称与别名",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F2",
+            "§3 R2",
+            "design D1/D3/D8"
+          ]
         },
         "boundary": {
           "description": "边界描述与依据",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F2",
+            "§3 R2",
+            "design D1/D3/D8"
+          ]
         },
         "locators": {
           "description": "定位线索",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F2",
+            "§3 R2",
+            "design D1/D3/D8"
+          ]
         }
-      },
-      "production_status": "unverified"
+      }
     },
     {
       "id": "F3",
@@ -170,34 +224,68 @@
       "fields": {
         "purpose": {
           "description": "目的与受众",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F3",
+            "§3 R3",
+            "design D1/D3/D8"
+          ]
         },
         "capabilities": {
           "description": "提供能力",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F3",
+            "§3 R3",
+            "design D1/D3/D8"
+          ]
         },
         "entries": {
           "description": "入口关联",
-          "value_shape": "reference_list"
+          "value_shape": "reference_list",
+          "basis": [
+            "§6 F3",
+            "§3 R3",
+            "design D1/D3/D8"
+          ]
         },
         "runtime": {
           "description": "运行角色",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F3",
+            "§3 R3",
+            "design D1/D3/D8"
+          ]
         },
         "deployment": {
           "description": "部署角色",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F3",
+            "§3 R3",
+            "design D1/D3/D8"
+          ]
         },
         "environment": {
           "description": "环境前提",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F3",
+            "§3 R3",
+            "design D1/D3/D8"
+          ]
         },
         "actors": {
           "description": "外部参与者",
-          "value_shape": "reference_list"
+          "value_shape": "reference_list",
+          "basis": [
+            "§6 F3",
+            "§3 R3",
+            "design D1/D3/D8"
+          ]
         }
-      },
-      "production_status": "unverified"
+      }
     },
     {
       "id": "F4",
@@ -214,30 +302,59 @@
       "fields": {
         "source": {
           "description": "被组织主体",
-          "value_shape": "reference_value"
+          "value_shape": "reference_value",
+          "basis": [
+            "§6 F4",
+            "§3 R4",
+            "design D1/D3/D8"
+          ]
         },
         "target": {
           "description": "容器或逻辑主体",
-          "value_shape": "reference_value"
+          "value_shape": "reference_value",
+          "basis": [
+            "§6 F4",
+            "§3 R4",
+            "design D1/D3/D8"
+          ]
         },
         "kind": {
           "description": "物理包含/工作空间成员/逻辑从属/内部组成",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F4",
+            "§3 R4",
+            "design D1/D3/D8"
+          ]
         },
         "direction": {
           "description": "关系方向",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F4",
+            "§3 R4",
+            "design D1/D3/D8"
+          ]
         },
         "member_scope": {
           "description": "成员与组成范围",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F4",
+            "§3 R4",
+            "design D1/D3/D8"
+          ]
         },
         "enumeration": {
           "description": "是否完整枚举",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F4",
+            "§3 R4",
+            "design D1/D3/D8"
+          ]
         }
-      },
-      "production_status": "unverified"
+      }
     },
     {
       "id": "F5",
@@ -254,30 +371,59 @@
       "fields": {
         "responsibility": {
           "description": "职责陈述",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F5",
+            "§3 R5",
+            "design D1/D3/D8"
+          ]
         },
         "bearers": {
           "description": "承担主体",
-          "value_shape": "reference_list"
+          "value_shape": "reference_list",
+          "basis": [
+            "§6 F5",
+            "§3 R5",
+            "design D1/D3/D8"
+          ]
         },
         "collaboration": {
           "description": "协作角色",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F5",
+            "§3 R5",
+            "design D1/D3/D8"
+          ]
         },
         "boundary": {
           "description": "边界约束及理由",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F5",
+            "§3 R5",
+            "design D1/D3/D8"
+          ]
         },
         "implementations": {
           "description": "实现主体关联",
-          "value_shape": "reference_list"
+          "value_shape": "reference_list",
+          "basis": [
+            "§6 F5",
+            "§3 R5",
+            "design D1/D3/D8"
+          ]
         },
         "premises": {
           "description": "解释前提",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F5",
+            "§3 R5",
+            "design D1/D3/D8"
+          ]
         }
-      },
-      "production_status": "unverified"
+      }
     },
     {
       "id": "F6",
@@ -298,38 +444,77 @@
       "fields": {
         "source": {
           "description": "依赖源",
-          "value_shape": "reference_value"
+          "value_shape": "reference_value",
+          "basis": [
+            "§6 F6",
+            "§3 R6",
+            "design D1/D3/D8"
+          ]
         },
         "target": {
           "description": "依赖目标或占位",
-          "value_shape": "reference_value"
+          "value_shape": "reference_value",
+          "basis": [
+            "§6 F6",
+            "§3 R6",
+            "design D1/D3/D8"
+          ]
         },
         "kind": {
           "description": "构建/代码接口/运行/数据/部署",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F6",
+            "§3 R6",
+            "design D1/D3/D8"
+          ]
         },
         "direction": {
           "description": "源到目标",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F6",
+            "§3 R6",
+            "design D1/D3/D8"
+          ]
         },
         "scope": {
           "description": "依赖作用域",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F6",
+            "§3 R6",
+            "design D1/D3/D8"
+          ]
         },
         "necessity": {
           "description": "必需或可选",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F6",
+            "§3 R6",
+            "design D1/D3/D8"
+          ]
         },
         "resolution": {
           "description": "目标解析状态",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F6",
+            "§3 R6",
+            "design D1/D3/D8"
+          ]
         },
         "cycle": {
           "description": "结构环/条件可满足环/观察循环及联合条件判定",
-          "value_shape": "semantic_value"
+          "value_shape": "cycle_value",
+          "basis": [
+            "§6 F6",
+            "§3 R6",
+            "design D1/D3/D8"
+          ]
         }
-      },
-      "production_status": "unverified"
+      }
     },
     {
       "id": "F7",
@@ -347,34 +532,68 @@
       "fields": {
         "participants": {
           "description": "参与者与各自角色",
-          "value_shape": "participant_set"
+          "value_shape": "participant_set",
+          "basis": [
+            "§6 F7",
+            "§3 R7",
+            "design D1/D3/D8"
+          ]
         },
         "kind": {
           "description": "发送/接收/响应等交互种类",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F7",
+            "§3 R7",
+            "design D1/D3/D8"
+          ]
         },
         "payload": {
           "description": "载荷语义",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F7",
+            "§3 R7",
+            "design D1/D3/D8"
+          ]
         },
         "trigger": {
           "description": "触发与守卫",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F7",
+            "§3 R7",
+            "design D1/D3/D8"
+          ]
         },
         "ordering": {
           "description": "时序并发及因果关系",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F7",
+            "§3 R7",
+            "design D1/D3/D8"
+          ]
         },
         "paths": {
           "description": "成功与失败路径",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F7",
+            "§3 R7",
+            "design D1/D3/D8"
+          ]
         },
         "mode": {
           "description": "实际观察或静态可能",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F7",
+            "§3 R7",
+            "design D1/D3/D8"
+          ]
         }
-      },
-      "production_status": "unverified"
+      }
     },
     {
       "id": "F8",
@@ -392,38 +611,77 @@
       "fields": {
         "owner": {
           "description": "所属主体",
-          "value_shape": "reference_value"
+          "value_shape": "reference_value",
+          "basis": [
+            "§6 F8",
+            "§3 R8",
+            "design D1/D3/D8"
+          ]
         },
         "capability": {
           "description": "能力语义",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F8",
+            "§3 R8",
+            "design D1/D3/D8"
+          ]
         },
         "inputs": {
           "description": "输入类型与含义",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F8",
+            "§3 R8",
+            "design D1/D3/D8"
+          ]
         },
         "outputs": {
           "description": "输出类型与含义",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F8",
+            "§3 R8",
+            "design D1/D3/D8"
+          ]
         },
         "constraints": {
           "description": "前后条件及约束",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F8",
+            "§3 R8",
+            "design D1/D3/D8"
+          ]
         },
         "visibility": {
           "description": "可见性",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F8",
+            "§3 R8",
+            "design D1/D3/D8"
+          ]
         },
         "effects": {
           "description": "副作用",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F8",
+            "§3 R8",
+            "design D1/D3/D8"
+          ]
         },
         "outcomes": {
           "description": "错误与协议结果",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F8",
+            "§3 R8",
+            "design D1/D3/D8"
+          ]
         }
-      },
-      "production_status": "unverified"
+      }
     },
     {
       "id": "F9",
@@ -440,38 +698,77 @@
       "fields": {
         "identity": {
           "description": "元素身份与语义角色",
-          "value_shape": "reference_value"
+          "value_shape": "reference_value",
+          "basis": [
+            "§6 F9",
+            "§3 R9",
+            "design D1/D3/D8"
+          ]
         },
         "name": {
           "description": "名称",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F9",
+            "§3 R9",
+            "design D1/D3/D8"
+          ]
         },
         "declaration": {
           "description": "声明或定义及位置",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F9",
+            "§3 R9",
+            "design D1/D3/D8"
+          ]
         },
         "scope": {
           "description": "所属作用域",
-          "value_shape": "reference_value"
+          "value_shape": "reference_value",
+          "basis": [
+            "§6 F9",
+            "§3 R9",
+            "design D1/D3/D8"
+          ]
         },
         "type": {
           "description": "类型语义",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F9",
+            "§3 R9",
+            "design D1/D3/D8"
+          ]
         },
         "type_relations": {
           "description": "组合继承等类型关系",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F9",
+            "§3 R9",
+            "design D1/D3/D8"
+          ]
         },
         "visibility": {
           "description": "可见性",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F9",
+            "§3 R9",
+            "design D1/D3/D8"
+          ]
         },
         "language_semantics": {
           "description": "影响行为的语言特有信息与原始语义引用",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F9",
+            "§3 R9",
+            "design D1/D3/D8"
+          ]
         }
-      },
-      "production_status": "unverified"
+      }
     },
     {
       "id": "F10",
@@ -488,30 +785,59 @@
       "fields": {
         "site": {
           "description": "引用主体与位置",
-          "value_shape": "reference_value"
+          "value_shape": "reference_value",
+          "basis": [
+            "§6 F10",
+            "§3 R9",
+            "design D1/D3/D8"
+          ]
         },
         "targets": {
           "description": "目标或候选集合",
-          "value_shape": "candidate_set"
+          "value_shape": "candidate_set",
+          "basis": [
+            "§6 F10",
+            "§3 R9",
+            "design D1/D3/D8"
+          ]
         },
         "scope": {
           "description": "绑定作用域与环境",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F10",
+            "§3 R9",
+            "design D1/D3/D8"
+          ]
         },
         "resolution": {
           "description": "解析依据及状态",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F10",
+            "§3 R9",
+            "design D1/D3/D8"
+          ]
         },
         "target_conditions": {
           "description": "各候选成立条件",
-          "value_shape": "candidate_set"
+          "value_shape": "candidate_set",
+          "basis": [
+            "§6 F10",
+            "§3 R9",
+            "design D1/D3/D8"
+          ]
         },
         "completeness": {
           "description": "候选完整性与未知原因",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F10",
+            "§3 R9",
+            "design D1/D3/D8"
+          ]
         }
-      },
-      "production_status": "unverified"
+      }
     },
     {
       "id": "F11",
@@ -530,34 +856,68 @@
       "fields": {
         "site": {
           "description": "调用位置",
-          "value_shape": "reference_value"
+          "value_shape": "reference_value",
+          "basis": [
+            "§6 F11",
+            "§3 R10",
+            "design D1/D3/D8"
+          ]
         },
         "source": {
           "description": "调用者",
-          "value_shape": "reference_value"
+          "value_shape": "reference_value",
+          "basis": [
+            "§6 F11",
+            "§3 R10",
+            "design D1/D3/D8"
+          ]
         },
         "targets": {
           "description": "接收者或候选目标",
-          "value_shape": "candidate_set"
+          "value_shape": "candidate_set",
+          "basis": [
+            "§6 F11",
+            "§3 R10",
+            "design D1/D3/D8"
+          ]
         },
         "arguments": {
           "description": "参数与结果关联",
-          "value_shape": "binding_set"
+          "value_shape": "binding_set",
+          "basis": [
+            "§6 F11",
+            "§3 R10",
+            "design D1/D3/D8"
+          ]
         },
         "dispatch": {
           "description": "分派语义与条件",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F11",
+            "§3 R10",
+            "design D1/D3/D8"
+          ]
         },
         "continuations": {
           "description": "正常与异常续接",
-          "value_shape": "edge_set"
+          "value_shape": "edge_set",
+          "basis": [
+            "§6 F11",
+            "§3 R10",
+            "design D1/D3/D8"
+          ]
         },
         "mode": {
           "description": "静态可能或动态观察",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F11",
+            "§3 R10",
+            "design D1/D3/D8"
+          ]
         }
-      },
-      "production_status": "unverified"
+      }
     },
     {
       "id": "F12",
@@ -578,42 +938,86 @@
       "fields": {
         "source": {
           "description": "来源",
-          "value_shape": "reference_value"
+          "value_shape": "reference_value",
+          "basis": [
+            "§6 F12",
+            "§3 R11",
+            "design D1/D3/D8"
+          ]
         },
         "target": {
           "description": "去向",
-          "value_shape": "reference_value"
+          "value_shape": "reference_value",
+          "basis": [
+            "§6 F12",
+            "§3 R11",
+            "design D1/D3/D8"
+          ]
         },
         "data": {
           "description": "数据资源身份",
-          "value_shape": "reference_list"
+          "value_shape": "reference_list",
+          "basis": [
+            "§6 F12",
+            "§3 R11",
+            "design D1/D3/D8"
+          ]
         },
         "operation": {
           "description": "定义使用读写等操作语义",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F12",
+            "§3 R11",
+            "design D1/D3/D8"
+          ]
         },
         "path": {
           "description": "条件与路径",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F12",
+            "§3 R11",
+            "design D1/D3/D8"
+          ]
         },
         "transformation": {
           "description": "转换关系",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F12",
+            "§3 R11",
+            "design D1/D3/D8"
+          ]
         },
         "aliasing": {
           "description": "别名与共享状态",
-          "value_shape": "edge_set"
+          "value_shape": "edge_set",
+          "basis": [
+            "§6 F12",
+            "§3 R11",
+            "design D1/D3/D8"
+          ]
         },
         "effects": {
           "description": "外部副作用",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F12",
+            "§3 R11",
+            "design D1/D3/D8"
+          ]
         },
         "precision": {
           "description": "分析精确性",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F12",
+            "§3 R11",
+            "design D1/D3/D8"
+          ]
         }
-      },
-      "production_status": "unverified"
+      }
     },
     {
       "id": "F13",
@@ -634,42 +1038,86 @@
       "fields": {
         "owner": {
           "description": "状态主体",
-          "value_shape": "reference_value"
+          "value_shape": "reference_value",
+          "basis": [
+            "§6 F13",
+            "§3 R12",
+            "design D1/D3/D8"
+          ]
         },
         "before": {
           "description": "前状态",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F13",
+            "§3 R12",
+            "design D1/D3/D8"
+          ]
         },
         "after": {
           "description": "后状态",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F13",
+            "§3 R12",
+            "design D1/D3/D8"
+          ]
         },
         "trigger": {
           "description": "触发事件",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F13",
+            "§3 R12",
+            "design D1/D3/D8"
+          ]
         },
         "guard": {
           "description": "守卫",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F13",
+            "§3 R12",
+            "design D1/D3/D8"
+          ]
         },
         "action": {
           "description": "转换动作",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F13",
+            "§3 R12",
+            "design D1/D3/D8"
+          ]
         },
         "lifetime": {
           "description": "起止与持有阶段",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F13",
+            "§3 R12",
+            "design D1/D3/D8"
+          ]
         },
         "composition": {
           "description": "并发或复合关系",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F13",
+            "§3 R12",
+            "design D1/D3/D8"
+          ]
         },
         "cleanup": {
           "description": "清理及恢复条件",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F13",
+            "§3 R12",
+            "design D1/D3/D8"
+          ]
         }
-      },
-      "production_status": "unverified"
+      }
     },
     {
       "id": "F14",
@@ -689,34 +1137,68 @@
       "fields": {
         "constraint": {
           "description": "约束陈述",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F14",
+            "§3 R13",
+            "design D1/D3/D8"
+          ]
         },
         "scope": {
           "description": "作用域",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F14",
+            "§3 R13",
+            "design D1/D3/D8"
+          ]
         },
         "error_kind": {
           "description": "违约或错误类别",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F14",
+            "§3 R13",
+            "design D1/D3/D8"
+          ]
         },
         "origin": {
           "description": "产生点",
-          "value_shape": "reference_value"
+          "value_shape": "reference_value",
+          "basis": [
+            "§6 F14",
+            "§3 R13",
+            "design D1/D3/D8"
+          ]
         },
         "propagation": {
           "description": "传播路径",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F14",
+            "§3 R13",
+            "design D1/D3/D8"
+          ]
         },
         "handling": {
           "description": "捕获补偿重试与恢复",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F14",
+            "§3 R13",
+            "design D1/D3/D8"
+          ]
         },
         "after": {
           "description": "后续状态",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F14",
+            "§3 R13",
+            "design D1/D3/D8"
+          ]
         }
-      },
-      "production_status": "unverified"
+      }
     },
     {
       "id": "F15",
@@ -733,38 +1215,77 @@
       "fields": {
         "owner": {
           "description": "所属元素",
-          "value_shape": "reference_value"
+          "value_shape": "reference_value",
+          "basis": [
+            "§6 F15",
+            "§3 R14",
+            "design D1/D3/D8"
+          ]
         },
         "operation": {
           "description": "步骤身份与语义操作",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F15",
+            "§3 R14",
+            "design D1/D3/D8"
+          ]
         },
         "inputs": {
           "description": "输入值",
-          "value_shape": "reference_list"
+          "value_shape": "reference_list",
+          "basis": [
+            "§6 F15",
+            "§3 R14",
+            "design D1/D3/D8"
+          ]
         },
         "outputs": {
           "description": "输出值",
-          "value_shape": "reference_list"
+          "value_shape": "reference_list",
+          "basis": [
+            "§6 F15",
+            "§3 R14",
+            "design D1/D3/D8"
+          ]
         },
         "successors": {
           "description": "正常异常及恢复后继",
-          "value_shape": "edge_set"
+          "value_shape": "edge_set",
+          "basis": [
+            "§6 F15",
+            "§3 R14",
+            "design D1/D3/D8"
+          ]
         },
         "guards": {
           "description": "守卫",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F15",
+            "§3 R14",
+            "design D1/D3/D8"
+          ]
         },
         "back_edges": {
           "description": "循环与递归回边",
-          "value_shape": "edge_set"
+          "value_shape": "edge_set",
+          "basis": [
+            "§6 F15",
+            "§3 R14",
+            "design D1/D3/D8"
+          ]
         },
         "effects": {
           "description": "局部效应",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F15",
+            "§3 R14",
+            "design D1/D3/D8"
+          ]
         }
-      },
-      "production_status": "unverified"
+      }
     },
     {
       "id": "F16",
@@ -781,38 +1302,77 @@
       "fields": {
         "steps": {
           "description": "所解释步骤集合",
-          "value_shape": "reference_list"
+          "value_shape": "reference_list",
+          "basis": [
+            "§6 F16",
+            "§3 R14",
+            "design D1/D3/D8"
+          ]
         },
         "goal": {
           "description": "目标与假设",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F16",
+            "§3 R14",
+            "design D1/D3/D8"
+          ]
         },
         "strategy": {
           "description": "计算策略",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F16",
+            "§3 R14",
+            "design D1/D3/D8"
+          ]
         },
         "invariants": {
           "description": "不变量",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F16",
+            "§3 R14",
+            "design D1/D3/D8"
+          ]
         },
         "termination": {
           "description": "终止陈述",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F16",
+            "§3 R14",
+            "design D1/D3/D8"
+          ]
         },
         "complexity": {
           "description": "复杂度陈述",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F16",
+            "§3 R14",
+            "design D1/D3/D8"
+          ]
         },
         "argument": {
           "description": "推导或证明理由",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F16",
+            "§3 R14",
+            "design D1/D3/D8"
+          ]
         },
         "open_items": {
           "description": "未决项",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F16",
+            "§3 R14",
+            "design D1/D3/D8"
+          ]
         }
-      },
-      "production_status": "unverified"
+      }
     },
     {
       "id": "F17",
@@ -829,22 +1389,41 @@
       "fields": {
         "assertion": {
           "description": "断言指代",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F17",
+            "§3 R15",
+            "design D1/D3/D8"
+          ]
         },
         "counterevidence": {
           "description": "反证与冲突",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F17",
+            "§3 R15",
+            "design D1/D3/D8"
+          ]
         },
         "process": {
           "description": "推导过程",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F17",
+            "§3 R15",
+            "design D1/D3/D8"
+          ]
         },
         "gaps": {
           "description": "缺口说明",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F17",
+            "§3 R15",
+            "design D1/D3/D8"
+          ]
         }
-      },
-      "production_status": "unverified"
+      }
     },
     {
       "id": "F18",
@@ -865,38 +1444,77 @@
       "fields": {
         "source": {
           "description": "起点",
-          "value_shape": "reference_value"
+          "value_shape": "reference_value",
+          "basis": [
+            "§6 F18",
+            "§3 R16",
+            "design D1/D3/D8"
+          ]
         },
         "target": {
           "description": "终点",
-          "value_shape": "reference_value"
+          "value_shape": "reference_value",
+          "basis": [
+            "§6 F18",
+            "§3 R16",
+            "design D1/D3/D8"
+          ]
         },
         "kind": {
           "description": "实现/细化/概括/对应",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F18",
+            "§3 R16",
+            "design D1/D3/D8"
+          ]
         },
         "direction": {
           "description": "关系方向",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F18",
+            "§3 R16",
+            "design D1/D3/D8"
+          ]
         },
         "participants": {
           "description": "参与对象集合",
-          "value_shape": "reference_list"
+          "value_shape": "reference_list",
+          "basis": [
+            "§6 F18",
+            "§3 R16",
+            "design D1/D3/D8"
+          ]
         },
         "covered": {
           "description": "摘要覆盖对象",
-          "value_shape": "reference_list"
+          "value_shape": "reference_list",
+          "basis": [
+            "§6 F18",
+            "§3 R16",
+            "design D1/D3/D8"
+          ]
         },
         "uncovered": {
           "description": "未覆盖对象",
-          "value_shape": "reference_list"
+          "value_shape": "reference_list",
+          "basis": [
+            "§6 F18",
+            "§3 R16",
+            "design D1/D3/D8"
+          ]
         },
         "limitations": {
           "description": "解释限制",
-          "value_shape": "semantic_value"
+          "value_shape": "semantic_value",
+          "basis": [
+            "§6 F18",
+            "§3 R16",
+            "design D1/D3/D8"
+          ]
         }
-      },
-      "production_status": "unverified"
+      }
     }
   ]
 }

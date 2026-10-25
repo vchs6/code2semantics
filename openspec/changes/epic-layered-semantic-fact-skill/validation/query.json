@@ -1,23 +1,34 @@
 {
   "contract_version": "1.0.0",
   "catalog_id": "semantic-facts-20261025",
-  "request_id": "q1",
-  "snapshot": {
-    "mode": "current"
+  "request_id": "q-a",
+  "scope": {
+    "scope_id": "scope-a",
+    "directories": [
+      "/workspace/a"
+    ],
+    "excludes": [],
+    "defaulted": false
   },
   "target": {
-    "kind": "scope"
+    "kind": "node",
+    "node": {
+      "source_id": "src-a",
+      "subject_id": "project-a",
+      "node_id": "unit-a"
+    }
   },
+  "granularity": "L4",
   "selections": [
     {
       "fact_type": "F16",
       "fields": [
-        "goal"
+        "strategy"
       ]
     }
   ],
   "budget": {
-    "max_rounds": 2,
-    "max_new_assertions": 20
+    "max_rounds": 3,
+    "max_new_assertions": 12
   }
 }

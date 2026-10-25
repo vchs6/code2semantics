@@ -7,23 +7,23 @@
 ## 1. 既有研究依据与主规划基线
 
 - [x] 1.1 核实既有 `../survey-semantic-fact-requirements/research/semantic-fact-requirements.md` 的四层、O1–O5、F1–F18、R1–R16、S1–S12 依据存在；完成依据为该报告及其 `../survey-semantic-fact-requirements/research/validation.md`，不重做研究。
-- [ ] 1.2 在后续 apply 开始前复核本次主规划和八子 proposal/specs 的同源边界，记录 `traceability.md` 的 requirement→D→子变更→验收映射；核验无历史/用户快照/revision/refresh 功能、无旧协议兼容义务、无重复组件实现，缺失子 design/tasks 保持未交付并转入对应子流程。
+- [x] 1.2 在后续 apply 开始前复核本次主规划和八子 proposal/specs 的同源边界，记录 `traceability.md` 的 requirement→D→子变更→验收映射；核验无历史/用户快照/revision/refresh 功能、无旧协议兼容义务、无重复组件实现，缺失子 design/tasks 保持未交付并转入对应子流程。
 
 ## 2. 公共事实目录定义（D1，先于查询契约）
 
-- [ ] 2.1 按报告第 3/5/6/7 节直接重写 `skills/layered-semantic-facts/assets/fact-catalog.json` 与 `fact-catalog.schema.json`，保持四层观察与组织职责分离及 F1–F18 依据；同步 `references/fact-catalog.md` 和 `traceability.md`，逐字段核对来源、直接节点完整性与目录内/外边界，不把工具可用性当事实覆盖，删除既有 production_status 等重复生产状态字段。
-- [ ] 2.2 更新本变更 `validation/schema-cases.json` 与 `semantic-cases.json` 的目录相关正反样例，主变更同步替换本变更 `validation/validate_contracts.py` 中设计资产的 shape/引用/样例检查，先展示旧目录不符合新要求的失败，再验证新目录通过；该校验仅验设计资产，不实现组件运行时校验；记录运行命令和输出到 `validation.md`；不等待查询组件实现，不用旧验证脚本通过替代。
+- [x] 2.1 按报告第 3/5/6/7 节直接重写 `skills/layered-semantic-facts/assets/fact-catalog.json` 与 `fact-catalog.schema.json`，保持四层观察与组织职责分离及 F1–F18 依据；同步 `references/fact-catalog.md` 和 `traceability.md`，逐字段核对来源、直接节点完整性与目录内/外边界，不把工具可用性当事实覆盖，删除既有 production_status 等重复生产状态字段。
+- [x] 2.2 更新本变更 `validation/schema-cases.json` 与 `semantic-cases.json` 的目录相关正反样例，主变更同步替换本变更 `validation/validate_contracts.py` 中设计资产的 shape/引用/样例检查，先展示旧目录不符合新要求的失败，再验证新目录通过；该校验仅验设计资产，不实现组件运行时校验；记录运行命令和输出到 `validation.md`；不等待查询组件实现，不用旧验证脚本通过替代。
 
 ## 3. 公共查询与中间契约定义（D1–D5，依赖第2组）
 
-- [ ] 3.1 直接重写 `assets/contract-format.schema.json`、`common.schema.json`、`information-needs.schema.json` 与 `references/contract-format.md`：当前项目集合、固定目标/粒度、主体证据、未满足项、合法边界及必要上级路径；移除用户历史/快照/revision/refresh 字段与分支，逐项核对主 specs 的入口/范围/变化/完整性需求并记录定义差异。
-- [ ] 3.2 直接重写 `assets/pipeline.schema.json`、`capability-matrix.schema.json` 与 `references/runtime-contracts.md` 的公共边界：原生输出+invocation-profile→ParseResult；ConstructRequest 消费请求/已有有效事实/未满足项/当前上下文，ConstructResult 只返回事实、证据和缺口；归纳按类型+主体+当前内容状态+上下文分组；矩阵初始空且仅解析开发流程完成接入验收可点亮，点亮即可供构造器使用，不设 production_status/actual_production/execution_validation 等重复维度，调用状态由执行器管理。核验旧 `parser(scope, needs)` 和直接构造持久化/response 均无残留。
-- [ ] 3.3 更新 `validation/query.json`、`parse-result.json`、`construct-request.json`、`construct-result.json`、`induction-request.json`、`stored-record.json`、`read-result.json`、`assertion.json`、`external-reference.json` 及相关正反样例，覆盖未知/非空不足、来源变化/删除、前提失效、未授权外部引用、直接节点完整性与纯解析。同步替换主 `validation/validate_contracts.py` 的设计资产检查并运行，验证 shape、引用及正反样例，不等待子组件运行时接口，保存命令与预期拒绝/接受结果到 `validation.md`；不要求旧数据可读或旧协议适配。
+- [x] 3.1 直接重写 `assets/contract-format.schema.json`、`common.schema.json`、`information-needs.schema.json` 与 `references/contract-format.md`：当前项目集合、固定目标/粒度、主体证据、未满足项、合法边界及必要上级路径；移除用户历史/快照/revision/refresh 字段与分支，逐项核对主 specs 的入口/范围/变化/完整性需求并记录定义差异。
+- [x] 3.2 直接重写 `assets/pipeline.schema.json`、`capability-matrix.schema.json` 与 `references/runtime-contracts.md` 的公共边界：原生输出+invocation-profile→ParseResult；ConstructRequest 消费请求/已有有效事实/未满足项/当前上下文，ConstructResult 只返回事实、证据和缺口；归纳按类型+主体+当前内容状态+上下文分组；矩阵初始空且仅解析开发流程完成接入验收可点亮，点亮即可供构造器使用，不设 production_status/actual_production/execution_validation 等重复维度，调用状态由执行器管理。核验旧 `parser(scope, needs)` 和直接构造持久化/response 均无残留。
+- [x] 3.3 更新 `validation/query.json`、`parse-result.json`、`construct-request.json`、`construct-result.json`、`induction-request.json`、`stored-record.json`、`read-result.json`、`assertion.json`、`external-reference.json` 及相关正反样例，覆盖未知/非空不足、来源变化/删除、前提失效、未授权外部引用、直接节点完整性与纯解析。同步替换主 `validation/validate_contracts.py` 的设计资产检查并运行，验证 shape、引用及正反样例，不等待子组件运行时接口，保存命令与预期拒绝/接受结果到 `validation.md`；不要求旧数据可读或旧协议适配。
 
 ## 4. 公共响应契约定义（D1/D3/D8，依赖第3组）
 
-- [ ] 4.1 直接重写 `assets/output-schema.schema.json` 与 `references/output-schema.md`，限定请求节点所需事实及其直接节点的最小投影，保留必要 context/coverage/basis、证据、节点引用、冲突、目录外与目录内缺口和终止原因；以逐条规格对照确认不自动后代展开、不输出全部上级事实。
-- [ ] 4.2 更新 `validation/response.json` 及响应正反样例，先展示丢失否定限定、混同来源与知识、缺完整性仍充分命中、泄漏非请求字段的失败，再同步替换并运行主 `validation/validate_contracts.py` 的响应设计资产检查，验证正确响应，不等待查询组件；在 `validation.md` 记录可执行命令、结果与尚未覆盖项。现有旧校验代码不得算作此项完成证据。
+- [x] 4.1 直接重写 `assets/output-schema.schema.json` 与 `references/output-schema.md`，限定请求节点所需事实及其直接节点的最小投影，保留必要 context/coverage/basis、证据、节点引用、冲突、目录外与目录内缺口和终止原因；以逐条规格对照确认不自动后代展开、不输出全部上级事实。
+- [x] 4.2 更新 `validation/response.json` 及响应正反样例，先展示丢失否定限定、混同来源与知识、缺完整性仍充分命中、泄漏非请求字段的失败，再同步替换并运行主 `validation/validate_contracts.py` 的响应设计资产检查，验证正确响应，不等待查询组件；在 `validation.md` 记录可执行命令、结果与尚未覆盖项。现有旧校验代码不得算作此项完成证据。
 
 ## 5. 推进工具研究、矩阵与解析子交付（D4/D7）
 

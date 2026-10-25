@@ -1,0 +1,25 @@
+{
+  "contract_version": "1.0.0",
+  "needs": [
+    {
+      "need_id": "need-a",
+      "fact_type": "F16",
+      "fields": [
+        "strategy"
+      ],
+      "subject_requirement": "bounded element",
+      "evidence_kinds": [
+        "source"
+      ],
+      "context_requirement": "language and conditions",
+      "current_source_requirement": "include dirty and untracked contents",
+      "coverage_requirement": "direct child enumeration",
+      "production_mode": "hybrid",
+      "acceptance_fixture": "parse-request.json",
+      "research_basis": [
+        "§3 R14",
+        "§6 F16"
+      ]
+    }
+  ]
+}

@@ -1,11 +1,17 @@
-# 事实目录设计
+# 公共事实目录
 
-权威数据为 `../assets/fact-catalog.json`。依据新研究报告§2–§7，采用 L1–L4 四种观察粒度与 F1–F18 十八项本轮目录；这些是本次有证据的设计版本，不是永久固定的层数/类型数。O1 是入口和覆盖维度，O2/O3 是组织/横向关系视图，O4 贯穿断言，O5 是跨粒度导航，均不是新增语义层。报告§5给出合并/细分反证，§9 U1–U5限制边界。
+本说明与 `../assets/fact-catalog.json`、`fact-catalog.schema.json` 同源。目录只定义事实表达能力；可用工具和实际事实覆盖分别由矩阵和查询判断。
 
-同一主体可承担多个粒度角色；没有独立职责证据时不造 L2。导航允许 L1→L3/L4、同粒度递归、多对多、循环。目录的 organizations 是可用视角，不是父节点约束。F4 不推出 F6，F9 不推出 F11，F15 与 F16分离。F17 的 origin/knowledge/context/coverage/basis 在每个字段断言内强制保留，显式查询F17可获取断言间反证/过程等内容，不要求消费者另查“证据层”才知道结果可靠性。
+依据：`openspec/changes/survey-semantic-fact-requirements/research/semantic-fact-requirements.md` 第 3 节 R1–R16、第 5 节 L1–L4/O1–O5、第 6 节 F1–F18、第 7 节追踪关系。JSON 的 `research.sha256` 按 UTF-8/LF 校验研究原文。每个事实类型保留 requirement、organizations、basis；每个字段的 basis 指回对应 F/R 章节与主设计决定，字段名是本次工程编码，不是外部标准。
 
-字段名称是本次协议选择，逐项 description 与 basis 对应报告中文语义字段。每字段value_shape指向common.schema.json的共享定义；关系端点、候选条件配对、参与角色、参数绑定和控制边有明确结构，消费者不得自定record键来编码这些关键引用。报告未规定传输编码；本设计选用带标签的语义值（文本、标量、主体引用、列表、具名条目）保存复杂语义。名称闭合到目录；具名条目只能细化一个已声明字段的语义，不能绕过目录发布新事实类型。条件、环境、语言原始语义、未知及推导限制不能在归一化时丢失。
+四个观察粒度分别为软件系统与协作全景、职责组件与协作、程序元素与契约、内部行为与算法。O1 范围、O2 组织、O3 交互行为、O4 证据状态、O5 细化导航与粒度分离；没有唯一父树或必经中间层。
 
-## 生产信息需求与能力矩阵
+事实目录完整保留 F1 覆盖、F2 身份边界、F3 用途形态、F4 组织、F5 职责、F6 依赖、F7 交互、F8 接口、F9 元素类型、F10 绑定、F11 调用、F12 数据效应、F13 生命周期、F14 错误、F15 内部计算、F16 算法解释、F17 证据状态、F18 实现细化。`fields` 是该类型允许的字段，单条事实不必填满所有字段；缺失或不足仍须明确缺口，不能填空冒充覆盖。
 
-信息需求每项只覆盖一个字段，need_id固定为“F编号.字段名”（如F16.goal），全局唯一；Observation.information_need_id必须解析到本批需求项，字段与主体适用性由语义校验核对。按每个 F 的字段逐项派生信息需求：主体边界/所需证据种类与定位/上下文/版本/解析或认知需求/否定所需覆盖/验证样本。该过程不能从“schema 可表达”推出“工具能生产”。矩阵记录由 `capability-matrix.schema.json` 约束；在解析器和归纳路径用真实项目证据通过非空生产测试前，actual_production 只能是 unverified，不能以一个 gap 样例宣称支持。目录中的 production_status 全部为 unverified。实现后矩阵至少按 F、字段、语言与环境、证据模式记录 validated/unsupported/unverified、测试定位、原始结果及限制。表达覆盖、实际产出、运行验证分别报告；未验证需求仍是待实施范围，不视为完成。
+所有字段使用 `common#/$defs/assertion`：origin、knowledge、context、coverage、basis、validity；有值时使用目录 value_shape。reference_value/reference_list/candidate_set/participant_set/binding_set/edge_set 分别保留引用、集合、候选条件、参与者角色、参数绑定和控制/数据边，不能压成无类型文本。F6.cycle 使用 cycle_value，区分结构环、条件环和具有联合条件及执行观察的实际循环。F15 控制计算与 F16 算法解释分列；语言差异保留在 context.language_semantics 和 F9.language_semantics 中。
+
+直接节点清单在 `common#/$defs/direct_inventory`，组织关系在 navigation_edge，依赖为 F6；清单完整不代表每个 child 的事实已完整构造。只发现匹配部分时必须保留 coverage_incomplete，不能宣称充分命中。
+
+信息需求清单结构由 `information-needs.schema.json` 定义，实际清单由构造器子变更开发期交付。每项可聚合一个类型的多个字段，need_id 是清单内稳定且唯一的标识；运行时仅匹配既定清单，未覆盖需求返回 uncovered_need。主变更没有产出或扩展实际开发需求清单。矩阵的工具接入验收与事实覆盖均不写入本目录。
+
+验证：`python openspec/changes/epic-layered-semantic-fact-skill/validation/validate_contracts.py`。这是设计资产验证，不能证明解析、构造、持久化或真实集成已实现。

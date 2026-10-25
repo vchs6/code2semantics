@@ -1,13 +1,23 @@
-# 查询契约
+# 当前查询契约
 
-本工件在 fact-catalog 之后派生；依据报告§3 R1/R2/R15/R16、§5 O1/O5、§6 F1/F2/F17/F18 与§8 S1–S12。机读权威是 `../assets/contract-format.schema.json`，复用 common.schema.json；版本 1.0.0，目录 semantic-facts-20261025。
+唯一入口结构为 `../assets/contract-format.schema.json`；公共类型定义在 `common.schema.json`。依据：研究 R1/R2/R14–R16、L1–L4/O1/O4/O5，以及主设计 D1–D6。
 
-`scope` 当前模式缺省时由宿主当前工作目录补为 directories 并在响应标注；目录集合只是观察入口。source namespace 由源注册表绑定独立来源身份，不能取文件名/行号或最近父目录来合并主体。当前模式先捕获全部授权内容清单（含已修改、未跟踪、排除规则和配置），再按不可变内容快照执行。历史模式必须指明 saved scope 和各来源快照，读取保存证据，不读取当前路径替代历史。无法取得历史内容时明确 gap。
+| Query 字段 | 语义 |
+| --- | --- |
+| contract_version / catalog_id | 当前公共定义标识，精确匹配；不匹配须拒绝 |
+| request_id | 本次调用关联标识 |
+| scope | scope_id、非空 directories、excludes、defaulted；是授权观察入口，不是项目身份 |
+| target | scope 或 node；node 使用 source_id + subject_id + node_id，不包含路径、父身份或用户版本 |
+| granularity | 固定本次 L1/L2/L3/L4 观察粒度 |
+| selections | 非空 fact_type/fields 请求；目录外字段结构合法，但响应必须分列 out_of_catalog |
+| budget | 正整数 max_rounds/max_new_assertions，达到预算时返回有效已有事实和剩余缺口 |
 
-target 为 scope 入口、确切 node continuation 或显式 refresh 节点；selections 指定事实类型与非空字段集合。目录外类型/字段为 out_of_catalog；合法目录内的未满足项为 gaps；二者可同时返回。结构合法但未知节点、无效主体或过期引用不成为空成功，返回 invalid_reference/stale_snapshot gap。版本/目录标识不匹配是输入错误，禁止当缓存命中。
+结构化输入必须显式携带 scope。对话适配层在意图已足够、位置缺省时，把调用时工作目录补入 directories 并标记 defaulted=true；不能将混合目录认作共同项目。目标、粒度或字段不明时应先澄清。接口只分析当前来源；历史、用户快照、revision、refresh 字段及旧入口一律拒绝，不提供兼容转换。
 
-一次仅返回目标的直接属性及下一级事实节点；更深节点只给 continuation 与身份/可靠性元数据，不递归展开。节点没有固定父字段，children 表达本次导航路径而非全局身份树。scope 可直接进入任何粒度；请求不自动扩大源码授权。
+source_id 是独立来源域，subject_id 是域内有边界证据的软件主体，node_id 定位该主体内的语义节点。同名、同路径、多成员、多父或移动不能直接证明身份相同/不同；身份由构造侧基于边界证据识别，Schema 不替代语义判断。外部依赖使用 external_ref，包含 observed_in 和未授权边界，只能保留引用，不能据此增加源码授权。成员关系不推出依赖。
 
-continuation 精确绑定 node、snapshot_set_id 与 fact_revision。current 续查先比较实际来源快照集合，变化时报 stale_snapshot；不能静默跟随新版本。historical 续查固定原集合和原 revision。精确 node 续查只读指定 fact_revision，不调用构造；缺字段即返回目标明确的 gap。显式 refresh 仅用于current模式且必须匹配同一来源快照集合，读取该节点最新知识并允许按缺口构造新revision，响应 resolved_target 给出新continuation。历史模式及所有精确node请求均只读；scope历史请求读取指定源码快照内查询开始时的已存知识并标出实际revision，不构造。相同源码快照内新证据形成新fact_revision，不覆盖旧引用；源码变动仍先报stale_snapshot，需新的scope查询重新解析主体，不自动改绑refresh引用。跨来源任一版本变化都重审依赖它的断言。
+当前来源由公共 source 记录：root、content_state、status、dirty、has_untracked、excludes。content_state 是内部当前内容判定标记，涵盖相关修改、未跟踪内容、配置及排除边界；不成为用户版本参数。来源删除、内容不匹配或必要前提失效时，相关断言不作为当前命中；保留无关有效事实，按本次需求增量构造，不自动全量重建。
 
-JSONSchema只检查输入结构、值类型及局部条件，不能验证目录成员、引用存在、命名域注册、快照内容、同一性、授权范围或依赖闭包；运行校验职责见 runtime-contracts.md。查询模式总返回 JSON；自然语言模式先补同一契约，意图不足先澄清。报告只在明确请求时由宿主从该响应渲染。
+构造输入使用 `pipeline#/$defs/construct_request`：query、existing_valid_facts、unmet、current_source_context；后者保留 sources/changes、necessary_ancestors 和 obligations。必要上级路径及直接节点完整性属于本次有界覆盖义务，推进这些义务也算有效进展；字段非空、重复候选、调用次数或无关事实不算进展。此处定义输入语义，不实现查询控制循环。
+
+请求内节点允许补齐必要上级，但输出只投影目标和直接节点，不输出全部上级或后代。已有不充分、unknown、冲突与限定否定必须保留 context/coverage/basis。主验证样例位于 `openspec/changes/epic-layered-semantic-fact-skill/validation/query.json` 和 `schema-cases.json`；运行命令见 runtime-contracts.md。
