@@ -50,3 +50,27 @@ The initial catalogue covers only evidence-backed Python/Rust syntax inventory:
 ## Determinism
 
 For fixed query, information-needs catalogue, existing valid facts, source state, matrix contents, and executor outputs, the plan and normalized constructor result must be deterministic. Sort needs, candidates, observations and gaps by stable identifiers before returning.
+
+## Expanded source-project information needs for S1–S12
+
+The four syntax-inventory needs are only the initial executable slice, not the complete constructor input model. Before the survey change adds or recommends tools, this design expands the development-time catalogue to enumerate the source/project evidence required by the accepted S1–S12 scenarios. The catalogue describes needs and evidence requirements; it does not claim that current producers satisfy them.
+
+Required acquisition groups:
+
+1. **Scope and project identity (F1/F2/F3):** explicit roots and exclusions, project boundary/identity, entry points, language/runtime/deployment/configuration hints, and the evidence supporting each boundary. Directory nesting alone must not establish ownership.
+2. **Workspace and organization (F4/F5):** workspace manifests, member lists, nested/overlapping project roots, logical responsibility and implementation links. Membership, physical containment and dependency must remain separate relation kinds.
+3. **Dependencies and interactions (F6/F7/F8):** declared build/package dependencies, source-level imports/references/calls, interface ownership, request/response shape, triggers, ordering, effects and outcomes. Every edge must retain its source, resolution status, conditions and in-scope/out-of-scope endpoint status.
+4. **Language semantics and binding (F9/F10/F11):** declarations, type relations where a real language tool can establish them, binding targets, dispatch/overrides, argument mapping and unresolved/conditional targets. Syntax names alone do not prove type identity or dynamic dispatch.
+5. **Internal behavior and algorithm evidence (F12/F13/F14/F15/F16):** data-flow candidates, state transitions, guards, error paths, control-flow successors/back-edges, algorithm steps and explicit proof limitations. Directly observed syntax must be separated from inferred intent, invariants, termination and complexity claims.
+6. **Evidence completeness and refinement (F17/F18):** counterevidence, knowledge state, checked/excluded regions, completeness of enumerations, unresolved needs and links from higher-level responsibilities to lower-level implementations.
+
+For each need, the catalogue must state the expected output kind, evidence source, language/platform/environment constraints, current-source binding, coverage/completeness rule, known blind spots, fixture, and research basis. A need may require several producers; tool selection must optimize for combined coverage and compatible environments, not one-tool-per-fact assumptions.
+
+### Ordered hand-off
+
+1. Update this constructor design and information-needs.json first; add negative tests for unknown, unsupported and incomplete evidence needs.
+2. Pass the expanded catalogue to survey-info-acquisition-tools. The survey must investigate candidates against each explicit need, execute approved environment probes where available, and record observed versions/output/limitations. Unverified toolchain availability remains unverified.
+3. Only after research evidence is recorded, update parser design and implement parsers for the accepted native output formats. Parser tests must use captured or generated native-output fixtures and preserve provenance; parsers do not execute tools or read the project themselves.
+4. Only after parser acceptance may the capability matrix enable the corresponding producer profile. Then connect the selected profiles to the constructor runtime and run cross-component acceptance.
+
+The currently enabled in-process Python/Rust syntax parsers remain valid for F2/L3 only. No external profile is enabled merely because a candidate appears in the survey.
