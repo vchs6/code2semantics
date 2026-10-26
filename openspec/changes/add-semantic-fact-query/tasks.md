@@ -7,7 +7,7 @@ TDD rule: each behavior task starts with a failing test, then the smallest imple
 - [x] 1.1 Validate Query and response against the main public schemas; reject malformed query before repository writes.
 - [x] 1.2 Inspect explicitly requested Python/Rust source roots and bind the current content snapshot, including dirty/untracked state.
 - [x] 1.3 Read only current source-head facts and filter assertions whose validity/evidence state is stale; retain historical fact rows.
-- [ ] 1.4 Add tests for multiple roots, nested/overlapping roots, unavailable repository, and out-of-scope references without expanding read authorization.
+- [x] 1.4 Add tests for multiple roots, nested/overlapping roots, unavailable source roots, and out-of-scope references without expanding read authorization.
 
 ## 2. Bounded construction loop
 
@@ -50,3 +50,9 @@ TDD rule: each behavior task starts with a failing test, then the smallest imple
 ### Ancestor-path progress (first-phase boundary)
 
 For the supported F2/L3 model, a node-target query now verifies both (a) the current project-scope inventory contains the requested file node and (b) that file has a current direct-declaration inventory. Scope-to-file prerequisite completion is included in the bounded progress set; final response projection returns only the requested node inventory. Tests cover node-target scoping and direct inventory persistence. This does not yet implement arbitrary semantic ancestor chains for higher-layer fact types; those remain outside the current syntax-only support boundary and require later component work.
+
+## Scope authorization regression evidence (2026-10-26)
+
+- Tests in `tests/test_query_orchestration.py` cover disjoint roots, explicitly requested nested roots with distinct source identities, unavailable roots (no fallback and no writes), and out-of-scope node source IDs rejected before repository read.
+- CI run `https://github.com/vchs6/code2semantics/actions/runs/40275462491`: repository 45, matrix 15, parser 9, scanner 7, source acceptance 4, packaging 2, executor 3, combined planning/constructor/binding/induction/query 48 passed; strict OpenSpec passed.
+- Still pending under 3.4: graph-specific multi-parent/dependency-cycle cases, explicit external-reference projection, conflict projection, and out-of-catalog response tests. Full S1–S12 acceptance remains pending.
