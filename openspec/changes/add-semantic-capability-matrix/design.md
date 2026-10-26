@@ -102,3 +102,6 @@
 4. ���о�����ԡ����� repository ���Ժ� OpenSpec �ϸ�У�顣
 5. �ع�ʱ�ָ���һ��ͨ�� schema У��ľ����ļ������޸��о����档
 
+## Parser-observation coverage is the source of truth
+
+A matrix entry's `information_need_ids` SHALL describe the observations the exact parser/invocation profile can currently produce and the constructor can consume, not every fact a tool might theoretically help research. Narrow a profile to proven need IDs; keep it disabled if the parser emits observations but no accepted FactBatch mapping exists. For example, the current `python.compileall` adapter emits only `source.f9.language-semantics`; it does not establish declaration, scope, error-handling or runtime semantics. Candidate capability claims remain disabled until parser and constructor mapping acceptance both pass.
