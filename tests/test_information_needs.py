@@ -212,9 +212,15 @@ def test_catalogue_rejects_missing_output_or_incomplete_coverage_metadata(tmp_pa
         load_information_needs(tmp_path)
 
 
-def test_research_required_need_is_not_treated_as_accepted_production():
-    value = request(("roles",))
-    result = plan_constructor_request(value, ASSETS)
-    assert result["plan"] == []
-    assert result["gaps"][0]["reason"] == "unavailable_tool"
-    assert result["gaps"][0]["fields"] == ["roles"]
+def test_research_required_need_is_not_marked_as_accepted_production():
+    catalogue = load_information_needs(ASSETS)
+    role_need = next(
+        need for need in catalogue["needs"]
+        if need["fact_type"] == "F2" and need["fields"] == ["roles"]
+    )
+    assert role_need["acceptance_status"] == "research_required"
+    matrix = json.loads((ASSETS / "capability-matrix.json").read_text(encoding="utf-8"))
+    assert not any(
+        role_need["need_id"] in entry["information_need_ids"] and entry["enabled"]
+        for entry in matrix["entries"]
+    )
