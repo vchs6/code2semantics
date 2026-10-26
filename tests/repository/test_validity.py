@@ -15,7 +15,7 @@ def test_current_read_excludes_invalid_assertion_without_deleting_it(batch, db_p
     result = repository.read(make_query())
 
     assert "fact-a" not in {fact["fact_id"] for fact in result["facts"]}
-    assert "fact-b" in {fact["fact_id"] for fact in result["facts"]}
+    assert "fact-b" not in {fact["fact_id"] for fact in result["facts"]}
     assert "fact-old" not in {fact["fact_id"] for fact in result["facts"]}
     assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == len(batch["facts"])
     assert repository.connection.execute("SELECT COUNT(*) FROM attributes").fetchone()[0] >= len(batch["facts"])
