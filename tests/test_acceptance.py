@@ -109,6 +109,12 @@ def test_changed_source_appends_new_facts_without_deleting_old_versions(tmp_path
     first = execute_query(query(), repository, ROOT / "skills" / "layered-semantic-facts" / "assets")
     assert any("function version_one" in fact["fields"]["names"]["value"]["text"] for fact in first["results"])
     old_source_ids = {source["source_id"] for source in first["sources"]}
+    old_fact_keys = {
+        row[0] for row in repository.connection.execute(
+            "SELECT fact_key FROM facts WHERE source_id IN ({})".format(",".join("?" for _ in old_source_ids)),
+            tuple(sorted(old_source_ids)),
+        )
+    }
     old_count = repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
     repository.close()
 
@@ -124,6 +130,13 @@ def test_changed_source_appends_new_facts_without_deleting_old_versions(tmp_path
     assert old_source_ids.issubset({
         row[0] for row in repository.connection.execute("SELECT source_id FROM sources")
     })
+    invalidated = {
+        key: state for key, state in repository.connection.execute(
+            "SELECT target_key, state FROM validity_events WHERE target_kind = 'fact' ORDER BY event_id"
+        ) if key in old_fact_keys
+    }
+    assert set(invalidated) == old_fact_keys
+    assert set(invalidated.values()) == {"modified"}
 
     current = execute_query(query(), repository, ROOT / "skills" / "layered-semantic-facts" / "assets")
     assert any("function version_two" in fact["fields"]["names"]["value"]["text"] for fact in current["results"])
@@ -143,6 +156,12 @@ def test_changed_source_appends_new_facts_without_deleting_old_versions(tmp_path
     assert all("function version_two" not in fact["fields"]["names"]["value"]["text"] for fact in reverted["results"])
     assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == count_after_second_version
     assert repository.connection.execute("SELECT COUNT(*) FROM sources").fetchone()[0] == 2
+    restored_states = {
+        key: state for key, state in repository.connection.execute(
+            "SELECT target_key, state FROM validity_events WHERE target_kind = 'fact' ORDER BY event_id"
+        ) if key in old_fact_keys
+    }
+    assert set(restored_states.values()) == {"current"}
     repository.close()
 
 def test_real_rust_source_scan_store_reopen_and_query(tmp_path, capsys):
