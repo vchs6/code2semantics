@@ -22,7 +22,7 @@
 | 对话同契约、默认机器结果、明确请求报告与规范包装 | D7/D8；7.2 | define-skill-packaging | 默认范围标注、模糊意图澄清、同源Response报告；仓库外安装及 skills-ref validate 或规范逐项检查 |
 | 真实集成与子交付非重复拥有 | D7/D8；5–8 | 八子变更局部实施，主编排接收 | 触发/推进子apply→交付→接收；S1–S12+新边界真实工具非空事实→入库重读→最小响应；接入验收与集成证据分别记录，不变成矩阵两套状态 |
 
-主公开定义交付路径与阶段见 tasks 2–4；八子入口、前置门槛和预期局部输出见 design D7 与 tasks 5–7。子 design/tasks 缺失时先进入子规划流程，不假定交付存在；本轮不新建缺失子工件。主未来集成入口和证据见 tasks 8；任何尚无可执行命令/实物的交付保持 pending。
+主公开定义交付路径与阶段见 tasks 2–4；八子入口、前置门槛和预期局部输出见 design D7 与 tasks 5–7。此前缺失的 add-semantic-fact-query 与 define-skill-packaging 子 design/tasks 已于 2026-10-26 创建；两者实施与局部验收仍按各自 tasks 保持 pending。主未来集成入口和证据见 tasks 8；任何尚无可执行命令/实物的交付保持 pending。
 
 ## 公共机读契约交付（2026-10-25）
 
@@ -46,3 +46,10 @@
 - Constructor child `design.md` and `tasks.md` now exist; catalogue/loader/planning initial tasks are checked based on CI evidence. Survey child `design.md` and `tasks.md` now exist; its external-tool probes and matrix acceptance remain pending.
 - CI evidence: https://github.com/vchs6/code2semantics/actions/runs/40261330788 — existing suites and the new information-needs/constructor-plan tests pass, strict OpenSpec passes. The fail-closed product delivery gate remains blocked for the unimplemented full constructor orchestration.
 - Current supported behavior remains syntax inventory F2/L3 only. Do not infer F1/F3–F18, type semantics, call/data flow or runtime behavior from this scope.
+
+
+## Query and packaging planning follow-up (2026-10-26)
+
+- Query child design/tasks: `openspec/changes/add-semantic-fact-query/design.md`, `tasks.md`. Existing query loop and tests are recorded as partial implementation; direct-node completeness, ancestor obligations, multi-project/cycle acceptance and S1–S12 remain pending.
+- Packaging child design/tasks: `openspec/changes/define-skill-packaging/design.md`, `tasks.md`. Independent copied-install test `tests/test_packaging.py` is now in CI; it is not a substitute for full main-change acceptance.
+- The induction child tasks are checked only for the deterministic batching/validation boundary, not for a cognitive provider. The main full-system tasks remain pending.
