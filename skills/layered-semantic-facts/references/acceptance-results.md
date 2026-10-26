@@ -131,3 +131,12 @@ CI run: https://github.com/vchs6/code2semantics/actions/runs/40277635793
 - Added a transfer test that rejects importing a different payload under an existing immutable fact identity and verifies all normalized row counts and submission receipts remain unchanged.
 - CI run: https://github.com/vchs6/code2semantics/actions/runs/40298718500 — repository 56 passed; transaction 6; transfer 7; repository acceptance 3; matrix 15; parser 9; scanner 7; runtime acceptance 6; packaging 2; executor 3; producer dispatch 3; combined planning/constructor/induction/query 52 passed; strict OpenSpec passed.
 - Full S1–S12 acceptance remains NOT_YET_PASSED. The delivery gate remains blocked until the full runtime acquisition/parse/constructor/induction/repository/query-response path and all root scenarios are demonstrated.
+
+
+## Full acceptance boundary expansion (2026-10-26)
+
+- Added root acceptance for unavailable sources: the query returns `termination=unavailable`, an explicit `source_unavailable` gap, and does not fall back to another project or write facts.
+- Added root acceptance for out-of-scope node targets: the request is rejected before querying foreign facts; only explicitly authorized source roots are returned and the foreign repository rows remain untouched.
+- Restore hardening now validates both the required normalized table names and required columns before copying a backup. Regressions cover empty SQLite files and malformed databases that reuse expected table names with wrong columns.
+- CI: https://github.com/vchs6/code2semantics/actions/runs/40299401934 — repository 57 passed; transaction 6; transfer 8; repository acceptance 3; matrix 15; parser 9; scanner 7; runtime acceptance 8; packaging 2; executor 3; producer dispatch 3; combined planning/constructor/induction/query 52 passed; strict OpenSpec passed.
+- Full S1–S12 acceptance remains NOT_YET_PASSED. The product gate is intentionally blocked until the complete provider/tool acquisition → parsing → construction/induction → repository re-read → final response workflow and the entire scenario matrix are verified.
