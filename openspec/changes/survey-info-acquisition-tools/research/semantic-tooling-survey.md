@@ -155,3 +155,44 @@ The active first-phase scope is now the fixed development-time catalogue at `ski
 - CI: https://github.com/vchs6/code2semantics/actions/runs/40261330788 (component suites and strict OpenSpec pass; product delivery gate remains intentionally blocked because full constructor orchestration is incomplete).
 - No external tool such as cargo/rustc/rust-analyzer is claimed as installed or accepted. The capability matrix remains empty; this survey does not enable entries.
 - Future needs outside F2 identity/names/boundary/locators must enter via a development-time OpenSpec change, tool research, parser acceptance and a separate matrix enablement action. Runtime code must not extend the catalogue or matrix.
+
+## 7. Expanded S1–S12 needs coverage and producer shortlist (2026-10-26)
+
+This section supersedes the earlier statement that the survey input is only the four F2 syntax needs. The authoritative input is now `skills/layered-semantic-facts/assets/information-needs.json`: 127 field-level needs across F1–F18, mapped to scenarios S1–S12. These are requirements, not 127 separate tools. Candidate selection is grouped by native output and complementary coverage.
+
+### 7.1 Candidate coverage matrix
+
+| Need group | Information needs / fact fields | Primary candidate families | Complementary sources | Gaps / acceptance status |
+|---|---|---|---|---|
+| Scope and project identity | F1 all fields; F2.roles; F3 entry/runtime/environment fields | Project/workspace manifest readers; Python/Rust source parsers | Configuration and documentation readers; caller-declared scope | Custom deterministic readers/parsers still need implementation and tests. Nested paths do not establish ownership. |
+| Workspace and organization | F4 all fields; F5 responsibility/implementation links | Cargo workspace metadata; Python project/workspace manifests | Source references and documentation; constrained induction for responsibility | Manifest membership does not establish dependency or responsibility. Candidate only. |
+| Dependencies and interactions | F6 all fields; F7 all fields; F8 all fields | Package manifests; import/reference/call analyzers; API/schema readers | Compiler semantic indexes and opt-in runtime traces | Static edges are candidates unless resolution/conditions are proven. External endpoints remain references only. |
+| Declarations, types, bindings and dispatch | F9 all fields; F10 all fields; F11 all fields | Existing AST parsers; ctags; ast-grep structural matches | Compiler/type-checker output; rust-analyzer LSP | Existing AST profiles only cover syntax inventory. Tag/pattern hits do not prove semantic binding. |
+| Data/control flow, state and errors | F12–F15 all fields | AST/control-flow analyzers; compiler IR/diagnostic output | Runtime traces when explicitly authorized; source/doc evidence | No accepted general data-flow or state-transition producer yet. Do not infer runtime behavior from syntax alone. |
+| Algorithm and evidence reasoning | F16 all fields; F17 all fields; F18 all fields | Accepted source/control-flow evidence; coverage/provenance validator | Constrained cognitive inference with premises and counterevidence | No automatic proof of intent, invariants, termination or complexity. Unsupported claims remain open items/gaps. |
+
+### 7.2 Small candidate shortlist (not a one-tool-per-field plan)
+
+| Candidate profile | Intended coverage | Native output to parse | Current decision |
+|---|---|---|---|
+| Python `compileall` | Additional Python syntax/compile diagnostics | Compiler/compileall diagnostics | Candidate; safe fixture probe in CI, disabled pending parser acceptance |
+| `cargo metadata --no-deps --format-version 1` | Rust workspace members, targets and declared dependencies | Cargo metadata JSON | Candidate; availability and output probe in CI, disabled pending parser acceptance |
+| `cargo check` | Rust type/compiler diagnostics for explicitly opted-in projects | Compiler diagnostics | Candidate; disabled pending environment, sandbox and parser acceptance |
+| `rust-analyzer` | Rust semantic symbols, references, implementations and call hierarchy | LSP responses/diagnostics | Candidate; server lifecycle/project readiness and adapter acceptance pending |
+| universal-ctags JSON | Cross-language declarations, tags, some signatures/scopes | JSON-lines tag records | Candidate; version/output probe pending |
+| ast-grep JSON | Cross-language structural matches for declarations/call/control-flow candidates | JSON stream | Candidate; version/rule/output probe pending |
+
+Existing `python.ast-source` and `rust.syntax-source` remain the only enabled profiles. The six candidate profiles are represented in the capability matrix as disabled entries solely to make the research/coverage hand-off explicit; disabled entries are not executable production capabilities and carry no parser-development acceptance.
+
+### 7.3 Environment probe evidence
+
+CI now runs `scripts/research/probe_candidate_tools.py` on the Ubuntu runner. The script records platform, executable paths, version output and safe sample output where the candidate is installed. It uses temporary fixtures only, never executes project source, and never enables matrix entries. The run linked from this report must be inspected before marking tool availability or native output as observed. A missing binary means unavailable in that CI environment only; it does not prove unavailable on every supported developer platform.
+
+### 7.4 Selection rules
+
+1. Prefer existing accepted producers when their output meets the need and completeness criterion.
+2. Add no new external tool merely to cover a field name; add it only when a specific need lacks adequate evidence.
+3. Combine producers where manifests, source references, compiler output and documentation supply complementary evidence.
+4. Preserve separate evidence and knowledge status for direct observations, interpretations and inferences.
+5. Keep every candidate disabled until the parser accepts the exact tool/version/output/invocation profile with positive, negative and missing-tool tests.
+6. After parser acceptance, test constructor selection and multi-producer composition. Only then may the matrix entry be enabled.
