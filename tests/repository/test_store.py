@@ -86,3 +86,45 @@ def test_write_rejects_non_fact_batch_without_changing_database(db_path):
     assert repository.connection.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall() == []
     repository.close()
 
+
+def test_navigation_deduplicates_edges_and_preserves_cycles_multi_parent_and_external_refs(batch, db_path):
+    import copy
+    from semantic_facts.repository.store import Repository
+
+    value = copy.deepcopy(batch)
+    original = value["navigation"][0]
+    duplicate = copy.deepcopy(original)
+    duplicate["edge_id"] = "member-a-duplicate"
+    parent_edge = copy.deepcopy(original)
+    parent_edge["edge_id"] = "member-b"
+    parent_edge["source"] = {"source_id": "src-a", "subject_id": "project-a", "node_id": "parent-b"}
+    cycle_edge = copy.deepcopy(original)
+    cycle_edge["edge_id"] = "cycle-a"
+    cycle_edge["source"], cycle_edge["target"] = original["target"], original["source"]
+    external_edge = copy.deepcopy(original)
+    external_edge["edge_id"] = "external-a"
+    external_edge["target"] = {
+        "kind": "external",
+        "reference_id": "external-service",
+        "label": "service outside requested scope",
+        "reason": "outside_authorized_scope",
+        "boundary": "not scanned",
+        "observed_in": {"kind": "subject", "source_id": "src-a", "subject_id": "project-a"},
+    }
+    value["navigation"] = [original, duplicate, parent_edge, cycle_edge, external_edge]
+
+    repository = Repository(db_path)
+    repository.write(value, "graph-shape-test")
+    query = make_query()
+    query["target"] = {"kind": "scope"}
+    result = repository.read(query)
+    signatures = [
+        (edge["source"], edge["target"], edge["relation"], edge["assertion"]["context"]["conditions"])
+        for edge in result["navigation"]
+    ]
+    assert len(signatures) == 4
+    assert len(set(map(repr, signatures))) == 4
+    assert any(edge["source"]["node_id"] == "parent-b" and edge["target"]["node_id"] == "child-a" for edge in result["navigation"])
+    assert any(edge["source"]["node_id"] == "child-a" and edge["target"]["node_id"] == "unit-a" for edge in result["navigation"])
+    assert any(edge["target"].get("kind") == "external" for edge in result["navigation"])
+    repository.close()
