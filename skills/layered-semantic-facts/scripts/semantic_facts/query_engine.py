@@ -4,7 +4,6 @@ from __future__ import annotations
 import json
 import hashlib
 import sqlite3
-import sqlite3
 from pathlib import Path
 from typing import Any
 
@@ -223,6 +222,65 @@ def _unavailable_source(root: str, detail: str) -> dict[str, Any]:
     }
 
 
+def _repository_unavailable_response(
+    query: dict[str, Any],
+    sources: list[dict[str, Any]],
+    detail: str,
+    response_validator: Draft202012Validator,
+) -> dict[str, Any]:
+    """Return a validated, explicit gap response when the fact store cannot be read."""
+    context = {
+        "source_ids": sorted(source["source_id"] for source in sources if source.get("status") == "available"),
+        "conditions": [],
+        "environment": {},
+        "language_semantics": ["Repository unavailable; no alternate store was selected"],
+    }
+    coverage = {
+        "domain": "explicitly requested project roots",
+        "checked": list(query["scope"]["directories"]),
+        "excluded": list(query["scope"]["excludes"]),
+        "completeness": "unknown",
+        "method": "repository access check",
+    }
+    gaps = [{
+        "fact_type": selection["fact_type"],
+        "fields": list(selection["fields"]),
+        "target": query["target"],
+        "reason": "repository_unavailable",
+        "detail": detail,
+        "context": context,
+        "coverage": coverage,
+    } for selection in query["selections"]]
+    gaps.append({
+        "fact_type": "F2",
+        "fields": ["direct_nodes"],
+        "target": query["target"],
+        "reason": "repository_unavailable",
+        "detail": detail,
+        "context": context,
+        "coverage": coverage,
+    })
+    response = {
+        "contract_version": "1.0.0",
+        "catalog_id": "semantic-facts-20261025",
+        "query": query,
+        "sources": sources,
+        "results": [],
+        "direct_nodes": [],
+        "premise_checks": [],
+        "conflicts": [],
+        "gaps": gaps,
+        "out_of_catalog": [],
+        "termination": "unavailable",
+    }
+    validation_error = next(response_validator.iter_errors(response), None)
+    if validation_error:
+        raise QueryContractError(
+            f"response {list(validation_error.absolute_path)}: {validation_error.message}"
+        )
+    return response
+
+
 def execute_query_with_construction(
     query: dict[str, Any],
     repository: Repository,
@@ -300,55 +358,9 @@ def execute_query_with_construction(
     try:
         stored = repository.read(query)
     except (OSError, sqlite3.Error) as error:
-        context = {
-            "source_ids": sorted(current_ids),
-            "conditions": [],
-            "environment": {},
-            "language_semantics": ["Repository unavailable; no alternate store was selected"],
-        }
-        coverage = {
-            "domain": "explicitly requested project roots",
-            "checked": list(query["scope"]["directories"]),
-            "excluded": list(query["scope"]["excludes"]),
-            "completeness": "unknown",
-            "method": "repository access check",
-        }
-        detail = f"Fact repository is unavailable: {error}"
-        gaps = [{
-            "fact_type": selection["fact_type"],
-            "fields": list(selection["fields"]),
-            "target": query["target"],
-            "reason": "repository_unavailable",
-            "detail": detail,
-            "context": context,
-            "coverage": coverage,
-        } for selection in query["selections"]]
-        gaps.append({
-            "fact_type": "F2",
-            "fields": ["direct_nodes"],
-            "target": query["target"],
-            "reason": "repository_unavailable",
-            "detail": detail,
-            "context": context,
-            "coverage": coverage,
-        })
-        response = {
-            "contract_version": "1.0.0",
-            "catalog_id": "semantic-facts-20261025",
-            "query": query,
-            "sources": current_sources,
-            "results": [],
-            "direct_nodes": [],
-            "premise_checks": [],
-            "conflicts": [],
-            "gaps": gaps,
-            "out_of_catalog": [],
-            "termination": "unavailable",
-        }
-        error = next(response_validator.iter_errors(response), None)
-        if error:
-            raise QueryContractError(f"response {list(error.absolute_path)}: {error.message}")
-        return response
+        return _repository_unavailable_response(
+            query, current_sources, f"Fact repository is unavailable: {error}", response_validator
+        )
 
     stored = {**stored, "facts": [fact for fact in stored["facts"] if fact["node"]["source_id"] in current_ids]}
     if any(source["status"] != "available" for source in current_sources):
