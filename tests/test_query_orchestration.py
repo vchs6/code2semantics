@@ -160,3 +160,60 @@ def test_node_query_returns_only_target_fact_and_its_direct_inventory(tmp_path):
         assert response["direct_nodes"][0]["target"]["node"] == target_fact["node"]
     finally:
         repository.close()
+
+def test_query_multiple_disjoint_roots_keeps_project_sources_separate(tmp_path):
+    first = tmp_path / "first-project"
+    second = tmp_path / "second-project"
+    first.mkdir()
+    second.mkdir()
+    (first / "engine.py").write_text("class FirstEngine:\n    pass\n", encoding="utf-8")
+    (second / "engine.py").write_text("class SecondEngine:\n    pass\n", encoding="utf-8")
+    query = make_query(first)
+    query["scope"]["directories"] = [str(first.resolve()), str(second.resolve())]
+    repository = Repository(tmp_path / "multi-root.db", ASSETS)
+    try:
+        response = execute_query_with_construction(query, repository, ASSETS)
+        assert response["termination"] == "satisfied", response
+        names = [fact["fields"]["names"]["value"]["text"] for fact in response["results"]]
+        assert any("class FirstEngine" in value for value in names)
+        assert any("class SecondEngine" in value for value in names)
+        assert {source["root"] for source in response["sources"]} == {str(first.resolve()), str(second.resolve())}
+        assert all(fact["node"]["source_id"] in {source["source_id"] for source in response["sources"]} for fact in response["results"])
+    finally:
+        repository.close()
+
+
+def test_query_explicit_nested_roots_preserves_both_root_identities(tmp_path):
+    parent = tmp_path / "parent-project"
+    nested = parent / "nested-project"
+    nested.mkdir(parents=True)
+    (parent / "parent.py").write_text("class ParentEngine:\n    pass\n", encoding="utf-8")
+    (nested / "nested.py").write_text("class NestedEngine:\n    pass\n", encoding="utf-8")
+    query = make_query(parent)
+    query["scope"]["directories"] = [str(parent.resolve()), str(nested.resolve())]
+    repository = Repository(tmp_path / "nested-roots.db", ASSETS)
+    try:
+        response = execute_query_with_construction(query, repository, ASSETS)
+        assert response["termination"] == "satisfied", response
+        roots = {source["root"] for source in response["sources"]}
+        assert roots == {str(parent.resolve()), str(nested.resolve())}
+        assert len({source["source_id"] for source in response["sources"]}) == 2
+    finally:
+        repository.close()
+
+
+def test_query_out_of_scope_node_reference_is_reported_without_reading_other_project(tmp_path):
+    project = tmp_path / "authorized-project"
+    project.mkdir()
+    (project / "engine.py").write_text("class AuthorizedEngine:\n    pass\n", encoding="utf-8")
+    query = make_query(project)
+    query["target"] = {"kind": "node", "node": {"source_id": "src-outside", "subject_id": "outside", "node_id": "secret-node"}}
+    repository = Repository(tmp_path / "out-of-scope.db", ASSETS)
+    try:
+        response = execute_query_with_construction(query, repository, ASSETS)
+        assert response["termination"] == "no_progress"
+        assert any(gap["reason"] == "invalid_reference" for gap in response["gaps"])
+        assert all(source["root"] == str(project.resolve()) for source in response["sources"])
+        assert all(fact["node"]["source_id"] != "src-outside" for fact in response["results"])
+    finally:
+        repository.close()
