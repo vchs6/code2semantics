@@ -62,10 +62,18 @@ def test_current_matrix_separates_accepted_profiles_from_disabled_research_candi
     assert any("test_runtime_producer_acceptance.py" in item for item in cargo["acceptance"]["evidence"])
     assert not any("DISABLED" in limit for limit in cargo["limitations"])
 
-    research_candidates = set(entries) - {"python.ast-source", "rust.syntax-source", "rust.cargo-metadata"}
+    python_manifest = entries["python.pyproject-toml"]
+    assert python_manifest["enabled"] is True
+    assert python_manifest["acceptance"]["actor"] == "parser_development"
+    assert set(python_manifest["information_need_ids"]) == {"source.f3.runtime", "source.f6.kind"}
+    assert any("test_runtime_producer_acceptance.py" in item for item in python_manifest["acceptance"]["evidence"])
+    assert not any("DISABLED" in limit for limit in python_manifest["limitations"])
+
+    research_candidates = set(entries) - {
+        "python.ast-source", "rust.syntax-source", "rust.cargo-metadata", "python.pyproject-toml"
+    }
     assert research_candidates == {
-        "python.compileall", "python.pyproject-toml", "rust.cargo-check",
-        "rust.rust-analyzer", "multi.ctags", "multi.ast-grep",
+        "python.compileall", "rust.cargo-check", "rust.rust-analyzer", "multi.ctags", "multi.ast-grep",
     }
     for tool_id in research_candidates:
         entry = entries[tool_id]
