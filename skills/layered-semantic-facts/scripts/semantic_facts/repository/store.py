@@ -162,6 +162,14 @@ class Repository:
             raise ValueError(f"conflict does not exist: {conflict_id}")
         return self.record_validity_event("conflict", conflict_key, state, reason)
 
+    def invalidate_premise(self, premise_key: str, reason: str) -> int:
+        """Invalidate a premise edge; current-read recursively hides all dependent assertions."""
+        return self.record_validity_event("premise", premise_key, "premise_invalid", reason)
+
+    def invalidate_inventory(self, inventory_key: str, reason: str, state: str = "modified") -> int:
+        """Append an inventory validity event without deleting its historical record."""
+        return self.record_validity_event("inventory", inventory_key, state, reason)
+
     def export_current(self) -> dict[str, Any]:
         """Export only current source-head facts; historical rows remain stored locally."""
         self._ensure_schema()
