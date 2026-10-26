@@ -104,8 +104,34 @@ def test_current_evidence_satisfies_field_but_stale_evidence_does_not():
             "names": {
                 "origin": "observed",
                 "knowledge": "supported",
-                "basis": {"evidence": [{"evidence_id": "ev-a"}]},
-                "coverage": {"completeness": "complete"},
+                "context": {
+                    "source_ids": ["source-current"],
+                    "conditions": [],
+                    "environment": {"language": "Python"},
+                    "language_semantics": ["syntax inventory"],
+                },
+                "coverage": {
+                    "domain": "Python syntax in service.py",
+                    "checked": ["service.py"],
+                    "excluded": [],
+                    "completeness": "complete",
+                    "method": "Python AST",
+                },
+                "basis": {
+                    "evidence": [{
+                        "evidence_id": "ev-a",
+                        "source_id": "source-current",
+                        "content_state": "sha256:current",
+                        "kind": "source",
+                        "locator": "service.py:L1-L2",
+                        "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                        "relation": "supports",
+                    }],
+                    "premises": [],
+                    "method": "Python AST",
+                    "limitations": [],
+                },
+                "value": {"kind": "text", "text": "class Example"},
                 "validity": {"state": "current", "sources": [
                     {"source_id": "source-current", "content_state": "sha256:current"}
                 ]},
