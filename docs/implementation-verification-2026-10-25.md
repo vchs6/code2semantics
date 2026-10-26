@@ -101,3 +101,17 @@
 - Query scope/response work: multiple disjoint and nested roots, same-name subjects, unavailable roots, and out-of-scope node references are tested. Out-of-scope references are rejected before repository reads. Fields absent from the fixed first-phase information-needs catalogue are returned in `out_of_catalog`, separate from in-scope gaps. External references and conflict evidence are retained by response projection.
 - CI run `https://github.com/vchs6/code2semantics/actions/runs/40276135137`: repository 45, matrix 15, parser 9, scanner 7, source acceptance 4, packaging 2, executor 3, producer dispatch 3, combined information-needs/constructor/binding/induction/query 51 passed; strict OpenSpec passed.
 - Still pending by OpenSpec: query graph cases for multi-parent/dependency cycles and full S1–S12; full dependency-aware invalidation; configured cognitive induction provider; full higher-layer semantics beyond Python/Rust F2/L3 syntax inventory. Product delivery gate remains intentionally blocked.
+
+## 2026-10-26：按 OpenSpec 依赖顺序推进 6.3 事实仓库验收
+
+基线：主变更的 5.0–5.3、6.1–6.2 已标记完成；6.3 是第一个尚未完成的主集成依赖项。本轮不重写已定稿的设计或任务、不绕过 OpenSpec 工件生成纪律，也不提前标记主集成通过。
+
+新增 `tests/repository/test_acceptance.py::test_repository_acceptance_graph_and_invalidation_survive_backup_without_deleting_facts`，在一个独立临时 SQLite 场景内验证：当前来源图导航、字段失效后查询过滤、事实/证据/关系/前提/直接节点行数不减少、备份到独立数据库及恢复后的失效/图结构一致性。
+
+实际 CI：https://github.com/vchs6/code2semantics/actions/runs/40300593977
+
+- Repository 58 passed（包含新增组合验收场景）。
+- 其他已启用测试组均通过，严格 OpenSpec 校验成功。
+- Product delivery gate 仍按预期 BLOCKED，因为全系统 `FULL_END_TO_END_ACCEPTANCE: PASS` 未取得真实 S1–S12 运行证据；不能以此轮仓库级验收替代整体交付。
+
+下一步仍需核对事实仓库 6.4 的独立评审与交付证据，再按 7.1 查询编排子变更的现有 design/tasks 推进。未经 OpenSpec 指令驱动的任务更新及评审，不在本轮直接勾选 6.2/6.4。
