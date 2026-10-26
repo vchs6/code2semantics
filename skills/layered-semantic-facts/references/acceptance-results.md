@@ -108,3 +108,11 @@ CI run: https://github.com/vchs6/code2semantics/actions/runs/40277635793
 - Strict OpenSpec and public contract validation passed. The only failed step is the product delivery gate, which remains intentionally blocked for full-system S1–S12 acceptance.
 - Added integrated repository acceptance covering write/reopen, local field invalidation, transitive premise filtering, explicit revalidation, current export and import into a fresh database. It asserts that fact rows remain unchanged throughout invalidation/revalidation and import/export.
 - This verifies the repository lifecycle more completely; it does not close the full product gate for tool orchestration, higher-layer semantic inference, or dependency-aware construction.
+
+## Bounded graph/query integration (2026-10-26)
+
+- CI run: https://github.com/vchs6/code2semantics/actions/runs/40297691458
+- Repository suite: 53 passed; capability matrix: 15; parser: 9; source scanner: 7; runtime source acceptance: 4; copied Skill packaging: 2; bounded executor: 3; producer dispatch: 3; combined information-needs/constructor/induction/query suite: 52 passed; strict OpenSpec passed.
+- Added repository graph traversal coverage for multiple parents, cycle termination, equivalent-edge deduplication, external terminal references, depth/edge budget truncation and no fact-row deletion.
+- Added query-orchestration coverage proving that a multi-parent cyclic graph with an external reference does not cause recursive expansion or leak graph-edge assertions into the minimal response.
+- Full S1–S12 acceptance is still NOT passed. The product gate remains blocked until the complete runtime acquisition → parse → constructor/induction → FactBatch → repository re-read → final response workflow and all root scenarios are verified.
