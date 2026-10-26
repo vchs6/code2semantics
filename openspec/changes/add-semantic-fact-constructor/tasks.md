@@ -194,7 +194,7 @@ Per-profile enablement rule: a profile's own accepted real-runtime evidence can 
 
 - [x] 12.1 Add a RED test for a Python-only project whose F6 need is catalogued for both Python and Rust; assert the plan does not select the Rust Cargo producer or report a missing Cargo.toml gap.
 - [x] 12.2 Implement bounded language discovery from authorized source roots and intersect each need's declared languages with languages actually present before request-wide set cover.
-- [ ] 12.3 Add mixed Python/Rust scope coverage proving both language producers remain eligible only when both languages are present, while language/platform/environment constraints stay hard constraints.
+- [x] 12.3 Add mixed Python/Rust scope coverage proving both language producers remain eligible only when both languages are present, while language/platform/environment constraints stay hard constraints.
 - [x] 12.4 Run planner, CLI Python/Rust manifest acceptance, failure modes, strict OpenSpec and all component suites; only then enable the exact Python manifest profile.
 
 ### Source-language-aware planning evidence (2026-10-26)
@@ -203,3 +203,9 @@ Per-profile enablement rule: a profile's own accepted real-runtime evidence can 
 - Implementation: planner discovers `.py`/`.rs` languages only under current authorized source roots, respects excluded directories and scope excludes, and filters each language/environment candidate group to languages actually present. If a concrete root exists but contains no supported language sources, it does not plan arbitrary language producers; abstract plans with unavailable roots retain prior catalogue planning behavior and runtime will return source-unavailable gaps.
 - GREEN: https://github.com/vchs6/code2semantics/actions/runs/40348620288 — runtime acceptance 19 passed (including CLI Python manifest + Rust workspace/dependency paths); source scanner 9; constructor/planning/query group 71; repository 63; transaction 6; transfer 8; repository acceptance 5; matrix 15; parser 14; packaging 2; executor 3; producer dispatch 3; quality gate tests 2; strict OpenSpec passed. Product gate remains blocked for full S1–S12.
 - Both exact manifest profiles are now enabled narrowly: Cargo only `source.f4.kind`/`source.f6.kind`; Python only `source.f3.runtime`/`source.f6.kind`. Other research candidates remain disabled. Task 12.3 remains pending until mixed Python/Rust scope regression passes.
+
+### Per-root producer language acceptance evidence (2026-10-26)
+
+- GREEN CI: https://github.com/vchs6/code2semantics/actions/runs/40349969959 — runtime acceptance 20 passed, including Python-only source scope, Rust workspace, and mixed Python/Rust scope; constructor/planning/contribution/query group 72 passed; repository 63; transaction 6; transfer 8; repository acceptance 5; capability matrix 15; parser 14; scanner 9; executor 3; producer dispatch 3; strict OpenSpec passed. Overall workflow remains blocked only by the full S1–S12 product delivery gate.
+- Planner discovers languages from explicitly authorized source roots and excludes producer profiles for languages absent from those roots. Constructor execution independently checks each root's actual source languages before invoking a selected producer, preventing Cargo from running against a Python-only root or Python manifest parsing against a Rust-only root. Mixed roots still invoke the appropriate profiles per root; the Cargo invocation count remains one for the Rust root.
+- Task 12.4 remains pending until the full regression and matrix status is confirmed on the newest main commit; full root tasks 8.1–8.5 remain pending.
