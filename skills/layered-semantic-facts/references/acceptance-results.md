@@ -65,3 +65,10 @@ CI run: https://github.com/vchs6/code2semantics/actions/runs/40269286038
 - Strict OpenSpec and public contract validation passed.
 - The constructor now persists complete scope and per-file direct-node inventories for supported Python/Rust syntax; query refuses to claim completeness without a current evidence-backed inventory. Tests verify inventory repair and target-node scoping without deleting prior facts.
 - Product delivery gate remains BLOCKED because necessary ancestor-path planning, dependency-aware invalidation, multi-project/overlapping-root and graph-cycle cases, tool orchestration/induction provider, and full S1–S12 acceptance remain pending.
+
+
+## Node-target ancestor path acceptance (2026-10-26)
+
+Latest CI: https://github.com/vchs6/code2semantics/actions/runs/40269644416
+
+The query test suite now proves that a node-target request requires a current scope inventory containing that file plus a current per-file direct-declaration inventory. The constructor appends both inventories, the query loop counts the scope-to-file prerequisite as progress, and the final response returns only the requested node inventory. All component suites and strict OpenSpec passed; the full product gate remains blocked for the remaining general semantic requirements.
