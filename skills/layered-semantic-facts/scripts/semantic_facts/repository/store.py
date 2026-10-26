@@ -198,9 +198,29 @@ class Repository:
                 value["fields"] = fields
                 selected.append(value)
                 source_ids.add(row[1])
-        sources = [json.loads(payload) for source_id, payload in self.connection.execute(
-            "SELECT source_id, payload FROM sources WHERE source_id IN ({})".format(",".join("?" for _ in source_ids)), tuple(source_ids)
-        )] if source_ids else []
+        # Preserve source context even when a valid query has no matching facts.
+        requested_source_ids = set(source_ids)
+        if target:
+            requested_source_ids.add(target["source_id"])
+        else:
+            directories = {
+                str(Path(directory).resolve())
+                for directory in query["scope"].get("directories", [])
+            }
+            for source_id, payload in self.connection.execute("SELECT source_id, payload FROM sources"):
+                source = json.loads(payload)
+                if str(Path(source["root"]).resolve()) in directories:
+                    requested_source_ids.add(source_id)
+        sources = []
+        if requested_source_ids:
+            placeholders = ",".join("?" for _ in requested_source_ids)
+            sources = [
+                json.loads(payload)
+                for _, payload in self.connection.execute(
+                    f"SELECT source_id, payload FROM sources WHERE source_id IN ({placeholders})",
+                    tuple(sorted(requested_source_ids)),
+                )
+            ]
         return {
             "contract_version": "1.0.0",
             "catalog_id": "semantic-facts-20261025",
