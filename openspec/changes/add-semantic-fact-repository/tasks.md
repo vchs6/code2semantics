@@ -39,7 +39,7 @@
 ## 5. ���������롢������ָ�
 
 - [x] 5.1 ��д������ԣ���Ч/ʧЧ��ʵ����Դ��֤�ݡ���ͻ��ǰ�ᱣ�棻��⵼��������ڲ� token��ȱʧ���á���ͬ�������ݡ�Խ��������𻵱��ݾ�����ܾ���
-- [ ] 5.2 ���� `python -m pytest tests/repository/test_transfer.py -q` RED��
+- [x] 5.2 ���� `python -m pytest tests/repository/test_transfer.py -q` RED��
 - [x] 5.3 ʵ�ֵ�ǰ��ʵ���������롢SQLite һ�±��ݻָ���ʧ�ܱ�������������ʷ���ݻ������ԴЭ�顣
 - [x] 5.4 ���д��䡢codec����Ч�Բ��� GREEN�����鵼��������Ӷ���һ�²��ύ�����ļ���
 
@@ -91,3 +91,11 @@
 - CI after fix: https://github.com/vchs6/code2semantics/actions/runs/40298151751 — repository 54 passed; matrix 15; parser 9; scanner 7; runtime acceptance 5; packaging 2; executor 3; producer dispatch 3; combined information-needs/constructor/induction/query 52 passed; strict OpenSpec passed. Product delivery gate remains blocked for full-system acceptance.
 - Graph traversal: `Repository.traverse_navigation` and `test_bounded_navigation_traversal_handles_cycles_multi_parent_and_external_refs` cover bounded traversal, cycle termination, multi-parent edges, edge deduplication, external terminal references, and depth/edge budgets. Evidence: https://github.com/vchs6/code2semantics/actions/runs/40297691458.
 - Remaining pending items are intentionally not checked: 5.2 still lacks a separately captured RED run for transfer tests; 6.2 still requires a demonstrated RED-first full repository acceptance path, and 6.4 remains pending until that acceptance is complete.
+
+
+## Transfer validation RED/GREEN evidence (2026-10-26)
+
+- RED: `test_restore_rejects_empty_sqlite_file_without_changing_fact_history` failed in CI https://github.com/vchs6/code2semantics/actions/runs/40298339861 because an empty but valid SQLite file passed the prior conditional schema check and could replace the target database.
+- Fix: `Repository.restore` now requires the full repository table set unconditionally before copying a backup. Empty/foreign SQLite databases are rejected before target mutation.
+- GREEN and focused CI: https://github.com/vchs6/code2semantics/actions/runs/40298437864 — repository 55 passed; focused transaction 6 passed; focused transfer 6 passed; repository acceptance 3 passed; matrix 15; parser 9; scanner 7; runtime acceptance 5; packaging 2; executor 3; producer dispatch 3; combined information-needs/constructor/induction/query 52 passed; strict OpenSpec passed.
+- The product delivery gate remains intentionally BLOCKED for full S1–S12 acceptance. Repository task 6.2/6.4 remain pending until their complete RED-first acceptance obligations and broader import/local-mutation policy are fully demonstrated.
