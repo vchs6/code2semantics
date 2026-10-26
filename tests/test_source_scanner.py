@@ -1,5 +1,15 @@
+from pathlib import Path
+
+import pytest
+
 from semantic_facts.source_scanner import build_fact_batch
-from semantic_facts.repository.store import Repository
+from semantic_facts.repository.contract import ContractCodec
+
+
+@pytest.fixture
+def codec():
+    root = Path(__file__).resolve().parents[1] / "skills" / "layered-semantic-facts" / "assets"
+    return ContractCodec(root)
 
 
 def test_scans_real_python_source_into_valid_fact_batch(tmp_path, codec):
