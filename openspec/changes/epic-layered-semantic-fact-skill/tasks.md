@@ -159,3 +159,9 @@
 - Root acceptance now tests two real Python project roots in one query. After changing and re-scanning one root, the query returns the changed root's new fact and the unchanged root's fact; validity events for the unrelated project's facts remain current.
 - GREEN CI: https://github.com/vchs6/code2semantics/actions/runs/40354905438 — root/runtime acceptance 22 passed; provider/constructor/query 86 passed; repository 63; transaction 6; transfer 8; repository acceptance 5; matrix 15; parser 14; scanner 9; strict OpenSpec passed.
 - This closes one cross-project invalidation scenario only. Full S1–S12 acceptance and provider-backed cognitive induction remain pending; product gate remains blocked.
+
+### Direct-child completeness at the root acceptance boundary (2026-10-26)
+
+- Added a real CLI acceptance test that asks only for F2.names yet requires a complete current scope inventory containing both direct source-file children, while returned fact fields remain minimal. It verifies stable child node IDs, complete coverage and the absence of unrelated projected fields.
+- GREEN CI: https://github.com/vchs6/code2semantics/actions/runs/40355303673 — root/runtime acceptance 23 passed; provider/constructor/query 86 passed; repository 63; transaction 6; transfer 8; repository acceptance 5; matrix 15; parser 14; scanner 9; strict OpenSpec passed.
+- This confirms direct-child enumeration does not imply recursive grandchild construction. Root tasks 8.1–8.5 remain pending because the complete S1–S12 scenarios, higher-layer facts and real provider-backed induction are not yet demonstrated.
