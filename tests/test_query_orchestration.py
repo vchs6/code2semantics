@@ -54,9 +54,13 @@ def test_query_reports_fixed_catalogue_gap_without_inventing_or_deleting_facts(t
     repository = Repository(database, ASSETS)
     try:
         response = execute_query_with_construction(make_query(project, ("purpose",)), repository, ASSETS)
-        assert response["termination"] == "no_progress"
-        assert response["gaps"][0]["reason"] == "uncovered_need"
-        assert response["gaps"][0]["fields"] == ["purpose"]
+        assert response["termination"] == "satisfied"
+        assert response["gaps"] == []
+        assert response["out_of_catalog"] == [{
+            "fact_type": "F2",
+            "fields": ["purpose"],
+            "reason": "No fixed first-phase information need covers these fields.",
+        }]
         assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == 0
     finally:
         repository.close()
