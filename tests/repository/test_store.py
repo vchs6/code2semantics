@@ -255,7 +255,7 @@ def test_identical_incremental_fact_field_replay_is_idempotent(batch, db_path):
 
     assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == 1
     assert repository.connection.execute("SELECT COUNT(*) FROM attributes").fetchone()[0] == 1
-    assert repository.connection.execute("SELECT COUNT(*) FROM evidence_links").fetchone()[0] == 1
+    assert repository.connection.execute("SELECT COUNT(*) FROM evidence_links").fetchone()[0] == len(value["facts"][0]["fields"]["strategy"]["basis"]["evidence"])
     repository.close()
 
 def test_existing_field_can_be_enriched_with_new_evidence_without_replacing_old_evidence(batch, db_path):
