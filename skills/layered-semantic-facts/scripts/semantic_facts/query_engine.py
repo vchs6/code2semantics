@@ -234,6 +234,40 @@ def execute_query_with_construction(
             raise QueryContractError(f"response {list(error.absolute_path)}: {error.message}")
         return response
 
+    def complete_inventory_keys(result: dict[str, Any]) -> set[str]:
+        current_states = {source["source_id"]: source["content_state"] for source in current_sources}
+        keys: set[str] = set()
+        for inventory in result["direct_nodes"]:
+            target = inventory.get("target", {})
+            if target != query["target"]:
+                continue
+            assertion = inventory.get("assertion", {})
+            if assertion.get("knowledge") != "supported" or assertion.get("coverage", {}).get("completeness") != "complete":
+                continue
+            validity = assertion.get("validity", {})
+            if validity.get("state") != "current":
+                continue
+            validity_sources = validity.get("sources", [])
+            if not validity_sources or any(
+                item.get("source_id") not in current_states
+                or item.get("content_state") != current_states[item.get("source_id")]
+                for item in validity_sources
+            ):
+                continue
+            evidence = assertion.get("basis", {}).get("evidence", [])
+            if not all(
+                item.get("source_id") in current_states
+                and item.get("content_state") == current_states[item.get("source_id")]
+                for item in evidence
+            ):
+                continue
+            keys.add(json.dumps({
+                "target": target,
+                "sources": sorted(assertion["context"]["source_ids"]),
+                "checked": assertion["coverage"]["checked"],
+            }, sort_keys=True, ensure_ascii=False))
+        return keys
+
     last_constructor_gaps: list[dict[str, Any]] = []
     max_rounds = max(1, query["budget"]["max_rounds"])
     for round_index in range(max_rounds):
@@ -243,6 +277,7 @@ def execute_query_with_construction(
             (fact["fact_type"], field)
             for fact in stored["facts"] for field in fact.get("fields", {})
         }
+        before_inventory = complete_inventory_keys(stored)
         response = execute_query(query, repository, assets, stored_result=stored, source_override=current_sources)
         if not response["gaps"]:
             return response
@@ -293,10 +328,11 @@ def execute_query_with_construction(
             (fact["fact_type"], field)
             for fact in refreshed["facts"] for field in fact.get("fields", {})
         }
+        after_inventory = complete_inventory_keys(refreshed)
         response = execute_query(query, repository, assets, stored_result=refreshed, source_override=current_sources)
         if not response["gaps"]:
             return response
-        if not (after_coverage - before_coverage):
+        if not (after_coverage - before_coverage) and not (after_inventory - before_inventory):
             break
         if round_index == max_rounds - 1:
             response["termination"] = "budget_exhausted"
