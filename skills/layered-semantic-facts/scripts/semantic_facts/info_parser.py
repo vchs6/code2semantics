@@ -442,6 +442,91 @@ def parse_compileall_request(
     return result
 
 
+
+def parse_pyproject_toml_request(
+    request: dict[str, Any], asset_root: str | Path | None = None
+) -> dict[str, Any]:
+    """Convert supplied pyproject.toml text into evidence-backed manifest observations."""
+    if asset_root is None:
+        asset_root = Path(__file__).resolve().parents[2] / "assets"
+    request_validator, result_validator = _validators(Path(asset_root))
+    error = next(request_validator.iter_errors(request), None)
+    if error:
+        raise ParserContractError(f"parse request {list(error.absolute_path)}: {error.message}")
+    profile = request["invocation_profile"]
+    if profile["tool_id"] != "python.pyproject-toml":
+        return _unsupported(profile, result_validator)
+    if len(profile["sources"]) != 1:
+        return _native_gap(profile, result_validator, fact_type="F3", fields=["environment"],
+                           reason="unsupported_profile", detail="pyproject TOML parsing requires exactly one source")
+    raw = request["tool_native_output"]["text"]
+    digest = "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
+    try:
+        document = tomllib.loads(raw)
+    except tomllib.TOMLDecodeError as error:
+        return _native_gap(profile, result_validator, fact_type="F3", fields=["environment"],
+                           reason="unparseable", detail=f"pyproject.toml parse error: {error}")
+    project = document.get("project", {})
+    build_system = document.get("build-system", {})
+    if not isinstance(project, dict) or not isinstance(build_system, dict):
+        return _native_gap(profile, result_validator, fact_type="F3", fields=["environment"],
+                           reason="unparseable", detail="project and build-system tables must be TOML tables")
+    observations: list[dict[str, Any]] = []
+    if project:
+        name = project.get("name", "unknown project")
+        version = project.get("version", "unspecified version")
+        python_requirement = project.get("requires-python", "unspecified Python requirement")
+        observations.append(_native_observation(
+            profile=profile, need_id="source.f3.runtime",
+            locator="pyproject.toml:/project",
+            text=f"Declared Python project: {name}; version: {version}; requires-python: {python_requirement}",
+            kind="manifest", digest=digest, ordinal="project-metadata",
+        ))
+        scripts = project.get("scripts", {})
+        if not isinstance(scripts, dict):
+            return _native_gap(profile, result_validator, fact_type="F3", fields=["entries"],
+                               reason="unparseable", detail="project.scripts must be a TOML table")
+        for index, (name, target) in enumerate(sorted(scripts.items())):
+            if not isinstance(name, str) or not isinstance(target, str):
+                return _native_gap(profile, result_validator, fact_type="F3", fields=["entries"],
+                                   reason="unparseable", detail="project.scripts entries must be string mappings")
+            observations.append(_native_observation(
+                profile=profile, need_id="source.f3.entries",
+                locator=f"pyproject.toml:/project/scripts/{name}",
+                text=f"declared console script: {name} -> {target}",
+                kind="manifest", digest=digest, ordinal=f"script-{index}",
+            ))
+        dependencies = project.get("dependencies", [])
+        if not isinstance(dependencies, list):
+            return _native_gap(profile, result_validator, fact_type="F6", fields=["kind"],
+                               reason="unparseable", detail="project.dependencies must be an array of strings")
+        for index, dependency in enumerate(dependencies):
+            if not isinstance(dependency, str):
+                return _native_gap(profile, result_validator, fact_type="F6", fields=["kind"],
+                                   reason="unparseable", detail="project.dependencies entries must be strings")
+            observations.append(_native_observation(
+                profile=profile, need_id="source.f6.kind",
+                locator=f"pyproject.toml:/project/dependencies/{index}",
+                text=f"declared Python package dependency: {dependency}",
+                kind="manifest", digest=digest, ordinal=f"dependency-{index}",
+            ))
+    if build_system:
+        requires = build_system.get("requires", [])
+        backend = build_system.get("build-backend", "unspecified")
+        observations.append(_native_observation(
+            profile=profile, need_id="source.f3.environment",
+            locator="pyproject.toml:/build-system",
+            text=f"Declared Python build backend: {backend}; build requirements: {requires}",
+            kind="manifest", digest=digest, ordinal="build-system",
+        ))
+    observations.sort(key=lambda item: (item["evidence"][0]["locator"], item["observation_id"]))
+    result = {"kind": "parse_result", "observations": observations, "gaps": []}
+    error = next(result_validator.iter_errors(result), None)
+    if error:
+        raise ParserContractError(f"pyproject parser produced invalid result {list(error.absolute_path)}: {error.message}")
+    return result
+
+
 def _unsupported(profile: dict[str, Any], validator: Draft202012Validator) -> dict[str, Any]:
     return _gap_result(profile, "unsupported_profile", f"unsupported tool profile: {profile['tool_id']}", validator)
 
@@ -488,6 +573,7 @@ class ParserRegistry:
         self.register("rust.syntax-source", lambda request: parse_rust_request(request, self.asset_root))
         self.register("rust.cargo-metadata", lambda request: parse_cargo_metadata_request(request, self.asset_root))
         self.register("python.compileall", lambda request: parse_compileall_request(request, self.asset_root))
+        self.register("python.pyproject-toml", lambda request: parse_pyproject_toml_request(request, self.asset_root))
 
     def register(self, tool_id: str, parser: Any) -> None:
         if not isinstance(tool_id, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]*", tool_id):
