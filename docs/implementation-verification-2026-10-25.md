@@ -92,3 +92,12 @@
 - 新增运行测试：源码由 `version_one` 改为 `version_two` 后，事实总行数和来源版本数增加，旧版本仍保留在 SQLite 中，当前查询只返回最新版本；相同扫描保持幂等。
 - 最新已完成 CI：https://github.com/vchs6/code2semantics/actions/runs/40258363539 。repository 35 passed、matrix 14 passed、parser 6 passed、scanner 4 passed、runtime acceptance 2 passed；严格 OpenSpec 通过。
 - 质量门禁仍 BLOCKED 是正确结果：尚未完成能力矩阵驱动的工具执行、归纳批组、完整多层事实构造，以及对依赖影响/部分源码变化的精确失效传播。不能把当前 Python 语法清单路径等同于完整 Code2Semantics。
+
+## 2026-10-26 OpenSpec dependency-order continuation
+
+- Constructor 3.2 implemented: `semantic_facts/producer_dispatch.py` routes matrix-selected accepted profiles through ParserRegistry; in-process profiles run directly, subprocess profiles require an injected allowlisted executor, and timeout/nonzero/unsupported/malformed outcomes return explicit gaps. `source_scanner.py` now uses this dispatcher.
+- Constructor 3.4 and 4.2 implemented and tested: per-file failures preserve independent valid facts and make project inventory partial; constructed observations are checked against exact source ID, subject ID, content state and file locator before FactBatch creation.
+- Repository immutable-write regression fixed: same-source same-identity conflicting assertion writes now raise `WriteConflict` and leave facts, attributes, versions and submissions unchanged. Valid source changes are represented by appended source snapshot identities; older facts remain stored.
+- Query scope/response work: multiple disjoint and nested roots, same-name subjects, unavailable roots, and out-of-scope node references are tested. Out-of-scope references are rejected before repository reads. Fields absent from the fixed first-phase information-needs catalogue are returned in `out_of_catalog`, separate from in-scope gaps. External references and conflict evidence are retained by response projection.
+- CI run `https://github.com/vchs6/code2semantics/actions/runs/40276135137`: repository 45, matrix 15, parser 9, scanner 7, source acceptance 4, packaging 2, executor 3, producer dispatch 3, combined information-needs/constructor/binding/induction/query 51 passed; strict OpenSpec passed.
+- Still pending by OpenSpec: query graph cases for multi-parent/dependency cycles and full S1–S12; full dependency-aware invalidation; configured cognitive induction provider; full higher-layer semantics beyond Python/Rust F2/L3 syntax inventory. Product delivery gate remains intentionally blocked.
