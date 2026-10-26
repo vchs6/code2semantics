@@ -103,16 +103,18 @@ def plan_constructor_request(
             key = need["need_id"]
             platform = "windows" if sys.platform.startswith("win") else "darwin" if sys.platform == "darwin" else "linux"
             producers_by_id: dict[str, dict[str, Any]] = {}
+            matrix = CapabilityMatrix(root / "capability-matrix.json")
             for language in need["languages"]:
-                selected = select_enabled_producers(
-                    CapabilityMatrix(root / "capability-matrix.json"),
-                    [key],
-                    language,
-                    platform,
-                    "in-process",
-                )
-                for entry in selected.get(key, []):
-                    producers_by_id[entry["tool_id"]] = entry
+                for environment in need["environments"]:
+                    selected = select_enabled_producers(
+                        matrix,
+                        [key],
+                        language,
+                        platform,
+                        environment,
+                    )
+                    for entry in selected.get(key, []):
+                        producers_by_id[entry["tool_id"]] = entry
             if not producers_by_id:
                 gaps.append({
                     "fact_type": fact_type,
@@ -133,6 +135,15 @@ def plan_constructor_request(
                 "evidence_kinds": list(need["evidence_kinds"]),
                 "acceptance_fixture": need["acceptance_fixture"],
                 "producer_ids": sorted(producers_by_id),
+                "producer_profiles": [
+                    {
+                        "tool_id": producers_by_id[tool_id]["tool_id"],
+                        "environment": producers_by_id[tool_id]["environment"],
+                        "invocation": list(producers_by_id[tool_id]["invocation"]),
+                        "output_kinds": list(producers_by_id[tool_id]["output_kinds"]),
+                    }
+                    for tool_id in sorted(producers_by_id)
+                ],
             })
             if field not in item["fields"]:
                 item["fields"].append(field)
