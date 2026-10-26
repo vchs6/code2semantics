@@ -34,7 +34,7 @@
 
 ## 6. 推进归纳、构造与仓库子交付（D2/D3/D5/D7）
 
-- [ ] 6.1 按第3组归纳契约推进 `../add-induction-batch-trigger/` 的规划补齐与 apply，接收未满足触发和字段分组的实现、非空不足/unknown/证据不足/冲突保留测试及接口说明；验收按事实类型+主体+当前来源内容状态+上下文分组，不直接持久化或组装 response。子 tasks 先固定交付路径和命令，主接收证据。
+- [x] 6.1 按第3组归纳契约推进 `../add-induction-batch-trigger/` 的规划补齐与 apply，接收未满足触发和字段分组的实现、非空不足/unknown/证据不足/冲突保留测试及接口说明；验收按事实类型+主体+当前来源内容状态+上下文分组，不直接持久化或组装 response。子 tasks 先固定交付路径和命令，主接收证据。
 - [ ] 6.2 在5.0首阶段需求清单、5.3与6.1完成后推进 `../add-semantic-fact-constructor/` 的规划补齐与 apply，接收仅消费开发期既定清单、匹配请求/未满足项形成当前获取计划、读取已点亮说明并运行时选择组合执行、纯解析接入和归纳返回的实现及局部证据；核验合法观察边界内必要上级路径与完整直接节点识别、不递归构造所有 child 完整事实、不读写事实仓库、不组装最终响应。未点亮/环境不符/清单未覆盖必须 gap，不擅自扩权；核验运行构造器不生成/扩展清单、不触发工具研究/解析器开发/点亮，待开发期变更处理。
 - [ ] 6.3 按公共事实契约推进 `../add-semantic-fact-repository/` 的规划补齐与 apply，接收 SQLite 结构化事实/证据关联/当前有效性、事务回滚和关闭重开读取实现及测试；核验修改/删除/前提失效不当当前命中、冲突保留、非法数据拒绝且原数据未因测试删除，存储接口不使用最终 response，不要求旧历史或用户版本协议。
 
@@ -64,3 +64,11 @@
 - 5.2 capability matrix now has only two accepted in-process parser profiles, each backed by parser/scanner/acceptance tests; cold-start empty matrix behavior remains schema-tested. No external cargo/rustc/rust-analyzer tool is claimed installed.
 - 5.3 parser has design/tasks, registry and deterministic Python/Rust parsing with explicit syntax-only limitations. Evidence is in `tests/test_info_parser.py`, `tests/test_source_scanner.py`, and the checked-in matrix acceptance evidence.
 - Constructor planning/execution and induction grouping/validation are being implemented; main full-system acceptance remains pending.
+
+
+## Query and packaging child planning artifacts (2026-10-26)
+
+- Created `openspec/changes/add-semantic-fact-query/design.md` and `tasks.md` from the existing proposal/specs and current implementation. Query execution and basic response projection tests exist; direct-node completeness, necessary ancestor progress, multi-project/cycle cases and full S1–S12 remain pending.
+- Created `openspec/changes/define-skill-packaging/design.md` and `tasks.md`. Added a copied-install integration test in `tests/test_packaging.py`, which copies only the Skill directory and runs Python/Rust scan plus query without using repository-relative runtime paths. Current CI run: https://github.com/vchs6/code2semantics/actions/runs/40268487627.
+- Induction batching/validation is accepted as a deterministic component boundary (no provider inference claimed): `tests/test_induction.py` covers grouping, evidence binding, conflicts, content-state/context separation and explicit no-provider gaps. Child task evidence is recorded in `add-induction-batch-trigger/tasks.md`.
+- Main integration tasks 8.1–8.5 remain pending until the actual tool → parser → constructor/induction → FactBatch → repository re-read → complete minimal response path satisfies S1–S12. The fail-closed product gate must remain blocked until that evidence exists.
