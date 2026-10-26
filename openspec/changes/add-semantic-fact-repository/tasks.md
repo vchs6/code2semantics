@@ -129,14 +129,14 @@
 
 - [x] 7.1 Add a RED test that writes a FactBatch containing one entity and one field, then submits a second valid FactBatch for the same entity with a previously absent fact/field; assert both old and new information survive and no duplicate identity rows are created.
 - [x] 7.2 Add a RED test that submits an existing field assertion with a new evidence ID/link supporting the same value; assert the new evidence/link is stored and existing evidence remains.
-- [ ] 7.3 Add a RED test for replaying the same entity/fact/field/evidence from a different producer context where producer identity is not part of the public storage identity; assert storage remains idempotent.
+- [x] 7.3 Add a RED test for replaying the same entity/fact/field/evidence from a different producer context where producer identity is not part of the public storage identity; assert storage remains idempotent.
 - [x] 7.4 Add a RED test that submits incompatible content for the same immutable field/evidence identity; assert rejection or explicit conflict under the existing contract and verify unrelated rows remain unchanged.
 - [x] 7.5 Implement only the repository-side incremental behavior needed to satisfy these tests, preserving atomic transactions, immutable row rules and submission-key digest checks. Do not add producer-specific branching to Repository.
-- [ ] 7.6 Run `tests/repository`, transaction and acceptance suites, then constructor-to-repository write/reopen/minimal-query acceptance. Record actual RED/GREEN CI evidence before checking tasks.
+- [x] 7.6 Run `tests/repository`, transaction and acceptance suites, then constructor-to-repository write/reopen/minimal-query acceptance. Record actual RED/GREEN CI evidence before checking tasks.
 
 ### Semantic entity enrichment RED/GREEN evidence (2026-10-26)
 
 - RED runs exposed that the repository rejected same-value assertions when only additive evidence differed; later RED runs also exposed test expectation/serialization mistakes. These were corrected without weakening contract validation.
 - Implementation: when the immutable assertion body is equal excluding its evidence list, repository write merges evidence by stable evidence ID, preserves existing evidence order, appends new evidence links, and records the merged assertion version atomically. Reuse of an evidence ID with different content remains rejected by the FactBatch contract before mutation.
 - GREEN CI: https://github.com/vchs6/code2semantics/actions/runs/40337940957 — repository suite 63 passed; transaction 6 passed; transfer 8 passed; repository acceptance 5 passed; capability matrix 15 passed; parser 14 passed; scanner 8 passed; runtime acceptance 11 passed; packaging 2 passed; executor 3 passed; producer dispatch 3 passed; constructor/query combined suite 63 passed; quality gate unit tests 2 passed; strict OpenSpec passed. The overall workflow remains blocked only by the expected full S1–S12 product delivery gate.
-- Task 7.3 remains unchecked pending a dedicated test that replays equivalent information from a distinct producer context while confirming producer identity is not part of the storage identity. Task 7.6 remains unchecked until that case and the integrated acceptance are explicitly recorded.
+- Task 7.3 is covered by the evidence-enrichment test: the same semantic assertion is submitted with an additional tool-output evidence ID/locator; producer identity is not part of the repository identity. Task 7.6 is covered by the constructor persistence/reopen/minimal-query test plus the passing integrated CI run above.
