@@ -34,8 +34,16 @@ def main() -> int:
         print("Do not mark the main semantic-facts change complete until these exist and the real-source integration test passes.")
         return 1
 
-    print("Required runtime acceptance artifacts exist.")
-    print("This check is only a presence gate; the acceptance tests and recorded run must still pass.")
+    acceptance_record = REQUIRED_DELIVERABLES["Recorded real runtime acceptance"]
+    record_text = acceptance_record.read_text(encoding="utf-8")
+    if "FULL_END_TO_END_ACCEPTANCE: PASS" not in record_text:
+        print("PRODUCT DELIVERY GATE: BLOCKED")
+        print("The acceptance record does not contain FULL_END_TO_END_ACCEPTANCE: PASS.")
+        print("A partial source-to-store smoke test cannot certify full component integration.")
+        return 1
+
+    print("Required runtime acceptance artifacts and full acceptance marker exist.")
+    print("The CI integration test must still pass; the marker is not a substitute for execution.")
     return 0
 
 if __name__ == "__main__":
