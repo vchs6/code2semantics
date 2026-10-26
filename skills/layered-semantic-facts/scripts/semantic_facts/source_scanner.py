@@ -68,7 +68,7 @@ def inspect_source(root: str | Path) -> dict[str, Any]:
     }
 
 
-def build_fact_batch(root: str | Path, codec: ContractCodec) -> dict[str, Any]:
+def build_fact_batch_with_gaps(root: str | Path, codec: ContractCodec) -> dict[str, Any]:
     """Read current Python source, parse it, and construct a validated FactBatch."""
     project_root = Path(root).resolve()
     if not project_root.is_dir():
@@ -114,18 +114,23 @@ def build_fact_batch(root: str | Path, codec: ContractCodec) -> dict[str, Any]:
     }
 
     parsed_files: list[tuple[str, dict[str, Any]]] = []
+    producer_gaps: list[dict[str, str]] = []
     parser_registry = ParserRegistry(codec.schema_root)
     matrix = CapabilityMatrix(Path(__file__).resolve().parents[2] / "assets" / "capability-matrix.json")
     platform = "windows" if sys.platform.startswith("win") else "darwin" if sys.platform == "darwin" else "linux"
     required_need_ids = ["syntax.f2.identity", "syntax.f2.names", "syntax.f2.boundary", "syntax.f2.locators"]
     for relative, source_text in raw:
         language = "Rust" if Path(relative).suffix == ".rs" else "Python"
-        selected_by_need = select_enabled_producers(matrix, required_need_ids, language, platform, "in-process")
-        common_tool_ids = set.intersection(*(
-            {entry["tool_id"] for entry in entries} for entries in selected_by_need.values()
-        )) if selected_by_need else set()
-        if not common_tool_ids:
-            raise ValueError(f"no accepted enabled parser covers all required F2 needs for {language} in {platform}")
+        try:
+            selected_by_need = select_enabled_producers(matrix, required_need_ids, language, platform, "in-process")
+            common_tool_ids = set.intersection(*(
+                {entry["tool_id"] for entry in entries} for entries in selected_by_need.values()
+            )) if selected_by_need else set()
+            if not common_tool_ids:
+                raise ValueError(f"no accepted enabled parser covers all required F2 needs for {language} in {platform}")
+        except (ValueError, KeyError) as error:
+            producer_gaps.append({"path": relative, "reason": "unavailable_tool", "detail": str(error)})
+            continue
         tool_id = sorted(common_tool_ids)[0]
         coverage = {
             "domain": language + " syntax in " + relative,
@@ -147,6 +152,32 @@ def build_fact_batch(root: str | Path, codec: ContractCodec) -> dict[str, Any]:
                 "evidence": [],
             },
         }
-        parsed_files.append((relative, parser_registry.parse(request)))
+        try:
+            parsed = parser_registry.parse(request)
+            if parsed.get("gaps"):
+                first_gap = parsed["gaps"][0]
+                producer_gaps.append({
+                    "path": relative,
+                    "reason": first_gap.get("reason", "unparseable"),
+                    "detail": first_gap.get("detail", "parser returned an unspecified gap"),
+                })
+                continue
+            parsed_files.append((relative, parsed))
+        except (ValueError, KeyError, TypeError) as error:
+            producer_gaps.append({"path": relative, "reason": "unparseable", "detail": str(error)})
+            continue
 
-    return construct_fact_batch(source_record, subject_id, parsed_files, codec)
+    batch = construct_fact_batch(
+        source_record, subject_id, parsed_files, codec,
+        coverage_complete=not producer_gaps,
+    )
+    return {"batch": batch, "gaps": producer_gaps}
+
+
+def build_fact_batch(root: str | Path, codec: ContractCodec) -> dict[str, Any]:
+    """Strict scan helper: fail if any source file could not be parsed."""
+    result = build_fact_batch_with_gaps(root, codec)
+    if result["gaps"]:
+        first = result["gaps"][0]
+        raise ValueError(f"cannot construct facts for {first['path']}: {first['detail']}")
+    return result["batch"]
