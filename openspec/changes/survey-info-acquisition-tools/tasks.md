@@ -25,9 +25,16 @@
 
 The existing survey acceptance covers the initial F2/L3 catalogue only. It is not sufficient for the expanded source/project information requirements. These tasks must remain pending until constructor tasks 6.1–6.4 are accepted.
 
-- [ ] 3.1 Read the expanded, validated constructor needs catalogue and map every need to one or more candidate producer families, required native output, supported language/environment and evidence coverage. Do not infer the needed tools from the existing matrix.
-- [ ] 3.2 For candidates that can be safely probed in the approved CI/runtime environment, execute version/help/fixture probes and record exact command, exit code, version and representative output. Mark unavailable or untested environments as unverified; never infer availability from documentation alone.
-- [ ] 3.3 Record per-need coverage, blind spots, output format, invocation profile, composition strategy and unsupported cases. Explicitly distinguish manifest-only, syntax-only, compiler/type-checking, reference/call-graph and cognitive-inference needs.
-- [ ] 3.4 Produce a coverage matrix (need → candidate tools → native output → parser work → gaps) and identify needs requiring tool combinations. Research must not edit/enable capability-matrix entries.
+- [x] 3.1 Read the expanded, validated constructor needs catalogue and map every need to one or more candidate producer families, required native output, supported language/environment and evidence coverage. Do not infer the needed tools from the existing matrix.
+- [x] 3.2 For candidates that can be safely probed in the approved CI/runtime environment, execute version/help/fixture probes and record exact command, exit code, version and representative output. Mark unavailable or untested environments as unverified; never infer availability from documentation alone.
+- [x] 3.3 Record per-need coverage, blind spots, output format, invocation profile, composition strategy and unsupported cases. Explicitly distinguish manifest-only, syntax-only, compiler/type-checking, reference/call-graph and cognitive-inference needs.
+- [x] 3.4 Produce a coverage matrix (need → candidate tools → native output → parser work → gaps) and identify needs requiring tool combinations. Research must not edit/enable capability-matrix entries.
 - [ ] 3.5 Add or update research tests/validation where applicable, strict-validate this change, and hand the accepted candidate/output coverage to `add-info-parser`. No parser implementation or matrix enablement is implied by survey completion.
 
+## Expanded needs survey and probe evidence (2026-10-26)
+
+- The authoritative input is the 127-record `assets/information-needs.json` covering all F1–F18 fields and S1–S12 scenarios. Candidate tools are grouped by capability/output family; this is not a 127-tool plan.
+- Coverage matrix and shortlist are in `research/semantic-tooling-survey.md` §7. Six research-only candidates were added to the capability matrix as disabled entries; no survey action enabled them.
+- Corrected CI probe evidence: https://github.com/vchs6/code2semantics/actions/runs/40319334019. Python 3.12.15 `compileall` fixture and Cargo 1.99.0 `cargo metadata --no-deps --format-version 1` fixture succeeded. rustc 1.99.0 is present, but `cargo check` was not probed. rust-analyzer path resolved but was not runnable; ctags, ast-grep and tree-sitter CLI were absent in this runner.
+- The first probe run is retained as RED evidence because fixture newline escaping caused sample failures; only the corrected run above is treated as positive evidence.
+- Candidate entries remain disabled until exact native-output parser fixtures and parser-development acceptance pass.
