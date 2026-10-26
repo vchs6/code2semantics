@@ -31,3 +31,9 @@ Baseline: `main`, direct commits only. This record separates verified behavior f
 - Graph semantics for multi-parent relations, dependency cycles and conditional/contradictory cycles beyond safe finite storage/projection.
 - Full dependency-aware incremental reconstruction and all S1–S12 end-to-end acceptance scenarios.
 - Product delivery gate intentionally remains blocked until these behaviors have executable acceptance evidence. Do not turn it green by weakening its checks.
+
+## Graph and premise-closure follow-up
+
+- Repository `read()` and `export_current()` now share transitive premise-closure behavior: a target field with stale/invalid premise or a premise cycle is excluded from current projection; no rows are deleted. `invalidate_premise()` and `invalidate_inventory()` are explicit append-only APIs.
+- Navigation projection deduplicates exact semantic duplicates but retains separate parent edges, reverse/cycle edges, external references, and edges under contradictory conditions. It stores/projects graph shape without claiming that a conditional cycle is executable.
+- Tests added in `tests/repository/test_validity.py` and `tests/repository/test_store.py`; latest CI `https://github.com/vchs6/code2semantics/actions/runs/40277417171` passed all component suites and strict OpenSpec. Product gate remains blocked as designed.
