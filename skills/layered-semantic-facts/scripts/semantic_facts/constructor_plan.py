@@ -173,14 +173,39 @@ def select_enabled_producers(
     Matrix candidate discovery is read-only. Disabled or unaccepted entries are
     never eligible, even if the generic matrix query returns them as candidates.
     """
-    selected: dict[str, list[dict[str, Any]]] = {}
-    for need_id in sorted(set(need_ids)):
+    requested = set(need_ids)
+    selected: dict[str, list[dict[str, Any]]] = {need_id: [] for need_id in sorted(requested)}
+    candidates_by_id: dict[str, dict[str, Any]] = {}
+    for need_id in sorted(requested):
         candidates = matrix.query([need_id], language.lower(), platform.lower(), environment)
-        eligible = [
-            item for item in candidates
-            if item.get("enabled") is True
-            and item.get("acceptance", {}).get("actor") == "parser_development"
-            and item.get("acceptance", {}).get("evidence")
-        ]
-        selected[need_id] = sorted(eligible, key=lambda item: item["tool_id"])
+        for item in candidates:
+            if (
+                item.get("enabled") is True
+                and item.get("acceptance", {}).get("actor") == "parser_development"
+                and item.get("acceptance", {}).get("evidence")
+            ):
+                candidates_by_id[item["tool_id"]] = item
+
+    # Deterministic greedy set cover over this request's unmet needs. Prefer
+    # the profile covering the most still-uncovered needs; ties use stable ID.
+    # This avoids selecting one narrow tool per field when one accepted profile
+    # safely covers several requested needs.
+    uncovered = set(requested)
+    while uncovered:
+        ranked: list[tuple[int, str, dict[str, Any], set[str]]] = []
+        for tool_id, item in candidates_by_id.items():
+            covered = set(item.get("information_need_ids", [])) & uncovered
+            if covered:
+                ranked.append((-len(covered), tool_id, item, covered))
+        if not ranked:
+            break
+        ranked.sort(key=lambda entry: (entry[0], entry[1]))
+        _, _, chosen, covered = ranked[0]
+        for need_id in covered:
+            selected[need_id].append(chosen)
+        uncovered.difference_update(covered)
+        candidates_by_id.pop(chosen["tool_id"], None)
+
+    for need_id in selected:
+        selected[need_id].sort(key=lambda item: item["tool_id"])
     return selected
