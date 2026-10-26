@@ -189,7 +189,7 @@ def test_partial_fact_updates_append_missing_attributes_and_reject_conflicts(tmp
 
     project = tmp_path / "partial-project"
     project.mkdir()
-    (project / "service.py").write_text("class Example:\\n    def run(self):\\n        return 1\\n", encoding="utf-8")
+    (project / "service.py").write_text("class Example:\n    def run(self):\n        return 1\n", encoding="utf-8")
     batch = build_fact_batch(project, ContractCodec(ROOT / "skills" / "layered-semantic-facts" / "assets"))
     identity_batch = copy.deepcopy(batch)
     identity_batch["facts"][0]["fields"] = {"identity": batch["facts"][0]["fields"]["identity"]}
