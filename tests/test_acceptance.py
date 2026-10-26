@@ -403,3 +403,42 @@ def test_root_acceptance_rejects_out_of_scope_target_before_repository_read(tmp_
         assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == len(foreign_batch["facts"])
     finally:
         repository.close()
+
+def test_local_invalidation_targets_current_source_head_without_deleting_history(tmp_path, capsys):
+    import hashlib
+
+    project = tmp_path / "invalidation-project"
+    project.mkdir()
+    source_file = project / "module.py"
+    source_file.write_text("def first():\n    return 1\n", encoding="utf-8")
+    database = tmp_path / "invalidation.db"
+    assert main(["scan-source", "--root", str(project), "--db", str(database)]) == 0
+    capsys.readouterr()
+
+    source_file.write_text("def second():\n    return 2\n", encoding="utf-8")
+    assert main(["scan-source", "--root", str(project), "--db", str(database)]) == 0
+    capsys.readouterr()
+
+    fact_id = "fact-" + hashlib.sha256(("module.py" + "\\0F2").encode("utf-8")).hexdigest()[:20]
+    repository = Repository(database)
+    rows = repository.connection.execute(
+        "SELECT f.fact_key, f.source_id, a.attribute_key FROM facts f "
+        "JOIN attributes a ON a.fact_key = f.fact_key "
+        "WHERE f.fact_id = ? AND a.field_name = ? ORDER BY f.source_id",
+        (fact_id, "names"),
+    ).fetchall()
+    assert len(rows) == 2
+    current_source_id = repository.connection.execute(
+        "SELECT source_id FROM source_heads WHERE root = ?", (str(project.resolve()),)
+    ).fetchone()[0]
+    current_row = next(row for row in rows if row[1] == current_source_id)
+    old_row = next(row for row in rows if row[1] != current_source_id)
+
+    repository.invalidate_field(fact_id, "names", "explicit local invalidation test")
+    event = repository.connection.execute(
+        "SELECT target_key FROM validity_events WHERE target_kind = 'field' ORDER BY event_id DESC LIMIT 1"
+    ).fetchone()[0]
+    assert event == current_row[2]
+    assert event != old_row[2]
+    assert repository.connection.execute("SELECT COUNT(*) FROM facts WHERE fact_id = ?", (fact_id,)).fetchone()[0] == 2
+    repository.close()
