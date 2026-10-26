@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from semantic_facts.info_parser import parse_python_request
+from semantic_facts.info_parser import parse_python_request, parse_rust_request
 
 
 def request(text, *, tool_id="python.ast-source"):
@@ -72,7 +72,7 @@ def test_registry_discovers_builtin_parser_and_reports_unknown_profiles():
     from semantic_facts.info_parser import ParserRegistry
 
     registry = ParserRegistry()
-    assert registry.supported_tools() == ("python.ast-source",)
+    assert registry.supported_tools() == ("python.ast-source", "rust.syntax-source")
     unsupported = request("raw output", tool_id="not.registered")
     result = registry.parse(unsupported)
     assert result["gaps"][0]["reason"] == "unsupported_profile"
