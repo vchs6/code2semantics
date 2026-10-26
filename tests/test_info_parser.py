@@ -112,7 +112,7 @@ def test_registry_registers_python_and_rust_parsers():
     from semantic_facts.info_parser import ParserRegistry
 
     registry = ParserRegistry()
-    assert registry.supported_tools() == ("python.ast-source", "rust.syntax-source")
+    assert registry.supported_tools() == ("python.ast-source", "python.compileall", "rust.cargo-metadata", "rust.syntax-source")
     result = registry.parse(request("pub enum State { Ready, Busy }", tool_id="rust.syntax-source"))
     assert any(item["payload"]["text"] == "enum State" for item in result["observations"])
 
@@ -172,7 +172,12 @@ def test_cargo_metadata_parser_returns_gap_for_malformed_or_unsupported_output()
 def test_compileall_parser_preserves_diagnostic_evidence_without_inferring_semantics():
     from semantic_facts.info_parser import parse_compileall_request
 
-    native = "*** Error compiling '/fixture/project/broken.py'...\\n  File \"/fixture/project/broken.py\", line 1\\n    def broken(:\\n                 ^\\nSyntaxError: invalid syntax\\n"
+    native = """*** Error compiling '/fixture/project/broken.py'...
+  File "/fixture/project/broken.py", line 1
+    def broken(:
+                 ^
+SyntaxError: invalid syntax
+"""
     value = request(native, tool_id="python.compileall")
     result = parse_compileall_request(value)
 
