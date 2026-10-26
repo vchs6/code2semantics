@@ -36,3 +36,13 @@
 | 4.1–4.2 / D3/D8 | output-schema：最小字段、完整直接身份清单、必要 context/coverage/basis/validity、最小 premise_checks、冲突、内外缺口、终止原因；64 shape + 30 semantic cases | 公共响应资产完成；查询运行时与主集成 tasks 8 保持 pending |
 
 所有 JSON Pointer、字段语义和验证命令见 `skills/layered-semantic-facts/references/runtime-contracts.md`。验证入口为本变更 `validation/validate_contracts.py`，本轮未调用组件运行时。旧定义、旧说明、旧正例和旧校验已直接替换，不留双轨或适配入口；测试只保留旧字段必须拒绝的反例。
+
+
+## Python + Rust first-phase implementation update (2026-10-26)
+
+- Fixed development-time needs catalogue: `skills/layered-semantic-facts/assets/information-needs.json`; schema adds explicit `languages: [Python, Rust]`; loader validates schema, duplicate IDs and fact-catalogue field membership.
+- Constructor planning: `semantic_facts/constructor_plan.py` maps requested F2 fields to the fixed catalogue deterministically, reuses only supported/current/evidence-backed/complete assertions, and reports uncovered fields as gaps. Tests: `tests/test_information_needs.py`, `tests/test_constructor_plan.py`.
+- Survey update: `openspec/changes/survey-info-acquisition-tools/research/semantic-tooling-survey.md` now includes Python and Rust candidates, invocation/coverage boundaries and explicit unverified environment assumptions. Existing matrix remains empty; research does not enable tools.
+- Constructor child `design.md` and `tasks.md` now exist; catalogue/loader/planning initial tasks are checked based on CI evidence. Survey child `design.md` and `tasks.md` now exist; its external-tool probes and matrix acceptance remain pending.
+- CI evidence: https://github.com/vchs6/code2semantics/actions/runs/40261330788 — existing suites and the new information-needs/constructor-plan tests pass, strict OpenSpec passes. The fail-closed product delivery gate remains blocked for the unimplemented full constructor orchestration.
+- Current supported behavior remains syntax inventory F2/L3 only. Do not infer F1/F3–F18, type semantics, call/data flow or runtime behavior from this scope.
