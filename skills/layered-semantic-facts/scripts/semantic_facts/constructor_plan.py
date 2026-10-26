@@ -3,6 +3,10 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
+import json
+
+from jsonschema import Draft202012Validator
+from referencing import Registry, Resource
 
 from .information_needs import load_information_needs
 
@@ -27,12 +31,32 @@ def _supported_current_assertion(assertion: Any, current_states: dict[str, str])
     )
 
 
+def _validate_construct_request(request: dict[str, Any], asset_root: Path) -> None:
+    schemas = [json.loads(path.read_text(encoding="utf-8")) for path in asset_root.glob("*.schema.json")]
+    registry = Registry().with_resources(
+        (schema["$id"], Resource.from_contents(schema)) for schema in schemas
+    )
+    pipeline_id = next(
+        schema["$id"] for schema in schemas
+        if schema["$id"].endswith("/pipeline.schema.json")
+    )
+    validator = Draft202012Validator(
+        {"$ref": pipeline_id + "#/$defs/construct_request"}, registry=registry
+    )
+    error = next(validator.iter_errors(request), None)
+    if error:
+        pointer = "/" + "/".join(str(part) for part in error.absolute_path)
+        raise ValueError(f"invalid ConstructRequest {pointer}: {error.message}")
+
+
 def plan_constructor_request(
     request: dict[str, Any],
     asset_root: str | Path | None = None,
 ) -> dict[str, Any]:
     """Return a stable need plan and explicit gaps; never mutate assets or matrix."""
-    catalogue = load_information_needs(asset_root)
+    root = Path(asset_root) if asset_root else Path(__file__).resolve().parents[2] / "assets"
+    _validate_construct_request(request, root)
+    catalogue = load_information_needs(root)
     query = request["query"]
     existing = request["existing_valid_facts"]
     current = request["current_source_context"]
