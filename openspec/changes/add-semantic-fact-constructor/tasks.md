@@ -192,7 +192,14 @@ Per-profile enablement rule: a profile's own accepted real-runtime evidence can 
 
 ## 12. Restrict producer selection to actual source languages
 
-- [ ] 12.1 Add a RED test for a Python-only project whose F6 need is catalogued for both Python and Rust; assert the plan does not select the Rust Cargo producer or report a missing Cargo.toml gap.
-- [ ] 12.2 Implement bounded language discovery from authorized source roots and intersect each need's declared languages with languages actually present before request-wide set cover.
+- [x] 12.1 Add a RED test for a Python-only project whose F6 need is catalogued for both Python and Rust; assert the plan does not select the Rust Cargo producer or report a missing Cargo.toml gap.
+- [x] 12.2 Implement bounded language discovery from authorized source roots and intersect each need's declared languages with languages actually present before request-wide set cover.
 - [ ] 12.3 Add mixed Python/Rust scope coverage proving both language producers remain eligible only when both languages are present, while language/platform/environment constraints stay hard constraints.
-- [ ] 12.4 Run planner, CLI Python/Rust manifest acceptance, failure modes, strict OpenSpec and all component suites; only then enable the exact Python manifest profile.
+- [x] 12.4 Run planner, CLI Python/Rust manifest acceptance, failure modes, strict OpenSpec and all component suites; only then enable the exact Python manifest profile.
+
+### Source-language-aware planning evidence (2026-10-26)
+
+- RED: https://github.com/vchs6/code2semantics/actions/runs/40348349667 exposed that a Python-only request still planned the Rust Cargo profile for a cross-language F6 need. The same run also showed a malformed TOML test fixture; the fixture was rewritten with literal multiline TOML, not by weakening parser checks.
+- Implementation: planner discovers `.py`/`.rs` languages only under current authorized source roots, respects excluded directories and scope excludes, and filters each language/environment candidate group to languages actually present. If a concrete root exists but contains no supported language sources, it does not plan arbitrary language producers; abstract plans with unavailable roots retain prior catalogue planning behavior and runtime will return source-unavailable gaps.
+- GREEN: https://github.com/vchs6/code2semantics/actions/runs/40348620288 — runtime acceptance 19 passed (including CLI Python manifest + Rust workspace/dependency paths); source scanner 9; constructor/planning/query group 71; repository 63; transaction 6; transfer 8; repository acceptance 5; matrix 15; parser 14; packaging 2; executor 3; producer dispatch 3; quality gate tests 2; strict OpenSpec passed. Product gate remains blocked for full S1–S12.
+- Both exact manifest profiles are now enabled narrowly: Cargo only `source.f4.kind`/`source.f6.kind`; Python only `source.f3.runtime`/`source.f6.kind`. Other research candidates remain disabled. Task 12.3 remains pending until mixed Python/Rust scope regression passes.
