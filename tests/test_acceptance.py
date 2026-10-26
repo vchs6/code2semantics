@@ -695,3 +695,66 @@ dependencies = ["requests>=2"]
         assert all(fact["fact_type"] == "F6" and set(fact["fields"]) == {"kind"} for fact in replay["results"])
     finally:
         reopened.close()
+
+def test_multi_project_source_change_does_not_invalidate_unrelated_project_facts(tmp_path, capsys):
+    left = tmp_path / "project-left"
+    right = tmp_path / "project-right"
+    left.mkdir()
+    right.mkdir()
+    left_source = left / "service.py"
+    right_source = right / "worker.py"
+    left_source.write_text("def left_version_one():\n    return 1\n", encoding="utf-8")
+    right_source.write_text("def stable_worker():\n    return 7\n", encoding="utf-8")
+    database = tmp_path / "multi-project-validity.sqlite"
+
+    for root in (left, right):
+        assert main(["scan-source", "--root", str(root), "--db", str(database)]) == 0
+        capsys.readouterr()
+
+    query = {
+        "contract_version": "1.0.0",
+        "catalog_id": "semantic-facts-20261025",
+        "request_id": "multi-project-validity-query",
+        "scope": {
+            "scope_id": "multi-project-validity-scope",
+            "directories": [str(left.resolve()), str(right.resolve())],
+            "excludes": [],
+            "defaulted": False,
+        },
+        "target": {"kind": "scope"},
+        "granularity": "L3",
+        "selections": [{"fact_type": "F2", "fields": ["names"]}],
+        "budget": {"max_rounds": 1, "max_new_assertions": 20},
+    }
+    repository = Repository(database)
+    before = execute_query_with_construction(query, repository, ROOT / "skills" / "layered-semantic-facts" / "assets")
+    assert before["termination"] == "satisfied", before["gaps"]
+    assert any("left_version_one" in fact["fields"]["names"]["value"]["text"] for fact in before["results"])
+    assert any("stable_worker" in fact["fields"]["names"]["value"]["text"] for fact in before["results"])
+
+    right_source_ids = {source["source_id"] for source in before["sources"] if source["root"] == str(right.resolve())}
+    right_fact_keys = {
+        row[0] for row in repository.connection.execute(
+            "SELECT fact_key FROM facts WHERE source_id IN ({})".format(",".join("?" for _ in right_source_ids)),
+            tuple(sorted(right_source_ids)),
+        )
+    }
+    assert right_fact_keys
+
+    left_source.write_text("def left_version_two():\n    return 2\n", encoding="utf-8")
+    assert main(["scan-source", "--root", str(left), "--db", str(database)]) == 0
+    capsys.readouterr()
+
+    after = execute_query_with_construction(query, repository, ROOT / "skills" / "layered-semantic-facts" / "assets")
+    assert after["termination"] == "satisfied", after["gaps"]
+    names = [fact["fields"]["names"]["value"]["text"] for fact in after["results"]]
+    assert any("left_version_two" in value for value in names)
+    assert all("left_version_one" not in value for value in names)
+    assert any("stable_worker" in value for value in names)
+    right_states = {
+        state for fact_key, state in repository.connection.execute(
+            "SELECT target_key, state FROM validity_events WHERE target_kind='fact'"
+        ) if fact_key in right_fact_keys
+    }
+    assert right_states <= {"current"}
+    repository.close()
