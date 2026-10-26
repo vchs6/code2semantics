@@ -299,6 +299,10 @@ class ParserRegistry:
             result = _unsupported(request["invocation_profile"], self._result_validator)
         else:
             result = parser(request)
+        return self.validate_result(result)
+
+    def validate_result(self, result: dict[str, Any]) -> dict[str, Any]:
+        """Validate a ParseResult returned by any registered producer adapter."""
         error = next(self._result_validator.iter_errors(result), None)
         if error:
             raise ParserContractError(f"parser result {list(error.absolute_path)}: {error.message}")
