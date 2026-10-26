@@ -10,7 +10,7 @@ import sys
 from .repository.contract import ContractCodec
 from .repository.store import Repository
 from .source_scanner import build_fact_batch
-from .query_engine import execute_query
+from .query_engine import execute_query_with_construction
 from .constructor_plan import plan_constructor_request
 from .constructor import execute_constructor_request
 
@@ -77,7 +77,7 @@ def main(argv: list[str] | None = None) -> int:
     query_document = json.loads(args.query_file.read_text(encoding="utf-8"))
     repository = Repository(args.db, _assets())
     try:
-        result = execute_query(query_document, repository, _assets())
+        result = execute_query_with_construction(query_document, repository, _assets())
     finally:
         repository.close()
     print(json.dumps(result, ensure_ascii=False, indent=2))
