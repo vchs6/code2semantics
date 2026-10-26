@@ -168,3 +168,47 @@ def test_cyclic_premise_closure_is_rejected_without_recursion_or_deletion(batch,
     assert "fact-b" not in returned_ids
     assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == fact_rows_before
     repository.close()
+def test_explicit_premise_invalidation_propagates_through_read_closure(batch, db_path):
+    from semantic_facts.repository.store import Repository
+    from test_store import make_query
+
+    repository = Repository(db_path)
+    repository.write(batch, "premise-invalidation")
+    premise_row = repository.connection.execute(
+        "SELECT p.premise_key FROM premises p JOIN attributes a ON a.attribute_key = p.owner_key "
+        "JOIN facts f ON f.fact_key = a.fact_key WHERE f.fact_id = ? AND a.field_name = ?",
+        ("fact-b", "strategy"),
+    ).fetchone()
+    assert premise_row is not None
+    fact_count = repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
+
+    repository.invalidate_premise(premise_row[0], "premise evidence is no longer current")
+    query = make_query()
+    query["selections"] = [{"fact_type": "F16", "fields": ["strategy"]}]
+    result = repository.read(query)
+    returned = {fact["fact_id"] for fact in result["facts"]}
+    assert "fact-a" in returned
+    assert "fact-b" not in returned
+    assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == fact_count
+    assert repository.connection.execute("SELECT COUNT(*) FROM premises").fetchone()[0] >= 1
+    repository.close()
+
+
+def test_inventory_invalidation_filters_projection_without_deleting_inventory(batch, db_path):
+    from semantic_facts.repository.store import Repository
+    from test_store import make_query
+
+    repository = Repository(db_path)
+    repository.write(batch, "inventory-invalidation")
+    inventory_key = repository.connection.execute("SELECT inventory_key FROM inventories LIMIT 1").fetchone()[0]
+    inventory_count = repository.connection.execute("SELECT COUNT(*) FROM inventories").fetchone()[0]
+    repository.invalidate_inventory(inventory_key, "direct-node inventory needs re-verification")
+
+    result = repository.read(make_query())
+    assert inventory_key not in {item["inventory_key"] for item in []}
+    assert repository.connection.execute("SELECT COUNT(*) FROM inventories").fetchone()[0] == inventory_count
+    assert repository.connection.execute(
+        "SELECT state FROM validity_events WHERE target_kind = ? AND target_key = ? ORDER BY event_id DESC LIMIT 1",
+        ("inventory", inventory_key),
+    ).fetchone()[0] == "modified"
+    repository.close()
