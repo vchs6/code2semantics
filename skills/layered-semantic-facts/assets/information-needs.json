@@ -1,0 +1,90 @@
+{
+  "contract_version": "1.0.0",
+  "needs": [
+    {
+      "need_id": "syntax.f2.identity",
+      "fact_type": "F2",
+      "fields": [
+        "identity"
+      ],
+      "subject_requirement": "One source file represented as a stable node under the requested project subject; source identity is versioned by the content snapshot.",
+      "evidence_kinds": [
+        "source"
+      ],
+      "context_requirement": "Preserve project root, source identity, language, and syntax-only interpretation limits.",
+      "current_source_requirement": "Evidence content_state must equal the scanned source snapshot; older snapshots remain stored but are not current.",
+      "coverage_requirement": "Identify the exact source file and declare the observed syntax scope; do not imply descendant or runtime completeness.",
+      "production_mode": "deterministic",
+      "acceptance_fixture": "tests/fixtures/scenarios/python_project/repository_reader.py",
+      "research_basis": [
+        "fact-catalog.json F2.identity",
+        "information-needs.schema.json",
+        "Python AST source inventory",
+        "Rust declaration inventory"
+      ]
+    },
+    {
+      "need_id": "syntax.f2.names",
+      "fact_type": "F2",
+      "fields": [
+        "names"
+      ],
+      "subject_requirement": "Enumerate module, class, function, async-function and import declarations for Python; enumerate module, function, struct, enum, trait, impl, type, const/static and use declarations for Rust.",
+      "evidence_kinds": [
+        "source"
+      ],
+      "context_requirement": "Record source language and explicitly state that syntax inventory does not establish runtime behavior.",
+      "current_source_requirement": "Each declaration observation must carry a digest of the exact source text and the source snapshot content_state.",
+      "coverage_requirement": "Return all supported declaration forms in the file or an explicit parse gap; unsupported syntax semantics must not be guessed.",
+      "production_mode": "deterministic",
+      "acceptance_fixture": "tests/fixtures/scenarios/python_project/repository_reader.py",
+      "research_basis": [
+        "fact-catalog.json F2.names",
+        "Python ast module",
+        "Rust source declaration parser contract"
+      ]
+    },
+    {
+      "need_id": "syntax.f2.boundary",
+      "fact_type": "F2",
+      "fields": [
+        "boundary"
+      ],
+      "subject_requirement": "State the observed file boundary and language-specific parser limits for the source node.",
+      "evidence_kinds": [
+        "source"
+      ],
+      "context_requirement": "Include language and parser method in the assertion context and limitations.",
+      "current_source_requirement": "Boundary assertions are current only for the exact content digest being scanned.",
+      "coverage_requirement": "Explicitly distinguish supported syntax coverage from unverified type, macro, runtime, or behavioral semantics.",
+      "production_mode": "deterministic",
+      "acceptance_fixture": "tests/fixtures/scenarios/python_project/repository_reader.py",
+      "research_basis": [
+        "fact-catalog.json F2.boundary",
+        "add-info-parser/specs/info-parser/spec.md",
+        "Python/Rust parser implementation limits"
+      ]
+    },
+    {
+      "need_id": "syntax.f2.locators",
+      "fact_type": "F2",
+      "fields": [
+        "locators"
+      ],
+      "subject_requirement": "Provide source-relative line locators for each supported declaration observation and a file identity locator.",
+      "evidence_kinds": [
+        "source"
+      ],
+      "context_requirement": "Evidence must include source_id, content_state, source kind, content digest and supports/refutes relation.",
+      "current_source_requirement": "Every locator must be tied to the exact scanned file bytes; a source change creates a new snapshot.",
+      "coverage_requirement": "Every reported name must have at least one evidence locator; never synthesize line numbers for non-source evidence.",
+      "production_mode": "deterministic",
+      "acceptance_fixture": "tests/fixtures/scenarios/python_project/repository_reader.py",
+      "research_basis": [
+        "fact-catalog.json F2.locators",
+        "common.schema.json evidence definition",
+        "pipeline.schema.json observation definition"
+      ]
+    }
+  ]
+}
