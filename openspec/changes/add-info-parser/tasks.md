@@ -32,9 +32,17 @@
 
 The current parser tasks cover only supplied Python/Rust syntax text. Additional parsers must be planned after the constructor's expanded information-needs catalogue and tool survey have been accepted.
 
-- [ ] 4.1 For each researched candidate selected for parser development, record the exact native output format/version and the corresponding information-needs IDs before implementing a parser.
-- [ ] 4.2 Add captured or deterministic native-output fixtures for successful, partial, malformed, unsupported-version and missing-evidence cases. Fixtures must retain invocation/source provenance and must not pretend to be runtime output when generated synthetically.
-- [ ] 4.3 Implement pure `tool-native-output + invocation-profile → ParseResult` transformations only for accepted formats; do not execute tools, read project files, select producers, write the matrix or infer facts in the parser.
+- [x] 4.1 For each researched candidate selected for parser development, record the exact native output format/version and the corresponding information-needs IDs before implementing a parser.
+- [x] 4.2 Add captured or deterministic native-output fixtures for successful, partial, malformed, unsupported-version and missing-evidence cases. Fixtures must retain invocation/source provenance and must not pretend to be runtime output when generated synthetically.
+- [x] 4.3 Implement pure `tool-native-output + invocation-profile → ParseResult` transformations only for accepted formats; do not execute tools, read project files, select producers, write the matrix or infer facts in the parser.
 - [ ] 4.4 Run focused parser tests and constructor/producer-dispatch regression. Enable a matrix entry only after parser-development acceptance for the exact tool, output format and invocation profile; record the evidence in the matrix acceptance field.
 - [ ] 4.5 Strict-validate this change and record supported needs plus explicit unimplemented gaps. Survey completion alone does not satisfy parser acceptance.
 
+
+
+## Native-output parser acceptance increment (2026-10-26)
+
+- Added pure `parse_cargo_metadata_request` and `parse_compileall_request` adapters and registered them in `ParserRegistry`. They consume supplied native output only, preserve source/content state/digest/locator/coverage, validate ParseResult, and return explicit gaps for malformed or unsupported output.
+- RED: CI run https://github.com/vchs6/code2semantics/actions/runs/40320249864 — new parser tests failed because the adapters did not exist.
+- GREEN component evidence: https://github.com/vchs6/code2semantics/actions/runs/40320586364 — parser component 12 passed; capability matrix 15 passed; constructor/query suite 57 passed; strict OpenSpec passed. Overall workflow remains blocked only by the product delivery gate, as S1–S12 is not complete.
+- Important dependency discovered: `plan_constructor_request` currently queries only `environment="in-process"`; it cannot select these subprocess profiles yet. Therefore the new matrix candidates remain disabled. Task 4.4 stays pending until constructor planning/execution supports the exact subprocess invocation profiles and the acceptance evidence is attached. Do not mark a profile enabled just because its pure parser test passes.
