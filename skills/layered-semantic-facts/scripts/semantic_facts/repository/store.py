@@ -86,6 +86,7 @@ class Repository:
     ) -> int:
         """Append an explicit validity event; never delete the target record."""
         tables = {
+            "source": ("sources", "source_id"),
             "fact": ("facts", "fact_key"),
             "field": ("attributes", "attribute_key"),
             "relation": ("relations", "relation_key"),
@@ -395,13 +396,80 @@ class Repository:
             raise WriteConflict(None, str(error)) from error
         return CommitReceipt(submission_key, digest, affected)
 
+    def _set_source_snapshot_validity(self, source_id: str, state: str, reason: str) -> None:
+        """Append validity events for a source snapshot and every owned fact artifact."""
+        self.connection.execute(
+            "INSERT INTO validity_events(target_kind, target_key, state, reason) VALUES (?, ?, ?, ?)",
+            ("source", source_id, state, reason),
+        )
+        fact_keys = [row[0] for row in self.connection.execute("SELECT fact_key FROM facts WHERE source_id = ?", (source_id,))]
+        for fact_key in fact_keys:
+            self.connection.execute(
+                "INSERT INTO validity_events(target_kind, target_key, state, reason) VALUES (?, ?, ?, ?)",
+                ("fact", fact_key, state, reason),
+            )
+            for (attribute_key,) in self.connection.execute("SELECT attribute_key FROM attributes WHERE fact_key = ?", (fact_key,)):
+                self.connection.execute(
+                    "INSERT INTO validity_events(target_kind, target_key, state, reason) VALUES (?, ?, ?, ?)",
+                    ("field", attribute_key, state, reason),
+                )
+        for key, payload in self.connection.execute("SELECT evidence_key, payload FROM evidence"):
+            if json.loads(payload).get("source_id") == source_id:
+                self.connection.execute(
+                    "INSERT INTO validity_events(target_kind, target_key, state, reason) VALUES (?, ?, ?, ?)",
+                    ("evidence", key, state, reason),
+                )
+        fact_key_set = set(fact_keys)
+        for key, owner_key in self.connection.execute("SELECT relation_key, owner_key FROM relations"):
+            if owner_key in fact_key_set:
+                self.connection.execute(
+                    "INSERT INTO validity_events(target_kind, target_key, state, reason) VALUES (?, ?, ?, ?)",
+                    ("relation", key, state, reason),
+                )
+        for key, owner_key in self.connection.execute("SELECT premise_key, owner_key FROM premises"):
+            if owner_key in fact_key_set:
+                self.connection.execute(
+                    "INSERT INTO validity_events(target_kind, target_key, state, reason) VALUES (?, ?, ?, ?)",
+                    ("premise", key, state, reason),
+                )
+        for key, payload in self.connection.execute("SELECT conflict_key, payload FROM conflicts"):
+            if source_id in json.loads(payload).get("context", {}).get("source_ids", []):
+                self.connection.execute(
+                    "INSERT INTO validity_events(target_kind, target_key, state, reason) VALUES (?, ?, ?, ?)",
+                    ("conflict", key, state, reason),
+                )
+        for key, payload in self.connection.execute("SELECT inventory_key, payload FROM inventories"):
+            assertion = json.loads(payload).get("assertion", {})
+            if source_id in assertion.get("context", {}).get("source_ids", []):
+                self.connection.execute(
+                    "INSERT INTO validity_events(target_kind, target_key, state, reason) VALUES (?, ?, ?, ?)",
+                    ("inventory", key, state, reason),
+                )
+
     def _mark_current_sources(self, sources: Sequence[SourceRow]) -> None:
         for row in sources:
             value = row.value
+            root = str(Path(value["root"]).resolve())
+            new_source_id = value["source_id"]
+            previous = self.connection.execute("SELECT source_id FROM source_heads WHERE root = ?", (root,)).fetchone()
+            previous_source_id = previous[0] if previous else None
+            if previous_source_id and previous_source_id != new_source_id:
+                self._set_source_snapshot_validity(
+                    previous_source_id, "modified", f"source snapshot superseded by {new_source_id}"
+                )
+            if previous_source_id != new_source_id:
+                was_invalidated = self.connection.execute(
+                    "SELECT 1 FROM validity_events WHERE target_kind = 'source' AND target_key = ? AND state != 'current' LIMIT 1",
+                    (new_source_id,),
+                ).fetchone()
+                if was_invalidated:
+                    self._set_source_snapshot_validity(
+                        new_source_id, "current", "previous source snapshot is current again"
+                    )
             self.connection.execute(
                 "INSERT INTO source_heads(root, source_id) VALUES (?, ?) "
                 "ON CONFLICT(root) DO UPDATE SET source_id = excluded.source_id",
-                (str(Path(value["root"]).resolve()), value["source_id"]),
+                (root, new_source_id),
             )
 
     def _insert_record(self, record: StoredRecord) -> None:
