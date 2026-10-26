@@ -20,6 +20,8 @@ def test_same_assertion_merges_distinct_evidence(tmp_path):
     extra = copy.deepcopy(assertion["basis"]["evidence"][0])
     extra.update({"evidence_id":"independent-tool-evidence","locator":"tool-output:independent","content_digest":"sha256:" + "c"*64})
     duplicate["fields"][field]["basis"]["evidence"] = [extra]
+    duplicate["fields"][field]["basis"]["method"] = "independent manifest producer"
+    duplicate["fields"][field]["basis"]["limitations"] = ["manifest-only evidence"]
     gaps = []
     merged = _merge_request_fact_contributions([fact, duplicate], gaps=gaps, target={"kind":"scope"}, context=assertion["context"], coverage=assertion["coverage"])
     assert not gaps and len(merged) == 1
