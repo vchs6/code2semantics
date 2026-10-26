@@ -47,7 +47,7 @@ jobs:
       - name: Runtime acceptance tests
         env:
           PYTHONPATH: skills/layered-semantic-facts/scripts
-        run: python -m pytest tests/test_acceptance.py -q -ra -p no:cacheprovider
+        run: python -m pytest tests/test_acceptance.py tests/test_manifest_acceptance.py -q -ra -p no:cacheprovider
       - name: Copied Skill packaging tests
         env:
           PYTHONPATH: skills/layered-semantic-facts/scripts
