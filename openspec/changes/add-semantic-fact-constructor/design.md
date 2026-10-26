@@ -134,3 +134,7 @@ The CLI/query orchestration must construct the executor from a host-owned allowl
 ## Per-profile production enablement vs full-system acceptance
 
 A producer profile may be enabled in the production matrix only after its exact tool ID, invocation profile, output parser, supported information needs, failure modes and real query-runtime → FactBatch → repository reopen → minimal response path pass acceptance. Enablement must narrow `information_need_ids` to the fields actually mapped and proven; unsupported observations remain gaps and must not be advertised as covered. This per-profile acceptance does not certify S1–S12 or permit the root delivery marker. Other profiles remain disabled until their own evidence is accepted, while the full product gate remains blocked until all root scenarios pass.
+
+## Language scope of producer planning
+
+The request-level minimum-cover planner must restrict candidate languages to languages actually present in the current authorized source roots. A need catalogued for both Python and Rust does not justify planning both producers for a Python-only project. Determine available languages from the bounded source inventory of the explicitly requested roots (Python `.py`, Rust `.rs`); mixed-language roots may select both. If no source language can be established, preserve the need as an explicit gap rather than invoking every catalogued language producer. This prevents spurious missing-manifest gaps and unnecessary tool calls while preserving mixed-directory semantics.
