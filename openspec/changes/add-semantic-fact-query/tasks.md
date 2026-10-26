@@ -56,3 +56,9 @@ For the supported F2/L3 model, a node-target query now verifies both (a) the cur
 - Tests in `tests/test_query_orchestration.py` cover disjoint roots, explicitly requested nested roots with distinct source identities, unavailable roots (no fallback and no writes), and out-of-scope node source IDs rejected before repository read.
 - CI run `https://github.com/vchs6/code2semantics/actions/runs/40275462491`: repository 45, matrix 15, parser 9, scanner 7, source acceptance 4, packaging 2, executor 3, combined planning/constructor/binding/induction/query 48 passed; strict OpenSpec passed.
 - Still pending under 3.4: graph-specific multi-parent/dependency-cycle cases, explicit external-reference projection, conflict projection, and out-of-catalog response tests. Full S1–S12 acceptance remains pending.
+## Additional projection and boundary evidence (2026-10-26)
+
+- Query now classifies fields outside the fixed first-phase information-needs catalogue into `out_of_catalog` instead of mixing them into in-scope gaps; supported fields in the same request continue through normal coverage and construction.
+- Tests cover mixed supported/out-of-catalog selections, same-named nodes in distinct roots, nested roots, unavailable sources without fallback, out-of-scope node references rejected before repository reads, and projection of external references plus conflict evidence.
+- CI run `https://github.com/vchs6/code2semantics/actions/runs/40276135137`: all component suites and strict OpenSpec passed; combined planning/constructor/binding/induction/query suite 51 passed. Product delivery gate still blocks full acceptance.
+- Task 3.4 remains pending for graph semantics beyond the current syntax-only F2/L3 boundary: multi-parent relation and dependency-cycle semantics, plus complete S1–S12 coverage. The added tests do not claim those semantics are implemented.
