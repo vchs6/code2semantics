@@ -49,13 +49,40 @@ def inspect_source(root: str | Path) -> dict[str, Any]:
         if not any(part in EXCLUDED_DIRS for part in path.relative_to(project_root).parts)
         and path.is_file() and path.suffix in {".py", ".rs"}
     )
-    snapshot_digest = hashlib.sha256()
+    state_inputs: list[tuple[str, str]] = []
     for path in files:
         relative = path.relative_to(project_root).as_posix()
-        content = path.read_bytes()
+        try:
+            state_inputs.append((relative, path.read_text(encoding="utf-8")))
+        except UnicodeDecodeError as error:
+            raise ValueError(f"source is not UTF-8: {relative}") from error
+
+    manifest_names = {
+        "Cargo.toml", "Cargo.lock", "pyproject.toml", "poetry.lock",
+        "Pipfile", "Pipfile.lock", "setup.cfg", "setup.py",
+        "requirements.txt", "package.json", "package-lock.json",
+        "Makefile", "CMakeLists.txt",
+    }
+    for manifest in sorted(project_root.rglob("*")):
+        if not manifest.is_file():
+            continue
+        relative = manifest.relative_to(project_root).as_posix()
+        if any(part in EXCLUDED_DIRS for part in manifest.relative_to(project_root).parts):
+            continue
+        if manifest.name not in manifest_names and not (
+            manifest.name.startswith("requirements-") and manifest.suffix == ".txt"
+        ):
+            continue
+        try:
+            state_inputs.append((relative, manifest.read_text(encoding="utf-8")))
+        except UnicodeDecodeError as error:
+            raise ValueError(f"project manifest is not UTF-8: {relative}") from error
+
+    snapshot_digest = hashlib.sha256()
+    for relative, source_text in sorted(set(state_inputs), key=lambda item: item[0]):
         snapshot_digest.update(relative.encode("utf-8"))
         snapshot_digest.update(b"\\0")
-        snapshot_digest.update(hashlib.sha256(content).digest())
+        snapshot_digest.update(hashlib.sha256(source_text.encode("utf-8")).digest())
     snapshot_hash = snapshot_digest.hexdigest()
     root_hash = hashlib.sha256(str(project_root).encode("utf-8")).hexdigest()[:20]
     dirty, has_untracked = _git_state(project_root)
