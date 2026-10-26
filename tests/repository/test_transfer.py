@@ -4,28 +4,34 @@ import sqlite3
 import pytest
 
 
+def _snapshot(repository):
+    return {
+        table: repository.connection.execute(
+            f"SELECT * FROM {table} ORDER BY 1"
+        ).fetchall()
+        for table in ("sources", "entities", "facts", "attributes", "relations", "submissions")
+    }
+
+
 def test_backup_and_restore_preserve_current_fact_set(batch, db_path, tmp_path):
     from semantic_facts.repository.store import Repository
 
     backup_path = tmp_path / "facts-backup.db"
-    repository = Repository(db_path)
-    repository.write(batch, "submission-1")
-    original_count = repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
+    restored_path = tmp_path / "restored-facts.db"
 
-    repository.backup(backup_path)
-    repository.connection.execute("DELETE FROM attributes")
-    repository.connection.execute("DELETE FROM facts")
-    repository.connection.execute("DELETE FROM entities")
-    repository.connection.execute("DELETE FROM sources")
-    repository.connection.execute("DELETE FROM relations")
-    repository.connection.execute("DELETE FROM submissions")
-    repository.connection.commit()
-    assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == 0
+    original = Repository(db_path)
+    original.write(batch, "submission-1")
+    expected = _snapshot(original)
+    original.backup(backup_path)
 
-    repository.restore(backup_path)
-    assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == original_count
-    assert repository.connection.execute("SELECT COUNT(*) FROM submissions").fetchone()[0] == 1
-    repository.close()
+    # Restore into a separate database. The source database and its fact history
+    # are never destructively modified by this test.
+    restored = Repository(restored_path)
+    restored.restore(backup_path)
+    assert _snapshot(restored) == expected
+    assert restored.connection.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
+    original.close()
+    restored.close()
 
 
 def test_restore_rejects_invalid_backup_without_changing_database(batch, db_path, tmp_path):
@@ -36,14 +42,12 @@ def test_restore_rejects_invalid_backup_without_changing_database(batch, db_path
 
     repository = Repository(db_path)
     repository.write(batch, "submission-1")
-    before = repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
+    before = _snapshot(repository)
 
     with pytest.raises((ValueError, sqlite3.DatabaseError)):
         repository.restore(invalid_backup)
 
-    after = repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
-    assert after == before
-    assert repository.connection.execute("SELECT COUNT(*) FROM submissions").fetchone()[0] == 1
+    assert _snapshot(repository) == before
     repository.close()
 
 
