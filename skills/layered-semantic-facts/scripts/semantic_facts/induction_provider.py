@@ -97,6 +97,13 @@ def invoke_induction_provider(
             "detail": f"Induction provider exceeded {timeout} seconds.",
             "induction_result": _empty_failed_result(request, asset_root),
         }
+    except subprocess.TimeoutExpired:
+        return {
+            "provider_id": provider_id,
+            "execution_status": "timeout",
+            "detail": f"Induction provider exceeded {timeout} seconds.",
+            "induction_result": _empty_failed_result(request, asset_root),
+        }
     except (OSError, UnicodeError) as error:
         return {
             "provider_id": provider_id,
