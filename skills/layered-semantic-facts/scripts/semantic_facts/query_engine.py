@@ -89,6 +89,8 @@ def execute_query(query: dict[str, Any], repository: Repository, asset_root: str
         )
 
     target = query["target"]
+    inventory_gap_reason = "coverage_incomplete"
+    inventory_gap_detail = "Direct-node completeness for the requested observation boundary is not established by current evidence."
     if target["kind"] == "scope":
         matching_direct_nodes = [
             inventory for inventory in stored["direct_nodes"]
@@ -104,20 +106,35 @@ def execute_query(query: dict[str, Any], repository: Repository, asset_root: str
         }
         inventory_complete = set(current_states).issubset(covered_sources)
     else:
+        scope_inventories = [
+            inventory for inventory in stored["direct_nodes"]
+            if inventory.get("target", {}).get("kind") == "scope"
+            and set(inventory.get("assertion", {}).get("context", {}).get("source_ids", [])).intersection(current_states)
+        ]
+        target_node = target["node"]
+        scope_is_current = any(inventory_is_current(item) for item in scope_inventories)
+        target_is_in_scope = any(
+            inventory_is_current(item) and target_node in item.get("children", [])
+            for item in scope_inventories
+        )
         matching_direct_nodes = [
             inventory for inventory in stored["direct_nodes"]
             if inventory.get("target", {}).get("kind") == "node"
-            and inventory["target"].get("node") == target.get("node")
+            and inventory["target"].get("node") == target_node
         ]
-        inventory_complete = any(inventory_is_current(inventory) for inventory in matching_direct_nodes)
+        target_inventory_complete = any(inventory_is_current(inventory) for inventory in matching_direct_nodes)
+        inventory_complete = scope_is_current and target_is_in_scope and target_inventory_complete
+        if scope_is_current and not target_is_in_scope:
+            inventory_gap_reason = "invalid_reference"
+            inventory_gap_detail = "The requested node is not present in the current direct-node inventory for the specified project scope."
 
     if not inventory_complete:
         gaps.append({
             "fact_type": "F2",
             "fields": ["direct_nodes"],
             "target": target,
-            "reason": "coverage_incomplete",
-            "detail": "Direct-node completeness for the requested observation boundary is not established by current evidence.",
+            "reason": inventory_gap_reason,
+            "detail": inventory_gap_detail,
             "context": context,
             "coverage": coverage,
         })
