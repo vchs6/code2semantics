@@ -126,6 +126,11 @@ def execute_constructor_request(
     else:
         sources.extend(current_sources)
 
+    if not sources:
+        # Keep the request's source context in the FactBatch even when every
+        # producer failed or the source changed during construction.
+        sources.extend(current_sources)
+
     batch = {
         "contract_version": "1.0.0",
         "catalog_id": "semantic-facts-20261025",
