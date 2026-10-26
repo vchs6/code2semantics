@@ -28,20 +28,20 @@
 ## 5. 推进工具研究、矩阵与解析子交付（D4/D7）
 
 - [x] 5.0 仅在后续开发期公共目录/契约语义就绪后，先推进 `../add-semantic-fact-constructor/` 子规划及首阶段 apply，由该子产出面向本次未满足事实需求的可检查信息获取需求清单（具体路径、字段与生成/验证命令先在该子 tasks 落盘）；该阶段属于开发期子提案/设计/任务与 apply 交付，不是查询运行步骤，不等待工具、矩阵、解析器或完整构造器实现；交付固定清单，后续新增需求须通过开发期提案启动研究与解析器开发验收。主验收需求与事实目录/字段的映射、来源上下文和覆盖条件，再把此清单作为5.1输入；不得由主代写组件实现。
-- [ ] 5.1 以5.0构造器首阶段交付的信息获取需求清单为输入，推进 `../survey-info-acquisition-tools/` 的规划补齐与 apply，基于既有 `research/semantic-tooling-survey.md` 增量复核未点亮工具说明，接收输出种类/覆盖/限制/语言/环境/调用/组合证据；验收先覆盖与环境、再轻量简洁多语言偏好，研究不点亮。交付路径与执行命令须先写入其自身 tasks，再推进；主不实施工具研究组件。
+- [x] 5.1 以5.0构造器首阶段交付的信息获取需求清单为输入，推进 `../survey-info-acquisition-tools/` 的规划补齐与 apply，基于既有 `research/semantic-tooling-survey.md` 增量复核未点亮工具说明，接收输出种类/覆盖/限制/语言/环境/调用/组合证据；验收先覆盖与环境、再轻量简洁多语言偏好，研究不点亮。交付路径与执行命令须先写入其自身 tasks，再推进；主不实施工具研究组件。
 - [x] 5.2 触发并推进 `../add-semantic-capability-matrix/` 的规划补齐与 apply，接收空矩阵初始化、工具说明读取和受控点亮状态接口及局部测试记录；验收初始为空、矩阵不生产/调度、研究与构造不可点亮。具体实现和测试路径以该子 tasks 交付为准，在 `traceability.md` 记录接收证据。
 - [x] 5.3 在说明与矩阵接口就绪后推进 `../add-info-parser/` 的规划补齐与 apply，接收原生输出+调用描述纯转换及证据保留的实现、正反测试与解析开发完成后的受控点亮记录；验收不执行工具、不读取源项目/事实仓库、不选工具/归纳/维护矩阵，所有证据来自输入，缺失返回 gap，点亮即工具通过接入验收可供构造器使用，集成实证另记但不增加矩阵状态。
 
 ## 6. 推进归纳、构造与仓库子交付（D2/D3/D5/D7）
 
 - [x] 6.1 按第3组归纳契约推进 `../add-induction-batch-trigger/` 的规划补齐与 apply，接收未满足触发和字段分组的实现、非空不足/unknown/证据不足/冲突保留测试及接口说明；验收按事实类型+主体+当前来源内容状态+上下文分组，不直接持久化或组装 response。子 tasks 先固定交付路径和命令，主接收证据。
-- [ ] 6.2 在5.0首阶段需求清单、5.3与6.1完成后推进 `../add-semantic-fact-constructor/` 的规划补齐与 apply，接收仅消费开发期既定清单、匹配请求/未满足项形成当前获取计划、读取已点亮说明并运行时选择组合执行、纯解析接入和归纳返回的实现及局部证据；核验合法观察边界内必要上级路径与完整直接节点识别、不递归构造所有 child 完整事实、不读写事实仓库、不组装最终响应。未点亮/环境不符/清单未覆盖必须 gap，不擅自扩权；核验运行构造器不生成/扩展清单、不触发工具研究/解析器开发/点亮，待开发期变更处理。
+- [x] 6.2 在5.0首阶段需求清单、5.3与6.1完成后推进 `../add-semantic-fact-constructor/` 的规划补齐与 apply，接收仅消费开发期既定清单、匹配请求/未满足项形成当前获取计划、读取已点亮说明并运行时选择组合执行、纯解析接入和归纳返回的实现及局部证据；核验合法观察边界内必要上级路径与完整直接节点识别、不递归构造所有 child 完整事实、不读写事实仓库、不组装最终响应。未点亮/环境不符/清单未覆盖必须 gap，不擅自扩权；核验运行构造器不生成/扩展清单、不触发工具研究/解析器开发/点亮，待开发期变更处理。
 - [ ] 6.3 按公共事实契约推进 `../add-semantic-fact-repository/` 的规划补齐与 apply，接收 SQLite 结构化事实/证据关联/当前有效性、事务回滚和关闭重开读取实现及测试；核验修改/删除/前提失效不当当前命中、冲突保留、非法数据拒绝且原数据未因测试删除，存储接口不使用最终 response，不要求旧历史或用户版本协议。
 
 ## 7. 推进查询与包装子交付（D6/D7）
 
 - [ ] 7.1 在公共契约与6.2/6.3就绪后推进 `../add-semantic-fact-query/` 的规划补齐与 apply，接收公共契约加载/校验、覆盖比对、构造调用、校验入库重读、最小响应与 CLI 实现及测试；验收需求满足/无有效覆盖进展/预算终止，进展包含有界必要上级与直接节点完整性前置义务，不把重复候选、非空或无关事实算进展。以该子 tasks 定义的命令核验，不在主变更重复实现。
-- [ ] 7.2 在查询入口就绪后推进 `../define-skill-packaging/` 的规划补齐与 apply，接收 `skills/layered-semantic-facts/SKILL.md`、安装说明、依赖、仓库外安装入口、对话与可选报告交付及局部测试；核验 Agent Skills Specification frontmatter/目录/渐进披露、默认机器响应、同一当前契约和明确请求才生成报告。执行 `skills-ref validate` 或规范逐项检查表并记录实际采用方式。
+- [x] 7.2 在查询入口就绪后推进 `../define-skill-packaging/` 的规划补齐与 apply，接收 `skills/layered-semantic-facts/SKILL.md`、安装说明、依赖、仓库外安装入口、对话与可选报告交付及局部测试；核验 Agent Skills Specification frontmatter/目录/渐进披露、默认机器响应、同一当前契约和明确请求才生成报告。执行 `skills-ref validate` 或规范逐项检查表并记录实际采用方式。
 
 ## 8. 主集成验收（D8，依赖全部公共定义与八子交付）
 
@@ -88,3 +88,13 @@
 - The query subtask 3.4 test set now covers multi-project same-name identities, nested/disjoint roots, external references, conflict evidence, out-of-catalog fields, plus the new multi-parent/cycle scenario.
 - CI: https://github.com/vchs6/code2semantics/actions/runs/40297691458 — repository 53 passed; matrix 15; parser 9; scanner 7; source acceptance 4; packaging 2; executor 3; producer dispatch 3; combined planning/constructor/induction/query suite 52 passed; strict OpenSpec passed.
 - Root task 8.1 remains pending because these tests are distributed across component suites and do not yet establish all S1–S12 scenarios in the single root acceptance harness. The full runtime tool/induction path remains unverified; product delivery gate correctly remains blocked.
+
+
+## Dependency-ordered component acceptance update (2026-10-26)
+
+- Marked 5.1 complete from the survey child tasks/evidence; toolchain availability remains explicitly unverified and survey findings do not enable matrix profiles.
+- Marked 6.1 complete for deterministic induction grouping/result validation. No cognitive provider is claimed; no-provider behavior remains an explicit gap.
+- Marked 6.2 complete for the current fixed Python/Rust F2/L3 scope: constructor catalogue/plan, accepted parser dispatch, evidence-bound FactBatch construction and partial-failure gaps have focused tests. This does not claim all F1–F18 semantic layers or a provider-backed induction workflow.
+- Marked 7.2 complete for self-contained Skill packaging and copied-install Python/Rust scan/query validation; official skills-ref validation was not run and is not claimed.
+- Latest completed full CI after concurrency and graph work: https://github.com/vchs6/code2semantics/actions/runs/40298151751. Repository 54 passed; matrix 15; parser 9; scanner 7; runtime acceptance 5; packaging 2; executor 3; producer dispatch 3; combined planning/constructor/induction/query 52 passed; strict OpenSpec passed. Product delivery gate remains BLOCKED.
+- Still pending in the dependency plan: 6.3 full repository acceptance (including a separate RED-first transfer run and remaining import/local mutation policy), 7.1 full S1–S12 query acceptance, and 8.1–8.5 root integration. These remain unchecked; the implementation is not declared globally complete.
