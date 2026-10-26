@@ -38,16 +38,16 @@
 
 ## 5. ���������롢������ָ�
 
-- [ ] 5.1 ��д������ԣ���Ч/ʧЧ��ʵ����Դ��֤�ݡ���ͻ��ǰ�ᱣ�棻��⵼��������ڲ� token��ȱʧ���á���ͬ�������ݡ�Խ��������𻵱��ݾ�����ܾ���
+- [x] 5.1 ��д������ԣ���Ч/ʧЧ��ʵ����Դ��֤�ݡ���ͻ��ǰ�ᱣ�棻��⵼��������ڲ� token��ȱʧ���á���ͬ�������ݡ�Խ��������𻵱��ݾ�����ܾ���
 - [ ] 5.2 ���� `python -m pytest tests/repository/test_transfer.py -q` RED��
-- [ ] 5.3 ʵ�ֵ�ǰ��ʵ���������롢SQLite һ�±��ݻָ���ʧ�ܱ�������������ʷ���ݻ������ԴЭ�顣
-- [ ] 5.4 ���д��䡢codec����Ч�Բ��� GREEN�����鵼��������Ӷ���һ�²��ύ�����ļ���
+- [x] 5.3 ʵ�ֵ�ǰ��ʵ���������롢SQLite һ�±��ݻָ���ʧ�ܱ�������������ʷ���ݻ������ԴЭ�顣
+- [x] 5.4 ���д��䡢codec����Ч�Բ��� GREEN�����鵼��������Ӷ���һ�²��ύ�����ļ���
 
 ## 6. �ֿ��������
 
 - [ ] 6.1 ��д��ģ���������ڲ��ԣ�FactBatch д�롢�ؿ���ȡ���ֲ�ά������Ч�ԡ����޹�ϵ��ȡ����������ͱ��ݻָ�����ѯ�����ɲ���ֱ���ṩ��
 - [ ] 6.2 ���� `python -m pytest tests/repository/test_acceptance.py -q` RED������¶ǰ��ȱ�ݣ��ص���Ӧ���Ȳ��������޸���
-- [ ] 6.3 ���� `python -m pytest tests/repository -q` ���ڶ������ض���֤����¼ʵ������˳��롢����������������ӳ�䵽 `implementation-validation.md`��
+- [x] 6.3 ���� `python -m pytest tests/repository -q` ���ڶ������ض���֤����¼ʵ������˳��롢����������������ӳ�䵽 `implementation-validation.md`��
 - [ ] 6.4 �ύ���������ļ�����ȷ����ѯ/����������������������𣬲��Զ�������鵵��
 
 ## Workflow follow-up
@@ -64,3 +64,12 @@
 - Added tests: tests/repository/test_validity.py and tests/repository/test_acceptance.py. Transfer tests restore to a separate database; acceptance tests verify normalized row counts, query, backup/restore equality and conflict rollback.
 - CI run https://github.com/vchs6/code2semantics/actions/runs/40268373808 is validating the updated repository and package suites. The previous completed repository suite passed 39 tests before the newest normalized row and acceptance changes; strict OpenSpec passed. Use the linked run for final pass/fail.
 - Still pending: a public local-mutation API for field/relation/evidence invalidation, complete premise dependency invalidation and graph-cycle traversal tests, current import/export API, and full repository acceptance after those APIs land. These tasks remain pending; this evidence does not claim the whole repository component complete.
+
+
+## 2026-10-26 implementation evidence
+
+- `Repository.export_current()` exports current source-head facts, navigation, inventories and conflicts while excluding stale assertions from the exported view; local historical rows remain stored.
+- `Repository.import_current(batch, submission_key)` validates and appends through atomic write; invalid imports fail before mutation. Backup/restore tests use separate databases and preserve row counts.
+- Normalized evidence/premise/inventory/conflict rows and navigation classification are persisted and read back.
+- Validation record: `implementation-validation.md`. CI run https://github.com/vchs6/code2semantics/actions/runs/40269799051: repository 41 passed; strict OpenSpec and all component test groups passed. Product delivery gate intentionally remains blocked.
+- Still pending: RED-first evidence for newest transfer tests; public local mutation/invalidation API; complete premise propagation, graph-cycle/ancestor traversal and broader import conflict policy. Do not infer these from export/import tests.
