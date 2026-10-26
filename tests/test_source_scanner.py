@@ -63,7 +63,7 @@ def test_scan_rejects_invalid_python_instead_of_inventing_facts(tmp_path, codec)
         raise AssertionError("invalid Python must not produce facts")
 
 
-def test_scan_fails_when_no_python_sources_exist(tmp_path, codec):
+def test_scan_fails_when_no_supported_language_sources_exist(tmp_path, codec):
     project = tmp_path / "empty-project"
     project.mkdir()
     (project / "readme.md").write_text("No Python files", encoding="utf-8")
@@ -71,7 +71,7 @@ def test_scan_fails_when_no_python_sources_exist(tmp_path, codec):
     try:
         build_fact_batch(project, codec)
     except ValueError as error:
-        assert "no Python source files" in str(error)
+        assert "no Python or Rust source files" in str(error)
     else:
         raise AssertionError("empty source scope must not silently produce an empty fact batch")
 
