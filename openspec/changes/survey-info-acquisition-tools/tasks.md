@@ -29,7 +29,7 @@ The existing survey acceptance covers the initial F2/L3 catalogue only. It is no
 - [x] 3.2 For candidates that can be safely probed in the approved CI/runtime environment, execute version/help/fixture probes and record exact command, exit code, version and representative output. Mark unavailable or untested environments as unverified; never infer availability from documentation alone.
 - [x] 3.3 Record per-need coverage, blind spots, output format, invocation profile, composition strategy and unsupported cases. Explicitly distinguish manifest-only, syntax-only, compiler/type-checking, reference/call-graph and cognitive-inference needs.
 - [x] 3.4 Produce a coverage matrix (need → candidate tools → native output → parser work → gaps) and identify needs requiring tool combinations. Research must not edit/enable capability-matrix entries.
-- [ ] 3.5 Add or update research tests/validation where applicable, strict-validate this change, and hand the accepted candidate/output coverage to `add-info-parser`. No parser implementation or matrix enablement is implied by survey completion.
+- [x] 3.5 Add or update research tests/validation where applicable, strict-validate this change, and hand the accepted candidate/output coverage to `add-info-parser`. No parser implementation or matrix enablement is implied by survey completion.
 
 ## Expanded needs survey and probe evidence (2026-10-26)
 
