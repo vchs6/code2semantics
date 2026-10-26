@@ -154,6 +154,7 @@ def parse_rust_request(request: dict[str, Any], asset_root: str | Path | None = 
     content_state = source["content_state"]
     source_path = profile["command"][-1] if profile["command"] else source["root"]
     text = request["tool_native_output"]["text"]
+    file_node_id = "file-" + hashlib.sha256(source_path.encode("utf-8")).hexdigest()[:20]
     digest = "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest()
     context = {
         "source_ids": [source_id],
@@ -185,7 +186,7 @@ def parse_rust_request(request: dict[str, Any], asset_root: str | Path | None = 
         node_id = _slug(f"{source_path}:{kind}:{name}:{line_no}")
         observations.append({
             "observation_id": _slug("obs-" + node_id),
-            "subject": {"source_id": source_id, "subject_id": _slug(source["root"]), "node_id": node_id},
+            "subject": {"source_id": source_id, "subject_id": _slug(source["root"]), "node_id": file_node_id},
             "information_need_id": "rust.syntax_inventory",
             "payload": {"kind": "text", "text": detail},
             "evidence": [{
