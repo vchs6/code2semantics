@@ -141,13 +141,13 @@ class Repository:
         for row in record.sources:
             value = row.value
             self.connection.execute(
-                "INSERT INTO sources(source_id, payload) VALUES (?, ?)",
+                "INSERT OR IGNORE INTO sources(source_id, payload) VALUES (?, ?)",
                 (value["source_id"], row.payload),
             )
         for row in record.entities:
             value = row.value
             self.connection.execute(
-                "INSERT INTO entities(entity_key, source_id, subject_id, node_id, payload) VALUES (?, ?, ?, ?, ?)",
+                "INSERT OR IGNORE INTO entities(entity_key, source_id, subject_id, node_id, payload) VALUES (?, ?, ?, ?, ?)",
                 (row.key, value["source_id"], value["subject_id"], value.get("node_id"), row.payload),
             )
         for row in record.facts:
