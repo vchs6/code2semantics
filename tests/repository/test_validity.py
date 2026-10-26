@@ -200,12 +200,13 @@ def test_inventory_invalidation_filters_projection_without_deleting_inventory(ba
 
     repository = Repository(db_path)
     repository.write(batch, "inventory-invalidation")
-    inventory_key = repository.connection.execute("SELECT inventory_key FROM inventories LIMIT 1").fetchone()[0]
+    inventory_key, inventory_payload = repository.connection.execute("SELECT inventory_key, payload FROM inventories LIMIT 1").fetchone()
+    inventory_target = json.loads(inventory_payload)["target"]
     inventory_count = repository.connection.execute("SELECT COUNT(*) FROM inventories").fetchone()[0]
     repository.invalidate_inventory(inventory_key, "direct-node inventory needs re-verification")
 
     result = repository.read(make_query())
-    assert inventory_key not in {item["inventory_key"] for item in []}
+    assert inventory_target not in [item["target"] for item in result["direct_nodes"]]
     assert repository.connection.execute("SELECT COUNT(*) FROM inventories").fetchone()[0] == inventory_count
     assert repository.connection.execute(
         "SELECT state FROM validity_events WHERE target_kind = ? AND target_key = ? ORDER BY event_id DESC LIMIT 1",
