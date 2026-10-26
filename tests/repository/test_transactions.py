@@ -111,3 +111,30 @@ def test_same_source_snapshot_cannot_rewrite_existing_field_assertion(batch, db_
         "SELECT fact_key, payload FROM facts ORDER BY fact_key"
     ).fetchall() == before_facts
     repository.close()
+
+def test_concurrent_identical_submission_is_idempotent_across_connections(batch, db_path):
+    from concurrent.futures import ThreadPoolExecutor
+    from semantic_facts.repository.store import Repository
+
+    bootstrap = Repository(db_path)
+    bootstrap._ensure_schema()
+    bootstrap.close()
+
+    def write_once():
+        repository = Repository(db_path)
+        try:
+            return repository.write(batch, "concurrent-idempotent-submission")
+        finally:
+            repository.close()
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(pool.map(lambda _: write_once(), range(2)))
+
+    assert results[0].digest == results[1].digest
+    repository = Repository(db_path)
+    assert repository.connection.execute(
+        "SELECT COUNT(*) FROM submissions WHERE submission_key = ?",
+        ("concurrent-idempotent-submission",),
+    ).fetchone()[0] == 1
+    assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == len(batch["facts"])
+    repository.close()
