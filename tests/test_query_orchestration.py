@@ -75,14 +75,36 @@ def test_query_uses_current_source_snapshot_and_keeps_old_fact_rows(tmp_path):
     repository = Repository(database, ASSETS)
     try:
         first = execute_query_with_construction(make_query(project), repository, ASSETS)
+        assert first["termination"] == "satisfied", first
         assert any("class FirstEngine" in fact["fields"]["names"]["value"]["text"] for fact in first["results"])
+        old_source_ids = {item["source_id"] for item in first["sources"]}
+        old_fact_keys = {
+            row[0] for row in repository.connection.execute(
+                "SELECT fact_key FROM facts WHERE source_id IN ({})".format(
+                    ",".join("?" for _ in old_source_ids)
+                ),
+                tuple(old_source_ids),
+            )
+        }
         first_count = repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
 
         source.write_text("class SecondEngine:\n    pass\n", encoding="utf-8")
         second = execute_query_with_construction(make_query(project), repository, ASSETS)
+        assert second["termination"] == "satisfied", second
         assert any("class SecondEngine" in fact["fields"]["names"]["value"]["text"] for fact in second["results"])
         assert all("class FirstEngine" not in fact["fields"]["names"]["value"]["text"] for fact in second["results"])
+        assert old_source_ids.isdisjoint({item["source_id"] for item in second["sources"]})
+        assert {fact["node"]["source_id"] for fact in second["results"]} <= {
+            item["source_id"] for item in second["sources"]
+        }
         assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] > first_count
+        assert old_fact_keys <= {
+            row[0] for row in repository.connection.execute("SELECT fact_key FROM facts")
+        }
+        assert repository.connection.execute(
+            "SELECT 1 FROM validity_events WHERE target_kind = 'source' AND target_key = ? AND state = 'modified'",
+            (next(iter(old_source_ids)),),
+        ).fetchone() is not None
     finally:
         repository.close()
 
