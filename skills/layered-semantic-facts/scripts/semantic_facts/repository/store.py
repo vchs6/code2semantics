@@ -266,6 +266,30 @@ class Repository:
                 if root in directories
             }
 
+        current_states = {
+            source_id: json.loads(payload)["content_state"]
+            for source_id, payload in self.connection.execute("SELECT source_id, payload FROM sources")
+            if source_id in current_source_ids
+        }
+
+        def assertion_is_current(assertion: dict[str, Any]) -> bool:
+            validity = assertion.get("validity")
+            if not isinstance(validity, dict) or validity.get("state") != "current":
+                return False
+            validity_sources = validity.get("sources", [])
+            if not validity_sources or any(
+                item.get("source_id") not in current_states
+                or item.get("content_state") != current_states[item.get("source_id")]
+                for item in validity_sources
+            ):
+                return False
+            evidence = assertion.get("basis", {}).get("evidence", [])
+            return all(
+                item.get("source_id") in current_states
+                and item.get("content_state") == current_states[item.get("source_id")]
+                for item in evidence
+            )
+
         params: list[Any] = []
         sql = "SELECT fact_key, source_id, subject_id, node_id, fact_id, fact_type, payload FROM facts WHERE 1=1"
         if target:
@@ -295,7 +319,9 @@ class Repository:
                 "SELECT field_name, payload FROM attributes WHERE fact_key = ?", (row[0],)
             ):
                 if name in wanted:
-                    fields[name] = json.loads(payload)
+                    assertion = json.loads(payload)
+                    if assertion_is_current(assertion):
+                        fields[name] = assertion
             if fields:
                 value["fields"] = fields
                 selected.append(value)
