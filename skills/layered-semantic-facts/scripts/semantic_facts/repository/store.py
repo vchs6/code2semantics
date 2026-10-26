@@ -440,14 +440,44 @@ class Repository:
                     tuple(sorted(current_source_ids)),
                 )
             ]
+        navigation = []
+        for payload, is_navigation in self.connection.execute(
+            "SELECT payload, navigation FROM relations WHERE navigation = 1"
+        ):
+            edge = json.loads(payload)
+            source_ref = edge.get("source", {})
+            if source_ref.get("source_id") not in current_source_ids:
+                continue
+            if target and source_ref != target:
+                continue
+            navigation.append(edge)
+
+        direct_nodes = []
+        for (payload,) in self.connection.execute("SELECT payload FROM inventories"):
+            inventory = json.loads(payload)
+            inventory_target = inventory.get("target", {})
+            node_ref = inventory_target.get("node", {}) if inventory_target.get("kind") == "node" else {}
+            if node_ref.get("source_id") not in current_source_ids:
+                continue
+            if target and node_ref != target:
+                continue
+            direct_nodes.append(inventory)
+
+        conflicts = []
+        for (payload,) in self.connection.execute("SELECT payload FROM conflicts"):
+            conflict = json.loads(payload)
+            conflict_sources = set(conflict.get("context", {}).get("source_ids", []))
+            if conflict_sources.intersection(current_source_ids):
+                conflicts.append(conflict)
+
         return {
             "contract_version": "1.0.0",
             "catalog_id": "semantic-facts-20261025",
             "sources": sources,
             "facts": selected,
-            "navigation": [],
-            "direct_nodes": [],
-            "conflicts": [],
+            "navigation": navigation,
+            "direct_nodes": direct_nodes,
+            "conflicts": conflicts,
         }
 
     @staticmethod
