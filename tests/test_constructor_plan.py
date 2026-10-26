@@ -95,3 +95,22 @@ def test_producer_selection_rejects_environment_mismatch(tmp_path):
     }])
     selected = select_enabled_producers(matrix, ["syntax.f2.names"], "Rust", "Linux", "missing-rust-toolchain")
     assert selected["syntax.f2.names"] == []
+
+def test_checked_in_matrix_exposes_only_accepted_first_phase_profiles():
+    from semantic_facts.capability_matrix import CapabilityMatrix
+    from semantic_facts.constructor_plan import select_enabled_producers
+
+    matrix = CapabilityMatrix(ASSETS / "capability-matrix.json")
+    for language, expected_tool in [
+        ("Python", "python.ast-source"),
+        ("Rust", "rust.syntax-source"),
+    ]:
+        selected = select_enabled_producers(
+            matrix,
+            ["syntax.f2.identity", "syntax.f2.names", "syntax.f2.boundary", "syntax.f2.locators"],
+            language,
+            "linux",
+            "in-process",
+        )
+        for need_id, entries in selected.items():
+            assert [entry["tool_id"] for entry in entries] == [expected_tool], need_id
