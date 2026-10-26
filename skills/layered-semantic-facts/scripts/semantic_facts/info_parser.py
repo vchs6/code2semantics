@@ -128,6 +128,109 @@ def parse_python_request(request: dict[str, Any], asset_root: str | Path | None 
     return result
 
 
+
+def parse_rust_request(request: dict[str, Any], asset_root: str | Path | None = None) -> dict[str, Any]:
+    """Parse supplied Rust source text into deterministic declaration observations.
+
+    This lightweight parser inventories declarations/imports only. It does not
+    claim type checking, macro expansion, borrow checking, or runtime semantics.
+    """
+    if asset_root is None:
+        asset_root = Path(__file__).resolve().parents[2] / "assets"
+    request_validator, result_validator = _validators(Path(asset_root))
+    error = next(request_validator.iter_errors(request), None)
+    if error:
+        raise ParserContractError(f"parse request {list(error.absolute_path)}: {error.message}")
+
+    profile = request["invocation_profile"]
+    if profile["tool_id"] != "rust.syntax-source":
+        return _unsupported(profile, result_validator)
+    if len(profile["sources"]) != 1:
+        return _gap_result(profile, "unsupported_profile", "rust.syntax-source requires exactly one source", result_validator)
+
+    source = profile["sources"][0]
+    source_id = source["source_id"]
+    content_state = source["content_state"]
+    source_path = profile["command"][-1] if profile["command"] else source["root"]
+    text = request["tool_native_output"]["text"]
+    digest = "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest()
+    context = {
+        "source_ids": [source_id],
+        "conditions": [],
+        "environment": profile["environment"],
+        "language_semantics": ["Rust declaration inventory; no type checking, macro expansion, or runtime behavior inferred"],
+    }
+    coverage = profile["coverage"]
+
+    # Remove comments and string contents for delimiter-balance diagnostics only.
+    scrubbed = re.sub(r'//[^\\n]*|/\\*.*?\\*/|"(?:\\\\.|[^"\\\\])*"', " ", text, flags=re.S)
+    stack: list[tuple[str, int]] = []
+    pairs = {")": "(", "]": "[", "}": "{"}
+    for offset, char in enumerate(scrubbed):
+        if char in "([{":
+            stack.append((char, offset))
+        elif char in ")]}":
+            if not stack or stack[-1][0] != pairs[char]:
+                line = scrubbed.count("\\n", 0, offset) + 1
+                return _gap_result(profile, "unparseable", f"Rust delimiter mismatch at line {line}", result_validator)
+            stack.pop()
+    if stack:
+        line = scrubbed.count("\\n", 0, stack[-1][1]) + 1
+        return _gap_result(profile, "unparseable", f"Rust unclosed delimiter at line {line}", result_validator)
+
+    observations: list[dict[str, Any]] = []
+
+    def add(kind: str, name: str, line_no: int, detail: str) -> None:
+        node_id = _slug(f"{source_path}:{kind}:{name}:{line_no}")
+        observations.append({
+            "observation_id": _slug("obs-" + node_id),
+            "subject": {"source_id": source_id, "subject_id": _slug(source["root"]), "node_id": node_id},
+            "information_need_id": "rust.syntax_inventory",
+            "payload": {"kind": "text", "text": detail},
+            "evidence": [{
+                "evidence_id": _slug(f"ev-{source_id}-{node_id}"),
+                "source_id": source_id,
+                "content_state": content_state,
+                "kind": "source",
+                "locator": f"{source_path}:L{line_no}",
+                "content_digest": digest,
+                "relation": "supports",
+            }],
+            "context": context,
+            "coverage": coverage,
+        })
+
+    add("module", Path(source_path).stem, 1, f"module {Path(source_path).stem}")
+    patterns = [
+        ("function", re.compile(r"^\\s*(?:(?:pub(?:\\([^)]*\\))?|async|unsafe|const|extern(?:\\s+\"[^\"]+\")?)\\s+)*fn\\s+([A-Za-z_][A-Za-z0-9_]*)"), "fn"),
+        ("struct", re.compile(r"^\\s*(?:pub(?:\\([^)]*\\))?\\s+)?struct\\s+([A-Za-z_][A-Za-z0-9_]*)"), "struct"),
+        ("enum", re.compile(r"^\\s*(?:pub(?:\\([^)]*\\))?\\s+)?enum\\s+([A-Za-z_][A-Za-z0-9_]*)"), "enum"),
+        ("trait", re.compile(r"^\\s*(?:pub(?:\\([^)]*\\))?\\s+)?trait\\s+([A-Za-z_][A-Za-z0-9_]*)"), "trait"),
+        ("type", re.compile(r"^\\s*(?:pub(?:\\([^)]*\\))?\\s+)?type\\s+([A-Za-z_][A-Za-z0-9_]*)"), "type"),
+        ("module", re.compile(r"^\\s*(?:pub(?:\\([^)]*\\))?\\s+)?mod\\s+([A-Za-z_][A-Za-z0-9_]*)"), "mod"),
+        ("import", re.compile(r"^\\s*(?:pub(?:\\([^)]*\\))?\\s+)?use\\s+(.+?);\\s*$"), "use"),
+        ("impl", re.compile(r"^\\s*impl(?:<[^>]+>)?\\s+(.+?)\\s*\\{?\\s*$"), "impl"),
+        ("constant", re.compile(r"^\\s*(?:pub(?:\\([^)]*\\))?\\s+)?(?:const|static)\\s+([A-Za-z_][A-Za-z0-9_]*)"), "const/static"),
+    ]
+    for line_no, line in enumerate(text.splitlines(), start=1):
+        stripped = line.strip()
+        if not stripped or stripped.startswith("//") or stripped.startswith("/*") or stripped.startswith("*"):
+            continue
+        for kind, pattern, label in patterns:
+            match = pattern.match(line)
+            if match:
+                name = match.group(1).strip()
+                add(kind, name, line_no, f"{label} {name}")
+                break
+
+    observations.sort(key=lambda item: (item["evidence"][0]["locator"], item["observation_id"]))
+    result = {"kind": "parse_result", "observations": observations, "gaps": []}
+    error = next(result_validator.iter_errors(result), None)
+    if error:
+        raise ParserContractError(f"Rust parser produced invalid result {list(error.absolute_path)}: {error.message}")
+    return result
+
+
 def _unsupported(profile: dict[str, Any], validator: Draft202012Validator) -> dict[str, Any]:
     return _gap_result(profile, "unsupported_profile", f"unsupported tool profile: {profile['tool_id']}", validator)
 
@@ -171,6 +274,7 @@ class ParserRegistry:
         self._request_validator, self._result_validator = _validators(self.asset_root)
         self._parsers: dict[str, Any] = {}
         self.register("python.ast-source", lambda request: parse_python_request(request, self.asset_root))
+        self.register("rust.syntax-source", lambda request: parse_rust_request(request, self.asset_root))
 
     def register(self, tool_id: str, parser: Any) -> None:
         if not isinstance(tool_id, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]*", tool_id):
