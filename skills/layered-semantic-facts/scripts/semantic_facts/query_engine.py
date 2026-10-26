@@ -14,6 +14,7 @@ from .repository.store import Repository
 from .source_scanner import inspect_source
 from .constructor import execute_constructor_request
 from .tool_executor import SubprocessToolExecutor
+from .induction_provider import InductionProviderRegistry
 
 
 class QueryContractError(ValueError):
@@ -288,6 +289,8 @@ def execute_query_with_construction(
     asset_root: str | Path | None = None,
     *,
     external_executor: SubprocessToolExecutor | None = None,
+    induction_provider_registry: InductionProviderRegistry | None = None,
+    induction_provider_id: str | None = None,
 ) -> dict[str, Any]:
     """Read current facts, construct gaps, append without replacement, re-read, and project."""
     assets = Path(asset_root) if asset_root else Path(__file__).resolve().parents[2] / "assets"
@@ -474,7 +477,7 @@ def execute_query_with_construction(
             },
         }
         try:
-            constructed = execute_constructor_request(construct_request, assets, external_executor=external_executor)
+            constructed = execute_constructor_request(construct_request, assets, external_executor=external_executor, induction_provider_registry=induction_provider_registry, induction_provider_id=induction_provider_id)
         except (OSError, ValueError) as error:
             last_constructor_gaps = [{
                 **gap,
