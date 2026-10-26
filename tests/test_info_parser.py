@@ -85,3 +85,32 @@ def test_registry_rejects_duplicate_registration():
     registry = ParserRegistry()
     with pytest.raises(ValueError, match="already registered"):
         registry.register("python.ast-source", lambda value: value)
+
+def test_rust_parser_emits_struct_trait_function_and_use_observations():
+    result = parse_rust_request(request(
+        "use std::path::Path;\n\npub struct Config { value: String }\n\npub trait Readable { fn read(&self); }\n\nimpl Config { pub fn load() {} }\n",
+        tool_id="rust.syntax-source",
+    ))
+
+    texts = {item["payload"]["text"] for item in result["observations"]}
+    assert "struct Config" in texts
+    assert "trait Readable" in texts
+    assert "fn read" in texts
+    assert "fn load" in texts
+    assert "use std::path::Path" in texts
+    assert all(item["evidence"][0]["locator"].startswith("src/example.py:L") for item in result["observations"])
+
+
+def test_rust_parser_returns_gap_for_unclosed_delimiter():
+    result = parse_rust_request(request("pub struct Config { value: String", tool_id="rust.syntax-source"))
+    assert result["observations"] == []
+    assert result["gaps"][0]["reason"] == "unparseable"
+
+
+def test_registry_registers_python_and_rust_parsers():
+    from semantic_facts.info_parser import ParserRegistry
+
+    registry = ParserRegistry()
+    assert registry.supported_tools() == ("python.ast-source", "rust.syntax-source")
+    result = registry.parse(request("pub enum State { Ready, Busy }", tool_id="rust.syntax-source"))
+    assert any(item["payload"]["text"] == "enum State" for item in result["observations"])
