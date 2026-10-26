@@ -170,7 +170,7 @@ These tasks follow accepted pure parser adapters. They are prerequisites to enab
 - [x] 11.3 Add a host-owned default executor factory with fixed argv prefixes for specifically accepted tool IDs; never build commands from query or matrix input. Wire CLI `query` and `construct` entrypoints to this factory.
 - [x] 11.4 Verify real Cargo metadata invocation through query runtime produces distinct workspace-membership F4 and dependency F6 facts, writes SQLite, survives close/reopen and returns only requested fields/evidence.
 - [ ] 11.5 Verify missing Cargo, timeout, non-zero exit, malformed output and source mutation all fail closed with explicit gaps and no fabricated facts.
-- [ ] 11.6 Keep production matrix entries disabled until the full runtime invocation profile and failure modes pass; run strict OpenSpec and all component suites, then continue root S1–S12 scenarios.
+- [ ] 11.6 Enable only the exact Cargo profile after its runtime path/failure-mode evidence passes, narrowed to supported F4.kind/F6.kind needs; keep Python and all other research profiles disabled until their own runtime acceptance. Keep the root S1–S12 product gate blocked.
 
 ### Query-runtime producer wiring evidence (2026-10-26)
 
@@ -186,3 +186,6 @@ These tasks follow accepted pure parser adapters. They are prerequisites to enab
 - Added runtime failure acceptance for missing executable, timeout, nonzero exit, malformed Cargo metadata output, and source mutation during execution. Each case asserts no F4/F6 manifest facts are fabricated and an explicit gap is returned.
 - GREEN CI: https://github.com/vchs6/code2semantics/actions/runs/40347002211 — runtime acceptance group 18 passed, including all new failure cases; source scanner 9 passed; repository 63; transactions 6; transfer 8; repository acceptance 5; matrix 15; parser 14; constructor/query group 70; quality gate tests 2; strict OpenSpec passed. Overall failure was only the expected product delivery gate.
 - Task 11.6 remains pending until the actual CLI entrypoint acceptance against the host-owned default executor and full S1–S12 scenario matrix are green. The production manifest matrix entries remain disabled meanwhile.
+
+
+Per-profile enablement rule: a profile's own accepted real-runtime evidence can authorize that narrow profile; it does not authorize any unrelated profile or the full S1–S12 success marker.
