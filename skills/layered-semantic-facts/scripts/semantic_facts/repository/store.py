@@ -185,6 +185,15 @@ class Repository:
                 field_name TEXT NOT NULL, payload TEXT NOT NULL,
                 FOREIGN KEY(fact_key) REFERENCES facts(fact_key)
             );
+            CREATE TABLE IF NOT EXISTS attribute_versions (
+                version_key TEXT PRIMARY KEY, attribute_key TEXT NOT NULL,
+                fact_key TEXT NOT NULL, field_name TEXT NOT NULL, payload TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS validity_events (
+                event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                target_kind TEXT NOT NULL, target_key TEXT NOT NULL,
+                state TEXT NOT NULL, reason TEXT
+            );
             CREATE TABLE IF NOT EXISTS relations (
                 relation_key TEXT PRIMARY KEY, owner_key TEXT NOT NULL,
                 payload TEXT NOT NULL, navigation INTEGER NOT NULL DEFAULT 0
@@ -338,16 +347,36 @@ class Repository:
         for row in record.attributes:
             field_name = row.field_path.removeprefix("/fields/")
             values = (row.key, row.fact_key, field_name, row.payload)
+            version_key = hashlib.sha256(_canonical((row.key, row.payload)).encode("utf-8")).hexdigest()
             self.connection.execute(
-                "INSERT OR IGNORE INTO attributes(attribute_key, fact_key, field_name, payload) VALUES (?, ?, ?, ?)",
-                values,
+                "INSERT OR IGNORE INTO attribute_versions(version_key, attribute_key, fact_key, field_name, payload) "
+                "VALUES (?, ?, ?, ?, ?)",
+                (version_key, *values),
             )
             existing = self.connection.execute(
                 "SELECT attribute_key, fact_key, field_name, payload FROM attributes WHERE attribute_key = ?",
                 (row.key,),
             ).fetchone()
-            if not existing or tuple(existing) != values:
-                raise WriteConflict(None, f"attribute conflict: {row.key}")
+            if existing is None:
+                self.connection.execute(
+                    "INSERT INTO attributes(attribute_key, fact_key, field_name, payload) VALUES (?, ?, ?, ?)",
+                    values,
+                )
+            elif tuple(existing[:3]) != values[:3]:
+                raise WriteConflict(None, f"attribute identity conflict: {row.key}")
+            elif existing[3] != row.payload:
+                # Keep the logical field key stable while retaining every prior
+                # assertion version in attribute_versions.
+                self.connection.execute(
+                    "UPDATE attributes SET payload = ? WHERE attribute_key = ?",
+                    (row.payload, row.key),
+                )
+                assertion = json.loads(row.payload)
+                if assertion.get("validity", {}).get("state") == "current":
+                    self.connection.execute(
+                        "INSERT INTO validity_events(target_kind, target_key, state, reason) VALUES (?, ?, ?, ?)",
+                        ("field", row.key, "current", "new validated assertion version appended"),
+                    )
 
         for row in record.relations:
             values = (row.key, row.owner_key, row.payload, int(row.navigation))
