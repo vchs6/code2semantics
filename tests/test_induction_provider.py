@@ -185,3 +185,33 @@ def test_provider_missing_executable_fails_closed(tmp_path):
     assert result["execution_status"] == "unavailable_tool"
     assert result["induction_result"]["batch"]["facts"] == []
     assert result["induction_result"]["gaps"]
+
+def test_provider_discards_output_when_source_changes_during_execution(tmp_path):
+    root = tmp_path / "source"
+    request = _request(root)
+    script = tmp_path / "mutating-provider.py"
+    provider_program = "\n".join([
+        "import json,sys,pathlib",
+        "request=json.load(sys.stdin)",
+        "root=pathlib.Path(request['existing_valid_facts']['sources'][0]['root'])",
+        "(root/'app.py').write_text('def changed():' + chr(10) + '    return 2' + chr(10))",
+        "json.dump({'provider_id':'fixture-provider','protocol_version':'1.0.0','proposed_batch':{",
+        "'contract_version':'1.0.0','catalog_id':'semantic-facts-20261025',",
+        "'sources':request['existing_valid_facts']['sources'],'facts':[],",
+        "'navigation':[],'direct_nodes':[],'conflicts':[]}},sys.stdout)",
+    ])
+    script.write_text(provider_program, encoding="utf-8")
+    registry = InductionProviderRegistry({
+        "fixture-provider": {
+            "argv": [sys.executable, str(script)],
+            "timeout_seconds": 2,
+            "max_stdout_bytes": 8192,
+            "max_stderr_bytes": 1024,
+        }
+    })
+
+    result = invoke_induction_provider("fixture-provider", request, registry)
+
+    assert result["execution_status"] == "source_modified"
+    assert result["induction_result"]["batch"]["facts"] == []
+    assert any(gap["reason"] == "source_modified" for gap in result["induction_result"]["gaps"])
