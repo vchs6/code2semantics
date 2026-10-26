@@ -457,9 +457,10 @@ class Repository:
             inventory = json.loads(payload)
             inventory_target = inventory.get("target", {})
             node_ref = inventory_target.get("node", {}) if inventory_target.get("kind") == "node" else {}
-            if node_ref.get("source_id") not in current_source_ids:
+            inventory_sources = set(inventory.get("assertion", {}).get("context", {}).get("source_ids", []))
+            if not inventory_sources.intersection(current_source_ids):
                 continue
-            if target and node_ref != target:
+            if target and (inventory_target.get("kind") != "node" or node_ref != target):
                 continue
             direct_nodes.append(inventory)
 
