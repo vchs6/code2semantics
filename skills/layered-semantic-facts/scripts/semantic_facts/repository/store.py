@@ -134,7 +134,8 @@ class Repository:
                 raise WriteConflict(None, "submission key already has different content")
             payload = json.loads(existing[1])
             # Re-observing an old snapshot can make it current again; fact history stays.
-            self._mark_current_sources(records[0].sources)
+            with self.connection:
+                self._mark_current_sources(records[0].sources)
             return CommitReceipt(submission_key, payload["digest"], tuple())
 
         record = records[0]
