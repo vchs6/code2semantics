@@ -34,7 +34,7 @@ The existing survey acceptance covers the initial F2/L3 catalogue only. It is no
 ## Expanded needs survey and probe evidence (2026-10-26)
 
 - The authoritative input is the 127-record `assets/information-needs.json` covering all F1–F18 fields and S1–S12 scenarios. Candidate tools are grouped by capability/output family; this is not a 127-tool plan.
-- Coverage matrix and shortlist are in `research/semantic-tooling-survey.md` §7. Six research-only candidates were added to the capability matrix as disabled entries; no survey action enabled them.
+- Coverage matrix and shortlist are in `research/semantic-tooling-survey.md` §7. Seven research-only candidates were added to the capability matrix as disabled entries; no survey action enabled them.
 - Corrected CI probe evidence: https://github.com/vchs6/code2semantics/actions/runs/40319334019. Python 3.12.15 `compileall` fixture and Cargo 1.99.0 `cargo metadata --no-deps --format-version 1` fixture succeeded. rustc 1.99.0 is present, but `cargo check` was not probed. rust-analyzer path resolved but was not runnable; ctags, ast-grep and tree-sitter CLI were absent in this runner.
 - The first probe run is retained as RED evidence because fixture newline escaping caused sample failures; only the corrected run above is treated as positive evidence.
 - Candidate entries remain disabled until exact native-output parser fixtures and parser-development acceptance pass.
