@@ -50,6 +50,24 @@ def execute_query(query: dict[str, Any], repository: Repository, asset_root: str
         raise QueryContractError("no stored source record is available for the requested scope")
 
     gaps: list[dict[str, Any]] = []
+    needs_document = json.loads((Path(asset_root) / "information-needs.json").read_text(encoding="utf-8"))
+    in_catalog = {
+        (need["fact_type"], field)
+        for need in needs_document["needs"]
+        for field in need["fields"]
+    }
+    out_of_catalog: list[dict[str, Any]] = []
+    for selection in query["selections"]:
+        unsupported = sorted(
+            field for field in selection["fields"]
+            if (selection["fact_type"], field) not in in_catalog
+        )
+        if unsupported:
+            out_of_catalog.append({
+                "fact_type": selection["fact_type"],
+                "fields": unsupported,
+                "reason": "No fixed first-phase information need covers these fields.",
+            })
     results = stored["facts"]
     source_ids = sorted({source["source_id"] for source in sources})
     context = {
@@ -140,11 +158,17 @@ def execute_query(query: dict[str, Any], repository: Repository, asset_root: str
         })
 
     for selection in query["selections"]:
+        requested_fields = [
+            field for field in selection["fields"]
+            if (selection["fact_type"], field) in in_catalog
+        ]
+        if not requested_fields:
+            continue
         matching = [fact for fact in results if fact["fact_type"] == selection["fact_type"]]
         if not matching:
             gaps.append({
                 "fact_type": selection["fact_type"],
-                "fields": list(selection["fields"]),
+                "fields": requested_fields,
                 "target": query["target"],
                 "reason": "missing",
                 "detail": "No stored fact of the requested type matched this query.",
@@ -153,7 +177,7 @@ def execute_query(query: dict[str, Any], repository: Repository, asset_root: str
             })
             continue
         present = {field for fact in matching for field in fact.get("fields", {})}
-        missing = sorted(set(selection["fields"]) - present)
+        missing = sorted(set(requested_fields) - present)
         if missing:
             gaps.append({
                 "fact_type": selection["fact_type"],
@@ -175,7 +199,7 @@ def execute_query(query: dict[str, Any], repository: Repository, asset_root: str
         "premise_checks": [],
         "conflicts": stored["conflicts"],
         "gaps": gaps,
-        "out_of_catalog": [],
+        "out_of_catalog": out_of_catalog,
         "termination": "no_progress" if gaps else "satisfied",
     }
     error = next(response_validator.iter_errors(response), None)
@@ -389,7 +413,7 @@ def execute_query_with_construction(
             } for gap in response["gaps"]]
             break
 
-        last_constructor_gaps = constructed["gaps"]
+        last_constructor_gaps = [gap for gap in constructed["gaps"] if gap["reason"] != "uncovered_need"]
         if any(gap["reason"] == "source_modified" for gap in last_constructor_gaps):
             break
 
@@ -432,6 +456,8 @@ def execute_query_with_construction(
             for gap in merged_gaps
         }
         for gap in last_constructor_gaps:
+            if gap["reason"] == "uncovered_need":
+                continue
             key = (gap["fact_type"], tuple(gap["fields"]), gap["reason"], gap["detail"])
             if key not in existing_keys:
                 merged_gaps.append(gap)
