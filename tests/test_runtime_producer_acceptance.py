@@ -172,3 +172,92 @@ dependencies = ["requests>=2"]
         assert calls == []
     finally:
         reopened.close()
+
+def test_mixed_language_scope_runs_each_manifest_producer_only_for_its_own_root(tmp_path, monkeypatch, capsys):
+    python_root = tmp_path / "python-project"
+    python_root.mkdir()
+    (python_root / "app.py").write_text("""def main():
+    return 0
+""", encoding="utf-8")
+    (python_root / "pyproject.toml").write_text(
+        """[project]
+name = "mixed-python"
+version = "1.0.0"
+dependencies = ["requests>=2"]
+""",
+        encoding="utf-8",
+    )
+    rust_root = tmp_path / "rust-project"
+    (rust_root / "crates" / "app" / "src").mkdir(parents=True)
+    (rust_root / "crates" / "core" / "src").mkdir(parents=True)
+    (rust_root / "Cargo.toml").write_text(
+        '[workspace]\nmembers = ["crates/app", "crates/core"]\nresolver = "2"\n',
+        encoding="utf-8",
+    )
+    (rust_root / "crates" / "app" / "Cargo.toml").write_text(
+        '[package]\nname = "mixed-app"\nversion = "0.1.0"\nedition = "2021"\n'
+        '[dependencies]\nmixed-core = { path = "../core" }\n',
+        encoding="utf-8",
+    )
+    (rust_root / "crates" / "core" / "Cargo.toml").write_text(
+        '[package]\nname = "mixed-core"\nversion = "0.1.0"\nedition = "2021"\n',
+        encoding="utf-8",
+    )
+    (rust_root / "crates" / "app" / "src" / "lib.rs").write_text("pub fn run() {}\n", encoding="utf-8")
+    (rust_root / "crates" / "core" / "src" / "lib.rs").write_text("pub fn core() {}\n", encoding="utf-8")
+
+    assets = tmp_path / "assets"
+    shutil.copytree(ASSETS, assets)
+    matrix_path = assets / "capability-matrix.json"
+    matrix = json.loads(matrix_path.read_text(encoding="utf-8"))
+    for tool_id in ("python.pyproject-toml", "rust.cargo-metadata"):
+        profile = next(item for item in matrix["entries"] if item["tool_id"] == tool_id)
+        profile["enabled"] = True
+        profile["acceptance"] = {
+            "actor": "parser_development",
+            "evidence": ["tests/test_runtime_producer_acceptance.py"],
+        }
+    matrix_path.write_text(json.dumps(matrix), encoding="utf-8")
+
+    query = {
+        "contract_version": "1.0.0",
+        "catalog_id": "semantic-facts-20261025",
+        "request_id": "mixed-language-runtime",
+        "scope": {
+            "scope_id": "mixed-language-scope",
+            "directories": [str(python_root.resolve()), str(rust_root.resolve())],
+            "excludes": [],
+            "defaulted": False,
+        },
+        "target": {"kind": "scope"},
+        "granularity": "L2",
+        "selections": [
+            {"fact_type": "F3", "fields": ["runtime"]},
+            {"fact_type": "F4", "fields": ["kind"]},
+            {"fact_type": "F6", "fields": ["kind"]},
+        ],
+        "budget": {"max_rounds": 2, "max_new_assertions": 30},
+    }
+    calls = []
+    original_execute = SubprocessToolExecutor.execute
+
+    def traced_execute(self, tool_id, args, *, cwd, timeout_seconds):
+        calls.append((tool_id, str(cwd)))
+        return original_execute(self, tool_id, args, cwd=cwd, timeout_seconds=timeout_seconds)
+
+    monkeypatch.setattr(SubprocessToolExecutor, "execute", traced_execute)
+    monkeypatch.setattr(cli, "_assets", lambda: assets)
+    database = tmp_path / "mixed-language.sqlite"
+    query_path = tmp_path / "mixed-language-query.json"
+    query_path.write_text(json.dumps(query), encoding="utf-8")
+
+    assert cli.main(["query", "--db", str(database), "--query-file", str(query_path)]) == 0
+    response = json.loads(capsys.readouterr().out)
+    assert response["termination"] == "satisfied", response["gaps"]
+    assert {fact["fact_type"] for fact in response["results"]} == {"F3", "F4", "F6"}
+    assert any("mixed-python" in field["value"].get("text", "") for fact in response["results"] for field in fact["fields"].values())
+    assert any("workspace member: mixed-app" in field["value"].get("text", "") for fact in response["results"] for field in fact["fields"].values())
+    assert any("mixed-app -> mixed-core" in field["value"].get("text", "") for fact in response["results"] for field in fact["fields"].values())
+    assert len(calls) == 1, calls
+    assert calls[0][0] == "rust.cargo-metadata"
+    assert calls[0][1] == str(rust_root.resolve())
