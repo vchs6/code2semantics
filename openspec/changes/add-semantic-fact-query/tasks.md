@@ -69,3 +69,11 @@ For the supported F2/L3 model, a node-target query now verifies both (a) the cur
 - Repository graph traversal has separate coverage in `tests/repository/test_store.py` for duplicate edge deduplication, multi-parent edges, cycles, external terminal references, depth/edge budget truncation, and immutable fact-row counts.
 - CI: https://github.com/vchs6/code2semantics/actions/runs/40297691458 — repository 53 passed; matrix 15; parser 9; scanner 7; source acceptance 4; packaging 2; executor 3; producer dispatch 3; combined information-needs/constructor/induction/query suite 52 passed; strict OpenSpec passed.
 - Task 4.4 remains pending: complete S1–S12 integration across the full runtime tool→parser→constructor/induction→FactBatch→repository→response path is not yet demonstrated. Product delivery gate remains blocked.
+
+
+## Query failure/termination acceptance evidence (2026-10-26)
+
+- RED/GREEN: `tests/test_query_orchestration.py` now covers a closed repository returning a schema-validated `termination=unavailable` response with `repository_unavailable` gaps and no fabricated results; it also covers partial Python-source progress under a one-round budget.
+- The budget test initially failed because the final projection reset `budget_exhausted` to `no_progress` after re-reading the repository. The query loop now retains an explicit budget-exhaustion flag through final response projection.
+- CI GREEN: https://github.com/vchs6/code2semantics/actions/runs/40311963317 — repository 59 passed; transaction 6; transfer 8; repository acceptance 5; matrix 15; parser 9; scanner 7; runtime acceptance 9; packaging 2; executor 3; producer dispatch 3; combined information-needs/constructor/binding/induction/query suite 55 passed; strict OpenSpec passed.
+- Task 4.4 remains pending: the current runtime producer is still first-phase F2/L3 syntax inventory. Full S1–S12 scenarios requiring F1/F4/F6/F7/F8/F12–F18 production semantics, workspace membership/dependency separation, condition-compatible cycles, and algorithm/negative-evidence reasoning have not yet been demonstrated end to end. Product delivery gate correctly remains BLOCKED.
