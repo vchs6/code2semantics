@@ -13,6 +13,7 @@ from .source_scanner import build_fact_batch
 from .query_engine import execute_query_with_construction
 from .constructor_plan import plan_constructor_request
 from .constructor import execute_constructor_request
+from .tool_executor import build_default_tool_executor
 
 
 def _assets() -> Path:
@@ -46,13 +47,13 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "construct":
         request_document = json.loads(args.request_file.read_text(encoding="utf-8"))
-        result = execute_constructor_request(request_document, _assets())
+        result = execute_constructor_request(request_document, _assets(), external_executor=build_default_tool_executor())
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
 
     if args.command in {"scan-source", "scan-python"}:
         codec = ContractCodec(_assets())
-        batch = build_fact_batch(args.root, codec)
+        batch = build_fact_batch(args.root, codec, external_executor=build_default_tool_executor())
         digest = hashlib.sha256(
             json.dumps(batch, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
         ).hexdigest()
@@ -77,7 +78,7 @@ def main(argv: list[str] | None = None) -> int:
     query_document = json.loads(args.query_file.read_text(encoding="utf-8"))
     repository = Repository(args.db, _assets())
     try:
-        result = execute_query_with_construction(query_document, repository, _assets())
+        result = execute_query_with_construction(query_document, repository, _assets(), external_executor=build_default_tool_executor())
     finally:
         repository.close()
     print(json.dumps(result, ensure_ascii=False, indent=2))
