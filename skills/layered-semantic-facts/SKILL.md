@@ -10,7 +10,7 @@ compatibility: Requires Python 3.12+, jsonschema, pytest for tests, and a local 
 
 Install the dependencies from `scripts/requirements.txt`, then set `PYTHONPATH=skills/layered-semantic-facts/scripts`.
 
-Scan Python source into a FactBatch and persist it:
+Scan Python and Rust source into a FactBatch and persist it:
 
 ```bash
 python -m semantic_facts.cli scan-python --root /path/to/project --db /path/to/facts.db --output /tmp/fact-batch.json
@@ -24,12 +24,13 @@ python -m semantic_facts.cli query --db /path/to/facts.db --query-file /path/to/
 
 ## What the current scanner observes
 
-- Python class and function declarations.
-- Import declarations.
+- Python: module, class, function/async function, and import declarations.
+- Rust: module, function, struct, enum, trait, impl, type, const/static, and use declarations.
+- Both languages: file identity and source evidence locators.
 - File identity and evidence locators.
 - Source-content digests and current-source context.
 
-The scanner uses Python's AST parser and does not execute project code. Its output is limited to syntax inventory (F2, L3); it does not infer runtime behavior, support other programming languages, orchestrate external tools, or implement the full multi-layer constructor/query workflow.
+The Python parser uses Python AST. The Rust parser is a deterministic declaration inventory with delimiter-balance diagnostics; it is not rustc, rust-analyzer, a type checker, or a macro expander. Both parsers are limited to syntax inventory (F2, L3); they do not infer runtime behavior. Other languages are not supported by this first-phase scanner. External tool orchestration, induction, and the full multi-layer constructor/query workflow remain incomplete.
 
 ## Evidence and retention
 
