@@ -130,4 +130,4 @@ def test_partial_scan_preserves_valid_files_when_another_file_is_unparseable(tmp
     assert len(result["gaps"]) == 1
     assert result["gaps"][0]["path"] == "broken.py"
     assert result["gaps"][0]["reason"] == "unparseable"
-    assert result["batch"]["direct_nodes"][0]["assertion"]["coverage"]["completeness"] == "partial"
+    assert next(item for item in result["batch"]["direct_nodes"] if item["target"]["kind"] == "scope")["assertion"]["coverage"]["completeness"] == "partial"
