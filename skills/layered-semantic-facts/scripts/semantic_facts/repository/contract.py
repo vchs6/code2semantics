@@ -79,8 +79,14 @@ class ContractCodec:
         for index, fact in enumerate(batch["facts"]):
             key = fact_key(fact)
             if key in seen:
-                detail = "identical repetition" if seen[key] == fact else "conflicting content"
-                raise ContractError(f"/facts/{index}", f"Duplicate fact identity ({detail})")
+                previous = seen[key]
+                detail = "identical repetition" if previous == fact else "conflicting content"
+                raise ContractError(
+                    f"/facts/{index}",
+                    f"Duplicate fact identity ({detail}); fact_id={fact.get('fact_id')}; "
+                    f"previous_fact_id={previous.get('fact_id')}; fact_type={fact.get('fact_type')}; "
+                    f"previous_fact_type={previous.get('fact_type')}; node_id={fact.get('node', {}).get('node_id')}",
+                )
             seen[key] = fact
 
     def decode(self, batch: JsonObject) -> tuple[StoredRecord, ...]:
