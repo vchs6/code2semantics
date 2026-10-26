@@ -256,8 +256,6 @@ def execute_query_with_construction(
         keys: set[str] = set()
         for inventory in result["direct_nodes"]:
             target = inventory.get("target", {})
-            if target != query["target"]:
-                continue
             assertion = inventory.get("assertion", {})
             if assertion.get("knowledge") != "supported" or assertion.get("coverage", {}).get("completeness") != "complete":
                 continue
@@ -278,10 +276,20 @@ def execute_query_with_construction(
                 for item in evidence
             ):
                 continue
+
+            is_requested_target = target == query["target"]
+            is_required_ancestor = (
+                query["target"]["kind"] == "node"
+                and target.get("kind") == "scope"
+                and query["target"]["node"] in inventory.get("children", [])
+            )
+            if not is_requested_target and not is_required_ancestor:
+                continue
             keys.add(json.dumps({
                 "target": target,
                 "sources": sorted(assertion["context"]["source_ids"]),
                 "checked": assertion["coverage"]["checked"],
+                "role": "ancestor" if is_required_ancestor else "target",
             }, sort_keys=True, ensure_ascii=False))
         return keys
 
