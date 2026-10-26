@@ -42,6 +42,10 @@ jobs:
         env:
           PYTHONPATH: skills/layered-semantic-facts/scripts
         run: python -m pytest tests/test_tool_executor.py -q -ra -p no:cacheprovider
+      - name: Producer dispatch tests
+        env:
+          PYTHONPATH: skills/layered-semantic-facts/scripts
+        run: python -m pytest tests/test_producer_dispatch.py -q -ra -p no:cacheprovider
       - name: Information-needs and constructor plan tests
         env:
           PYTHONPATH: skills/layered-semantic-facts/scripts:tests
