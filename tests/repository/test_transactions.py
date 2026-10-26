@@ -61,7 +61,7 @@ def test_new_submission_cannot_replace_existing_fact_history(batch, db_path):
     ).fetchall()
 
     changed = copy.deepcopy(batch)
-    changed["facts"][0]["fields"]["strategy"]["value"]["text"] = "changed content"
+    changed["facts"][0]["granularities"] = ["L2"]
 
     with pytest.raises(WriteConflict):
         repository.write(changed, "submission-2")
