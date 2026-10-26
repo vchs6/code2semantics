@@ -100,7 +100,7 @@ def test_provider_accepts_versioned_json_protocol_and_routes_result_through_indu
         "import json,sys\n"
         "request=json.load(sys.stdin)\n"
         "json.dump({'provider_id':'fixture-provider','protocol_version':'1.0.0','proposed_batch':"
-        "{'contract_version':'1.0.0','catalog_id':'semantic-facts-20261025','sources':[],"
+        "{'contract_version':'1.0.0','catalog_id':'semantic-facts-20261025','sources':request['existing_valid_facts']['sources'],"
         "'facts':[],'navigation':[],'direct_nodes':[],'conflicts':[]}},sys.stdout)\n",
         encoding="utf-8",
     )
