@@ -216,15 +216,19 @@ class Repository:
                 facts.append(fact)
 
         navigation = []
-        for payload, is_navigation in self.connection.execute(
-            "SELECT payload, navigation FROM relations WHERE navigation = 1"
+        for relation_key, payload in self.connection.execute(
+            "SELECT relation_key, payload FROM relations WHERE navigation = 1"
         ):
+            if not active("relation", relation_key):
+                continue
             edge = json.loads(payload)
             if edge.get("source", {}).get("source_id") in current_states:
                 navigation.append(edge)
 
         direct_nodes = []
-        for (payload,) in self.connection.execute("SELECT payload FROM inventories"):
+        for inventory_key, payload in self.connection.execute("SELECT inventory_key, payload FROM inventories"):
+            if not active("inventory", inventory_key):
+                continue
             inventory = json.loads(payload)
             assertion = inventory.get("assertion", {})
             source_ids = set(assertion.get("context", {}).get("source_ids", []))
@@ -232,7 +236,9 @@ class Repository:
                 direct_nodes.append(inventory)
 
         conflicts = []
-        for (payload,) in self.connection.execute("SELECT payload FROM conflicts"):
+        for conflict_key, payload in self.connection.execute("SELECT conflict_key, payload FROM conflicts"):
+            if not active("conflict", conflict_key):
+                continue
             conflict = json.loads(payload)
             source_ids = set(conflict.get("context", {}).get("source_ids", []))
             if source_ids.intersection(current_states):
@@ -591,6 +597,15 @@ class Repository:
             for source_id, payload in self.connection.execute("SELECT source_id, payload FROM sources")
             if source_id in current_source_ids
         }
+        event_states = self._validity_event_states()
+        evidence_key_by_identity = {
+            (item["source_id"], item["evidence_id"]): key
+            for key, payload in self.connection.execute("SELECT evidence_key, payload FROM evidence")
+            for item in [json.loads(payload)]
+        }
+
+        def active(kind: str, key: str) -> bool:
+            return event_states.get((kind, key), "current") == "current"
 
         def assertion_is_current(assertion: dict[str, Any]) -> bool:
             validity = assertion.get("validity")
@@ -607,6 +622,7 @@ class Repository:
             return all(
                 item.get("source_id") in current_states
                 and item.get("content_state") == current_states[item.get("source_id")]
+                and active("evidence", evidence_key_by_identity.get((item.get("source_id"), item.get("evidence_id")), ""))
                 for item in evidence
             )
 
@@ -631,6 +647,8 @@ class Repository:
         rows = self.connection.execute(sql, params).fetchall()
         selected: list[dict[str, Any]] = []
         for row in rows:
+            if not active("fact", row[0]):
+                continue
             value = json.loads(row[6])
             selection = next(item for item in selections if item["fact_type"] == row[5])
             wanted = set(selection["fields"])
@@ -638,7 +656,10 @@ class Repository:
             for name, payload in self.connection.execute(
                 "SELECT field_name, payload FROM attributes WHERE fact_key = ?", (row[0],)
             ):
-                if name in wanted:
+                if name in wanted and active("field", self.connection.execute(
+                    "SELECT attribute_key FROM attributes WHERE fact_key = ? AND field_name = ?",
+                    (row[0], name),
+                ).fetchone()[0]):
                     assertion = json.loads(payload)
                     if assertion_is_current(assertion):
                         fields[name] = assertion
