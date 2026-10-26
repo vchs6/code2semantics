@@ -116,3 +116,10 @@ CI run: https://github.com/vchs6/code2semantics/actions/runs/40277635793
 - Added repository graph traversal coverage for multiple parents, cycle termination, equivalent-edge deduplication, external terminal references, depth/edge budget truncation and no fact-row deletion.
 - Added query-orchestration coverage proving that a multi-parent cyclic graph with an external reference does not cause recursive expansion or leak graph-edge assertions into the minimal response.
 - Full S1–S12 acceptance is still NOT passed. The product gate remains blocked until the complete runtime acquisition → parse → constructor/induction → FactBatch → repository re-read → final response workflow and all root scenarios are verified.
+
+
+## Cross-project Python/Rust acceptance (2026-10-26)
+
+- CI run: https://github.com/vchs6/code2semantics/actions/runs/40297921776
+- Runtime acceptance suite: 5 passed. The new case runs the real query/construction pipeline across two explicitly authorized roots (Python and Rust), where both define a same-named `Engine`; it verifies source/subject identity separation, minimal requested-field projection, and explicit out-of-catalog fields.
+- Full S1–S12 system acceptance remains NOT_YET_PASSED. The delivery gate is still intentionally blocked because the full provider-backed semantic construction/induction workflow and complete scenario matrix have not been demonstrated.
