@@ -442,3 +442,71 @@ def test_local_invalidation_targets_current_source_head_without_deleting_history
     assert event != old_row[2]
     assert repository.connection.execute("SELECT COUNT(*) FROM facts WHERE fact_id = ?", (fact_id,)).fetchone()[0] == 2
     repository.close()
+
+def test_query_cli_rebuilds_current_snapshot_after_source_file_deletion(tmp_path, capsys):
+    project = tmp_path / "query-cli-deleted-source"
+    project.mkdir()
+    stable = project / "stable.py"
+    removed = project / "removed.py"
+    stable.write_text("class Stable:\\n    pass\\n", encoding="utf-8")
+    removed.write_text("class Removed:\\n    pass\\n", encoding="utf-8")
+    database = tmp_path / "query-cli-deleted-source.db"
+
+    assert main(["scan-source", "--root", str(project), "--db", str(database)]) == 0
+    capsys.readouterr()
+    repository = Repository(database)
+    old_source_id = repository.connection.execute(
+        "SELECT source_id FROM source_heads WHERE root = ?", (str(project.resolve()),)
+    ).fetchone()[0]
+    old_fact_count = repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
+    old_fact_keys = {
+        row[0] for row in repository.connection.execute("SELECT fact_key FROM facts")
+    }
+    repository.close()
+
+    removed.unlink()
+    query = {
+        "contract_version": "1.0.0",
+        "catalog_id": "semantic-facts-20261025",
+        "request_id": "query-cli-after-source-deletion",
+        "scope": {
+            "scope_id": "query-cli-deleted-scope",
+            "directories": [str(project.resolve())],
+            "excludes": [],
+            "defaulted": False,
+        },
+        "target": {"kind": "scope"},
+        "granularity": "L3",
+        "selections": [{"fact_type": "F2", "fields": ["identity", "names"]}],
+        "budget": {"max_rounds": 2, "max_new_assertions": 20},
+    }
+    query_path = tmp_path / "query.json"
+    query_path.write_text(json.dumps(query, ensure_ascii=False), encoding="utf-8")
+
+    assert main(["query", "--db", str(database), "--query-file", str(query_path)]) == 0
+    response = json.loads(capsys.readouterr().out)
+
+    assert response["termination"] == "satisfied", response
+    assert any("class Stable" in fact["fields"]["names"]["value"]["text"] for fact in response["results"])
+    assert all("class Removed" not in fact["fields"]["names"]["value"]["text"] for fact in response["results"])
+    current_source_ids = {source["source_id"] for source in response["sources"]}
+    assert old_source_id not in current_source_ids
+    assert {fact["node"]["source_id"] for fact in response["results"]} <= current_source_ids
+
+    repository = Repository(database)
+    try:
+        current_source_id = repository.connection.execute(
+            "SELECT source_id FROM source_heads WHERE root = ?", (str(project.resolve()),)
+        ).fetchone()[0]
+        assert current_source_id in current_source_ids
+        assert current_source_id != old_source_id
+        assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] > old_fact_count
+        assert old_fact_keys <= {
+            row[0] for row in repository.connection.execute("SELECT fact_key FROM facts")
+        }
+        assert repository.connection.execute(
+            "SELECT 1 FROM validity_events WHERE target_kind = 'source' AND target_key = ? AND state = 'modified'",
+            (old_source_id,),
+        ).fetchone() is not None
+    finally:
+        repository.close()
