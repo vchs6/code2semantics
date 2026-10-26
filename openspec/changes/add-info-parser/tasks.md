@@ -27,3 +27,14 @@
 - Real source acceptance: `tests/test_acceptance.py` (3 passed before induction tests were added).
 - Accepted profiles: `assets/capability-matrix.json` entries `python.ast-source` and `rust.syntax-source`, each with `parser_development` acceptance evidence.
 - Current CI runs parser, scanner, acceptance, constructor planning and induction tests; full product delivery remains blocked until the entire multi-layer pipeline is complete.
+
+## 4. Dependency gate for researched native tool outputs
+
+The current parser tasks cover only supplied Python/Rust syntax text. Additional parsers must be planned after the constructor's expanded information-needs catalogue and tool survey have been accepted.
+
+- [ ] 4.1 For each researched candidate selected for parser development, record the exact native output format/version and the corresponding information-needs IDs before implementing a parser.
+- [ ] 4.2 Add captured or deterministic native-output fixtures for successful, partial, malformed, unsupported-version and missing-evidence cases. Fixtures must retain invocation/source provenance and must not pretend to be runtime output when generated synthetically.
+- [ ] 4.3 Implement pure `tool-native-output + invocation-profile → ParseResult` transformations only for accepted formats; do not execute tools, read project files, select producers, write the matrix or infer facts in the parser.
+- [ ] 4.4 Run focused parser tests and constructor/producer-dispatch regression. Enable a matrix entry only after parser-development acceptance for the exact tool, output format and invocation profile; record the evidence in the matrix acceptance field.
+- [ ] 4.5 Strict-validate this change and record supported needs plus explicit unimplemented gaps. Survey completion alone does not satisfy parser acceptance.
+
