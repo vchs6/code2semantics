@@ -474,18 +474,11 @@ class Repository:
             elif tuple(existing[:3]) != values[:3]:
                 raise WriteConflict(None, f"attribute identity conflict: {row.key}")
             elif existing[3] != row.payload:
-                # Keep the logical field key stable while retaining every prior
-                # assertion version in attribute_versions.
-                self.connection.execute(
-                    "UPDATE attributes SET payload = ? WHERE attribute_key = ?",
-                    (row.payload, row.key),
-                )
-                assertion = json.loads(row.payload)
-                if assertion.get("validity", {}).get("state") == "current":
-                    self.connection.execute(
-                        "INSERT INTO validity_events(target_kind, target_key, state, reason) VALUES (?, ?, ?, ?)",
-                        ("field", row.key, "current", "new validated assertion version appended"),
-                    )
+                # A logical field identity is immutable within one source snapshot.
+                # A changed source must produce a new source/fact identity; a caller
+                # cannot rewrite an existing field payload under the same identity.
+                # Prior assertion versions remain in attribute_versions for audit.
+                raise WriteConflict(None, f"field assertion conflict: {row.key}")
 
         for row in record.relations:
             values = (row.key, row.owner_key, row.payload, int(row.navigation))
