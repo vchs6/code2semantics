@@ -19,6 +19,10 @@
       "research_basis": [
         "§3 R14",
         "§6 F16"
+      ],
+      "languages": [
+        "Python",
+        "Rust"
       ]
     }
   ]
