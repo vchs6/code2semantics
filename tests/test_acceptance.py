@@ -53,6 +53,13 @@ def test_real_source_scan_store_reopen_and_query(tmp_path, capsys):
     assert any("class RepositoryReader" in fact["fields"]["names"]["value"]["text"] for fact in result["results"])
     assert all(fact["fields"]["names"]["basis"]["evidence"] for fact in result["results"])
 
+    query_path = tmp_path / "query.json"
+    query_path.write_text(json.dumps(query, ensure_ascii=False), encoding="utf-8")
+    assert main(["query", "--db", str(database), "--query-file", str(query_path)]) == 0
+    cli_response = json.loads(capsys.readouterr().out)
+    assert cli_response["termination"] == "satisfied"
+    assert cli_response["results"]
+
     query_with_missing_field = dict(query)
     query_with_missing_field["selections"] = [{"fact_type": "F2", "fields": ["purpose"]}]
     incomplete = execute_query(query_with_missing_field, reopened, ROOT / "skills" / "layered-semantic-facts" / "assets")
