@@ -53,7 +53,7 @@ def entry(environment="subprocess", enabled=True):
 
 def test_dispatch_invokes_registered_subprocess_then_parser(tmp_path):
     executor = SubprocessToolExecutor({
-        "python.ast-source": [sys.executable, "-c", "print('class FromProducer:')"],
+        "python.ast-source": [sys.executable, "-c", "print('class FromProducer:'); print('    pass')"],
     })
     result = dispatch_registered_producer(
         entry(), request(), ParserRegistry(ASSETS),
