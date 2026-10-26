@@ -81,3 +81,48 @@ def test_query_uses_current_source_snapshot_and_keeps_old_fact_rows(tmp_path):
         assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] > first_count
     finally:
         repository.close()
+
+
+def test_query_requires_and_returns_current_scope_direct_node_completeness(tmp_path):
+    project = tmp_path / "inventory-query-project"
+    project.mkdir()
+    (project / "engine.py").write_text(
+        "class Engine:\\n    def run(self):\\n        return True\\n",
+        encoding="utf-8",
+    )
+    repository = Repository(tmp_path / "inventory.db", ASSETS)
+    try:
+        response = execute_query_with_construction(make_query(project), repository, ASSETS)
+        assert response["termination"] == "satisfied"
+        assert response["gaps"] == []
+        assert len(response["direct_nodes"]) == 1
+        inventory = response["direct_nodes"][0]
+        assert inventory["target"]["kind"] == "scope"
+        assert inventory["assertion"]["coverage"]["completeness"] == "complete"
+        assert len(inventory["children"]) == 1
+    finally:
+        repository.close()
+
+
+def test_query_rebuilds_missing_inventory_without_deleting_existing_facts(tmp_path):
+    from semantic_facts.repository.contract import ContractCodec
+    from semantic_facts.source_scanner import build_fact_batch
+
+    project = tmp_path / "missing-inventory-project"
+    project.mkdir()
+    (project / "engine.py").write_text("class Engine:\\n    pass\\n", encoding="utf-8")
+    batch = build_fact_batch(project, ContractCodec(ASSETS))
+    batch["direct_nodes"] = []
+    repository = Repository(tmp_path / "missing-inventory.db", ASSETS)
+    try:
+        repository.write(batch, "seed-without-inventory")
+        fact_count_before = repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
+        response = execute_query_with_construction(make_query(project), repository, ASSETS)
+        fact_count_after = repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
+        assert response["termination"] == "satisfied"
+        assert response["gaps"] == []
+        assert any(item["target"]["kind"] == "scope" for item in response["direct_nodes"])
+        assert fact_count_after == fact_count_before
+        assert repository.connection.execute("SELECT COUNT(*) FROM inventories").fetchone()[0] >= 1
+    finally:
+        repository.close()
