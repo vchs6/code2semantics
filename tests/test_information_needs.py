@@ -112,12 +112,25 @@ def test_plan_is_deterministic_and_covers_supported_f2_fields():
     assert first["matrix_mutated"] is False
 
 
-def test_unknown_field_is_an_explicit_gap_not_added_to_catalogue():
+def test_catalogue_omission_is_an_explicit_gap_not_added_at_runtime(tmp_path):
+    import shutil
+
+    for filename in ("information-needs.schema.json", "information-needs.json", "fact-catalog.json", "pipeline.schema.json", "common.schema.json", "contract-format.schema.json", "capability-matrix.json"):
+        shutil.copy(ASSETS / filename, tmp_path / filename)
+    path = tmp_path / "information-needs.json"
+    catalogue = json.loads(path.read_text(encoding="utf-8"))
+    catalogue["needs"] = [
+        need for need in catalogue["needs"]
+        if not (need["fact_type"] == "F3" and need["fields"] == ["purpose"])
+    ]
+    path.write_text(json.dumps(catalogue), encoding="utf-8")
     value = request(("purpose",))
-    result = plan_constructor_request(value, ASSETS)
+    result = plan_constructor_request(value, tmp_path)
     assert result["plan"] == []
     assert result["gaps"][0]["reason"] == "uncovered_need"
     assert result["gaps"][0]["fields"] == ["purpose"]
+    persisted = json.loads(path.read_text(encoding="utf-8"))
+    assert not any(need["fact_type"] == "F3" and need["fields"] == ["purpose"] for need in persisted["needs"])
 
 
 def test_current_evidence_satisfies_field_but_stale_evidence_does_not():
