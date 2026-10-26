@@ -20,6 +20,8 @@ from .producer_dispatch import dispatch_registered_producer
 from .repository.contract import ContractCodec
 from .source_scanner import build_fact_batch_with_gaps
 from .tool_executor import SubprocessToolExecutor
+from .induction import ELIGIBLE_REASONS, build_induction_requests, validate_induction_result
+from .induction_provider import InductionProviderRegistry, run_induction_requests
 
 
 
@@ -153,6 +155,8 @@ def execute_constructor_request(
     asset_root: str | Path | None = None,
     *,
     external_executor: SubprocessToolExecutor | None = None,
+    induction_provider_registry: InductionProviderRegistry | None = None,
+    induction_provider_id: str | None = None,
 ) -> dict[str, Any]:
     """Execute the currently supported deterministic Python/Rust F2 constructor.
 
@@ -170,6 +174,7 @@ def execute_constructor_request(
     sources: list[dict[str, Any]] = []
     facts: list[dict[str, Any]] = []
     direct_nodes: list[dict[str, Any]] = []
+    induction_observations: list[dict[str, Any]] = []
     current_sources = request["current_source_context"]["sources"]
     needs_inventory = any(gap.get("reason") == "coverage_incomplete" for gap in request["unmet"])
     if not current_sources:
@@ -347,6 +352,7 @@ def execute_constructor_request(
                             for parser_gap in parsed["gaps"]:
                                 gaps.append({**parser_gap, "target": request["query"]["target"]})
                             continue
+                        induction_observations.extend(parsed["observations"])
                         mapping = {
                             "source.f3.runtime": ("F3", "runtime"),
                             "source.f3.environment": ("F3", "environment"),
@@ -473,6 +479,34 @@ def execute_constructor_request(
         "direct_nodes": direct_nodes,
         "conflicts": [],
     }
+    eligible_gaps = [gap for gap in gaps if gap.get("reason") in ELIGIBLE_REASONS]
+    if eligible_gaps and induction_observations:
+        if induction_provider_registry is not None and induction_provider_id:
+            provider_result = run_induction_requests(
+                induction_observations,
+                batch,
+                eligible_gaps,
+                induction_provider_id,
+                induction_provider_registry,
+                assets,
+            )
+            batch["facts"].extend(
+                fact
+                for item in provider_result["results"]
+                for fact in item["induction_result"]["batch"]["facts"]
+            )
+            gaps = [gap for gap in gaps if gap not in eligible_gaps]
+            gaps.extend(provider_result["gaps"])
+        else:
+            induction_plan = build_induction_requests(
+                induction_observations, batch, eligible_gaps, assets
+            )
+            gaps = [gap for gap in gaps if gap not in eligible_gaps]
+            gaps.extend(induction_plan["gaps"])
+            for induction_request in induction_plan["requests"]:
+                unresolved = validate_induction_result(induction_request, None, assets)
+                gaps.extend(unresolved["gaps"])
+
     codec.validate_batch(batch)
     result = {"kind": "construct_result", "batch": batch, "gaps": gaps}
     _validate_result(result, assets)
