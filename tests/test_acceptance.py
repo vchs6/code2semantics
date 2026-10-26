@@ -288,3 +288,56 @@ def test_first_phase_acceptance_combines_python_and_rust_projects_without_identi
         assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] >= 2
     finally:
         repository.close()
+
+def test_deleted_source_file_is_excluded_from_current_query_but_history_is_retained(tmp_path):
+    project = tmp_path / "deleted-file-project"
+    project.mkdir()
+    first_file = project / "first.py"
+    deleted_file = project / "to_delete.py"
+    first_file.write_text("class First:\n    pass\n", encoding="utf-8")
+    deleted_file.write_text("class ToDelete:\n    pass\n", encoding="utf-8")
+    database = tmp_path / "deleted-file.db"
+    codec = __import__("semantic_facts.repository.contract", fromlist=["ContractCodec"]).ContractCodec(
+        ROOT / "skills" / "layered-semantic-facts" / "assets"
+    )
+    from semantic_facts.source_scanner import build_fact_batch
+
+    initial_batch = build_fact_batch(project, codec)
+    repository = Repository(database, ROOT / "skills" / "layered-semantic-facts" / "assets")
+    repository.write(initial_batch, "initial-snapshot")
+    old_source_id = initial_batch["sources"][0]["source_id"]
+    old_fact_count = repository.connection.execute(
+        "SELECT COUNT(*) FROM facts WHERE source_id = ?", (old_source_id,)
+    ).fetchone()[0]
+    assert any("class ToDelete" in fact["fields"]["names"]["value"]["text"] for fact in initial_batch["facts"])
+
+    deleted_file.unlink()
+    new_batch = build_fact_batch(project, codec)
+    repository.write(new_batch, "after-file-deletion")
+    assert new_batch["sources"][0]["source_id"] != old_source_id
+    assert repository.connection.execute(
+        "SELECT COUNT(*) FROM facts WHERE source_id = ?", (old_source_id,)
+    ).fetchone()[0] == old_fact_count
+
+    query = {
+        "contract_version": "1.0.0",
+        "catalog_id": "semantic-facts-20261025",
+        "request_id": "after-source-file-deletion",
+        "scope": {
+            "scope_id": "deleted-file-scope",
+            "directories": [str(project.resolve())],
+            "excludes": [],
+            "defaulted": False,
+        },
+        "target": {"kind": "scope"},
+        "granularity": "L3",
+        "selections": [{"fact_type": "F2", "fields": ["identity", "names"]}],
+        "budget": {"max_rounds": 1, "max_new_assertions": 20},
+    }
+    current = execute_query(query, repository, ROOT / "skills" / "layered-semantic-facts" / "assets")
+    assert len(current["sources"]) == 1
+    assert current["sources"][0]["source_id"] == new_batch["sources"][0]["source_id"]
+    assert all("class ToDelete" not in fact["fields"]["names"]["value"]["text"] for fact in current["results"])
+    assert any("class First" in fact["fields"]["names"]["value"]["text"] for fact in current["results"])
+    assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] > old_fact_count
+    repository.close()
