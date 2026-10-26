@@ -1,6 +1,8 @@
 import copy
 from pathlib import Path
 
+import pytest
+
 from semantic_facts.induction import build_induction_requests, validate_induction_result
 from semantic_facts.repository.contract import ContractCodec
 from semantic_facts.source_scanner import build_fact_batch
@@ -171,3 +173,37 @@ def test_induction_rejects_wrong_subject_source_state_and_unobserved_evidence(tm
         result = validate_induction_result(request, proposed, ASSETS)
         assert result["batch"]["facts"] == [], mutation
         assert result["gaps"], mutation
+
+
+@pytest.mark.parametrize("reason", ["missing", "unknown", "insufficient_evidence", "nonempty_insufficient"])
+def test_each_eligible_gap_state_triggers_induction(reason, tmp_path):
+    batch, observation, gap = fixture(tmp_path)
+    gap = {**gap, "reason": reason}
+    result = build_induction_requests([observation], batch, [gap], ASSETS)
+    assert len(result["requests"]) == 1
+    assert result["requests"][0]["group"]["fields"] == ["roles"]
+
+
+def test_induction_separates_different_subjects(tmp_path):
+    batch, observation, gap = fixture(tmp_path)
+    other_subject = copy.deepcopy(observation)
+    other_subject["observation_id"] = "observation-other-subject"
+    other_subject["subject"] = {**observation["subject"], "node_id": "file-other"}
+    result = build_induction_requests([observation, other_subject], batch, [gap], ASSETS)
+    assert len(result["requests"]) == 2
+    assert len({item["group"]["subject"]["node_id"] for item in result["requests"]}) == 2
+
+
+def test_induction_rejects_unrequested_fields_and_malformed_batches(tmp_path):
+    batch, observation, gap = fixture(tmp_path)
+    request = build_induction_requests([observation], batch, [gap], ASSETS)["requests"][0]
+    unrequested = copy.deepcopy(batch)
+    unrequested["facts"][0]["fields"] = {"names": unrequested["facts"][0]["fields"]["names"]}
+    result = validate_induction_result(request, unrequested, ASSETS)
+    assert result["batch"]["facts"] == []
+    assert result["gaps"]
+
+    malformed = copy.deepcopy(batch)
+    malformed["facts"][0]["fact_type"] = "NOT-A-FACT-TYPE"
+    with pytest.raises(ValueError, match="invalid proposed FactBatch"):
+        validate_induction_result(request, malformed, ASSETS)
