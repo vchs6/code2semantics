@@ -24,6 +24,8 @@ jobs:
         run: python -m pytest tests/capability_matrix -q -ra -p no:cacheprovider
       - name: Contract validation
         run: python openspec/changes/epic-layered-semantic-fact-skill/validation/validate_contracts.py
+      - name: Product delivery gate
+        run: python scripts/quality_gates/check_product_delivery.py
   openspec:
     runs-on: ubuntu-latest
     steps:
