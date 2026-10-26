@@ -100,3 +100,41 @@ def test_constructor_preserves_valid_file_when_another_producer_fails(tmp_path):
     assert any(gap["reason"] == "unparseable" and "broken.py" in gap["detail"] for gap in result["gaps"])
     scope_inventory = next(item for item in result["batch"]["direct_nodes"] if item["target"]["kind"] == "scope")
     assert scope_inventory["assertion"]["coverage"]["completeness"] == "partial"
+
+def test_constructor_wires_allowlisted_external_producer_through_parser(tmp_path):
+    import json
+    import shutil
+    import sys
+
+    from semantic_facts.tool_executor import SubprocessToolExecutor
+
+    project = tmp_path / "external-producer-project"
+    project.mkdir()
+    (project / "service.py").write_text(
+        "class ExternalService:\\n    def run(self):\\n        return True\\n",
+        encoding="utf-8",
+    )
+    assets = tmp_path / "assets"
+    shutil.copytree(ASSETS, assets)
+    matrix_path = assets / "capability-matrix.json"
+    matrix = json.loads(matrix_path.read_text(encoding="utf-8"))
+    python_entry = next(entry for entry in matrix["entries"] if entry["tool_id"] == "python.ast-source")
+    python_entry["environment"] = "subprocess"
+    python_entry["invocation"] = ["subprocess", "ParserRegistry.parse(ParseRequest)"]
+    matrix_path.write_text(json.dumps(matrix, indent=2) + "\\n", encoding="utf-8")
+
+    executor = SubprocessToolExecutor({
+        "python.ast-source": [
+            sys.executable, "-c",
+            "import pathlib,sys; sys.stdout.write(pathlib.Path(sys.argv[1]).read_text(encoding='utf-8'))",
+        ],
+    })
+    request_value = _request_for_project(project)
+    result = execute_constructor_request(request_value, assets, external_executor=executor)
+
+    assert result["gaps"] == []
+    assert any(
+        "class ExternalService" in fact["fields"]["names"]["value"]["text"]
+        for fact in result["batch"]["facts"]
+    )
+    assert result["batch"]["facts"][0]["fields"]["names"]["basis"]["evidence"]
