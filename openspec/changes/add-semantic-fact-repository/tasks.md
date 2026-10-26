@@ -124,3 +124,12 @@
 - Added repository acceptance coverage for two projects with colliding file-level fact IDs: unscoped mutation is rejected; scoped mutation affects only the selected current source.
 - GREEN CI: https://github.com/vchs6/code2semantics/actions/runs/40310872678 — repository 59 passed; transactions 6; transfer 8; repository acceptance 5; matrix 15; parser 9; scanner 7; runtime acceptance 9; packaging 2; executor 3; producer dispatch 3; combined information-needs/constructor/binding/induction/query 52 passed; strict OpenSpec passed.
 - This closes the repository component's current mutation/transfer acceptance obligations. It does not close query S1–S12 or root full-system acceptance; the product delivery gate remains BLOCKED.
+
+## 7. Semantic entity enrichment and producer-agnostic incremental writes
+
+- [ ] 7.1 Add a RED test that writes a FactBatch containing one entity and one field, then submits a second valid FactBatch for the same entity with a previously absent fact/field; assert both old and new information survive and no duplicate identity rows are created.
+- [ ] 7.2 Add a RED test that submits an existing field assertion with a new evidence ID/link supporting the same value; assert the new evidence/link is stored and existing evidence remains.
+- [ ] 7.3 Add a RED test for replaying the same entity/fact/field/evidence from a different producer context where producer identity is not part of the public storage identity; assert storage remains idempotent.
+- [ ] 7.4 Add a RED test that submits incompatible content for the same immutable field/evidence identity; assert rejection or explicit conflict under the existing contract and verify unrelated rows remain unchanged.
+- [ ] 7.5 Implement only the repository-side incremental behavior needed to satisfy these tests, preserving atomic transactions, immutable row rules and submission-key digest checks. Do not add producer-specific branching to Repository.
+- [ ] 7.6 Run `tests/repository`, transaction and acceptance suites, then constructor-to-repository write/reopen/minimal-query acceptance. Record actual RED/GREEN CI evidence before checking tasks.
