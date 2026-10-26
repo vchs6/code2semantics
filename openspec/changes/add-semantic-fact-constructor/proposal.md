@@ -89,3 +89,9 @@
 仓库负责跨提交的增量存储和幂等性。仓库按公共契约中的稳定身份检查主体/节点、事实、字段、关系和证据：完全相同的已有记录不重复插入；已存在主体下新增的事实字段、关系或证据按仓库局部更新契约补充；相同身份但不可兼容的内容按契约拒绝或记录冲突，不能静默覆盖。不能仅因主体存在就丢弃其所有新字段或证据。
 
 验收应分别验证：工具组合覆盖需求且尽量减少调用；同一请求的重复输出不会形成重复事实身份；仓库重复提交幂等；已有主体可增量补充缺失字段/证据；冲突不静默覆盖。这些验收属于不同层次，不得以某一层的去重替代另一层的职责。
+
+## Clarification: choose a minimum sufficient producer set for the request
+
+The constructor SHALL select tools against the set of unmet information needs for the whole request, not independently select every eligible producer for every field. It SHALL prefer the smallest suitable set of enabled, accepted producers whose combined declared coverage satisfies the requested needs, subject to language/platform/environment, evidence, completeness and limitation constraints. A producer covering several unmet needs should be preferred over several redundant producers when both options are equally valid. If no complete coverage set exists, select only producers that advance the request and report the remaining needs as explicit gaps.
+
+The constructor may discard a later producer's duplicate contribution only when it represents the same requested semantic information for the same source snapshot and adds no distinct field, value or useful independent evidence. It must preserve novel fields/evidence and report incompatible values as conflicts. Repository storage remains producer-agnostic and owns cross-request idempotency and incremental entity enrichment.
