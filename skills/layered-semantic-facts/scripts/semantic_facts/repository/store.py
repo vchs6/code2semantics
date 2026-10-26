@@ -34,6 +34,40 @@ class Repository:
     def close(self) -> None:
         self.connection.close()
 
+    def backup(self, destination: str | Path) -> None:
+        """Create a consistent SQLite backup of the current repository."""
+        destination_path = Path(destination)
+        if destination_path.resolve() == Path(self.path).resolve():
+            raise ValueError("backup destination must differ from the repository path")
+        destination_path.parent.mkdir(parents=True, exist_ok=True)
+        with sqlite3.connect(str(destination_path)) as target:
+            self.connection.backup(target)
+
+    def restore(self, source: str | Path) -> None:
+        """Restore a validated SQLite backup without touching state on validation failure."""
+        source_path = Path(source)
+        if not source_path.is_file():
+            raise ValueError("backup file does not exist")
+        if source_path.resolve() == Path(self.path).resolve():
+            raise ValueError("restore source must differ from the repository path")
+
+        try:
+            uri = "file:" + source_path.resolve().as_posix() + "?mode=ro"
+            with sqlite3.connect(uri, uri=True) as backup:
+                integrity = backup.execute("PRAGMA integrity_check").fetchone()
+                if not integrity or integrity[0] != "ok":
+                    raise ValueError("backup failed SQLite integrity check")
+                tables = {row[0] for row in backup.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
+                expected = {"sources", "entities", "facts", "attributes", "relations", "submissions"}
+                if tables and not expected.issubset(tables):
+                    raise ValueError("backup does not contain the repository schema")
+                backup.backup(self.connection)
+        except sqlite3.DatabaseError as error:
+            raise ValueError("invalid SQLite backup: " + str(error)) from error
+
+        self.connection.execute("PRAGMA foreign_keys = ON")
+        self._initialized = False
+
     def _ensure_schema(self) -> None:
         if self._initialized:
             return
