@@ -110,7 +110,15 @@ class ContractCodec:
             key = identity_key(_json(edge["source"]), edge["edge_id"])
             relations.append(RelationRow(key, f"/navigation/{i}", _json(edge), i, key, self._endpoint(edge["source"]), self._endpoint(edge["target"]), edge["relation"], True))
             self._project_edges(edge["assertion"], f"/navigation/{i}/assertion", key, "/assertion", relations)
-        inventories = tuple(InventoryRow(identity_key("direct", str(i), _json(inv["target"]), inv["granularity"], inv["boundary"]), f"/direct_nodes/{i}", _json(inv), i) for i, inv in enumerate(batch["direct_nodes"]))
+        inventories = tuple(
+            InventoryRow(
+                identity_key("direct", str(i), _json(inv["target"]), inv["granularity"], inv["boundary"], _json(inv["assertion"]["validity"])),
+                f"/direct_nodes/{i}",
+                _json(inv),
+                i,
+            )
+            for i, inv in enumerate(batch["direct_nodes"])
+        )
         for inventory in inventories:
             self._project_edges(inventory.value["assertion"], inventory.pointer + "/assertion", inventory.key, "/assertion", relations)
         conflicts = tuple(ConflictRow(identity_key(*sorted(c["context"]["source_ids"]), c["conflict_id"]), f"/conflicts/{i}", _json(c), i) for i, c in enumerate(batch["conflicts"]))
