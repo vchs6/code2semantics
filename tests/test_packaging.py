@@ -79,3 +79,23 @@ def test_copied_skill_scans_python_and_rust_then_queries_without_repo_paths(tmp_
     assert len(response["results"]) == 2
     assert any("class PythonEngine" in fact["fields"]["names"]["value"]["text"] for fact in response["results"])
     assert any("struct RustEngine" in fact["fields"]["names"]["value"]["text"] for fact in response["results"])
+
+
+def test_skill_metadata_and_layout_follow_agent_skills_constraints():
+    skill_file = SKILL_ROOT / "SKILL.md"
+    text = skill_file.read_text(encoding="utf-8")
+    assert text.startswith("---\\n")
+    _, frontmatter, body = text.split("---", 2)
+    fields = {}
+    for line in frontmatter.strip().splitlines():
+        if ":" in line:
+            key, value = line.split(":", 1)
+            fields[key.strip()] = value.strip().strip('"')
+    assert fields["name"] == SKILL_ROOT.name
+    assert fields.get("description")
+    assert len(fields["description"]) <= 1024
+    assert fields.get("compatibility")
+    assert len(body.splitlines()) < 500
+    for directory in ("scripts", "assets", "references"):
+        assert (SKILL_ROOT / directory).is_dir()
+    assert (SKILL_ROOT / "scripts" / "requirements.txt").is_file()
