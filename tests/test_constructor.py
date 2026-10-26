@@ -135,11 +135,26 @@ def test_constructor_runs_accepted_manifest_profile_and_preserves_manifest_obser
         {"fact_type": "F4", "fields": ["kind"]},
         {"fact_type": "F6", "fields": ["kind"]},
     ]
-    executor = SubprocessToolExecutor({
-        "rust.cargo-metadata": ["cargo", "metadata", "--no-deps", "--format-version", "1"],
-    })
+    class CountingExecutor:
+        def __init__(self):
+            self.delegate = SubprocessToolExecutor({
+                "rust.cargo-metadata": ["cargo", "metadata", "--no-deps", "--format-version", "1"],
+            })
+            self.calls = []
 
+        def execute(self, tool_id, args, *, cwd, timeout_seconds):
+            self.calls.append((tool_id, tuple(args), str(cwd)))
+            return self.delegate.execute(
+                tool_id, args, cwd=cwd, timeout_seconds=timeout_seconds
+            )
+
+    executor = CountingExecutor()
     result = execute_constructor_request(request_value, assets, external_executor=executor)
+
+    # The same producer covers F4.kind and F6.kind in this single request;
+    # it must execute once and its output must fan out to both needs.
+    assert len(executor.calls) == 1, executor.calls
+    assert executor.calls[0][0] == "rust.cargo-metadata"
 
     assert any(fact["fact_type"] == "F2" for fact in result["batch"]["facts"])
     assert any(fact["fact_type"] == "F4" for fact in result["batch"]["facts"])
