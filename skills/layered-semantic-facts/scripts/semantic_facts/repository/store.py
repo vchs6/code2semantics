@@ -653,13 +653,10 @@ class Repository:
             selection = next(item for item in selections if item["fact_type"] == row[5])
             wanted = set(selection["fields"])
             fields = {}
-            for name, payload in self.connection.execute(
-                "SELECT field_name, payload FROM attributes WHERE fact_key = ?", (row[0],)
+            for attribute_key, name, payload in self.connection.execute(
+                "SELECT attribute_key, field_name, payload FROM attributes WHERE fact_key = ?", (row[0],)
             ):
-                if name in wanted and active("field", self.connection.execute(
-                    "SELECT attribute_key FROM attributes WHERE fact_key = ? AND field_name = ?",
-                    (row[0], name),
-                ).fetchone()[0]):
+                if name in wanted and active("field", attribute_key):
                     assertion = json.loads(payload)
                     if assertion_is_current(assertion):
                         fields[name] = assertion
