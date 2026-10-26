@@ -26,11 +26,17 @@ def test_current_read_excludes_assertion_whose_evidence_state_is_stale(batch, db
 
     stale_fact = next(fact for fact in batch["facts"] if fact["fact_id"] == "fact-a")
     evidence_id = stale_fact["fields"]["strategy"]["basis"]["evidence"][0]["evidence_id"]
-    for fact in batch["facts"]:
-        for assertion in fact["fields"].values():
-            for evidence in assertion["basis"]["evidence"]:
-                if evidence["evidence_id"] == evidence_id:
-                    evidence["content_state"] = "sha256:" + "0" * 64
+    def update_evidence(value):
+        if isinstance(value, dict):
+            if value.get("evidence_id") == evidence_id:
+                value["content_state"] = "sha256:" + "0" * 64
+            for child in value.values():
+                update_evidence(child)
+        elif isinstance(value, list):
+            for child in value:
+                update_evidence(child)
+
+    update_evidence(batch)
 
     repository = Repository(db_path)
     repository.write(batch, "submission-stale-evidence")
