@@ -8,14 +8,14 @@
 
 ## 2. Failure and evidence validation
 - [x] 2.1 Test absent provider, timeout, nonzero exit, malformed JSON and output-size overflow; assert empty accepted facts and explicit gaps.
-- [ ] 2.2 Test a valid but ungrounded proposal, wrong subject, stale source state, unrequested field and evidence not present in request observations; assert rejection.
-- [ ] 2.3 Test existing-fact conflict and verify existing facts remain unchanged.
+- [x] 2.2 Test a valid but ungrounded proposal, wrong subject, stale source state, unrequested field and evidence not present in request observations; assert rejection.
+- [x] 2.3 Test existing-fact conflict and verify existing facts remain unchanged.
 - [x] 2.4 Test source mutation during provider execution; discard all proposal output from the stale snapshot.
 
 ## 3. Runtime integration
-- [ ] 3.1 Add provider injection to constructor/query orchestration without changing pure query projection or repository responsibilities.
-- [ ] 3.2 Add an executable protocol fixture to test real process boundaries and bounded output.
-- [ ] 3.3 Run all component suites and strict OpenSpec; record protocol-only evidence separately from real inference acceptance.
+- [x] 3.1 Add provider injection to constructor/query orchestration without changing pure query projection or repository responsibilities.
+- [x] 3.2 Add an executable protocol fixture to test real process boundaries and bounded output.
+- [x] 3.3 Run all component suites and strict OpenSpec; record protocol-only evidence separately from real inference acceptance.
 - [ ] 3.4 Configure an actual inference provider and execute S1–S12 real-source scenarios. Keep provider and product gates blocked until this passes.
 
 ## Implementation evidence (2026-10-26)
@@ -31,3 +31,10 @@
 - Added explicit missing-executable coverage and a provider fixture that mutates the source after receiving an induction request. The adapter re-inspects each source after process completion and after timeout; any changed/unavailable source changes status to `source_modified`, discards provider output and returns an empty accepted batch with explicit source_modified gaps.
 - Task 2.2–2.3 are enforced through the existing `validate_induction_result` path and its existing evidence/source/subject/field/conflict tests; task 2.4 now has a direct provider process-boundary regression.
 - Remaining tasks 2.2/2.3 provider-specific nonempty candidate cases and 3.1–3.4 runtime/provider integration remain pending. No actual cognitive inference provider is configured, so this adapter's protocol tests do not constitute provider-backed S1–S12 acceptance.
+
+### Constructor/query injection and evidence validation (2026-10-26)
+
+- `execute_constructor_request` now accepts an optional `InductionProviderRegistry` plus provider ID. It groups only eligible unmet fields with current observations, invokes the configured provider through `run_induction_requests`, and merges only the `validate_induction_result`-accepted additions. If no provider is configured, eligible grouped requests are passed through the existing no-provider validation path and remain explicit `constructor_unavailable` gaps. No repository writes occur in the provider adapter.
+- `execute_query_with_construction` now exposes the same optional provider registry/ID and passes them through to the constructor; the default CLI does not configure a provider, so no arbitrary provider is selected and current behavior remains fail-closed.
+- GREEN CI: https://github.com/vchs6/code2semantics/actions/runs/40352903470 — induction provider/constructor/query suite 84 passed; runtime acceptance 20; repository 63; transaction 6; transfer 8; repository acceptance 5; capability matrix 15; parser 14; scanner 9; executor 3; producer dispatch 3; strict OpenSpec passed. Overall workflow remains blocked only by the full S1–S12 product delivery gate.
+- Tasks 3.1–3.3 are complete for the generic adapter/injection boundary. Task 3.4 remains pending: no actual cognitive inference provider is configured, and no provider-backed S1–S12 acceptance is claimed.
