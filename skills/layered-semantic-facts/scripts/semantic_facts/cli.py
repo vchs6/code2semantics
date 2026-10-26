@@ -21,7 +21,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="semantic-facts")
     commands = parser.add_subparsers(dest="command", required=True)
 
-    scan = commands.add_parser("scan-python", help="extract syntax inventory from Python files")
+    scan = commands.add_parser("scan-source", aliases=["scan-python"], help="extract syntax inventory from Python and Rust files")
     scan.add_argument("--root", required=True, type=Path, help="source project root")
     scan.add_argument("--db", required=True, type=Path, help="SQLite fact repository")
     scan.add_argument("--output", type=Path, help="optional path to write the validated FactBatch")
@@ -31,7 +31,7 @@ def main(argv: list[str] | None = None) -> int:
     query.add_argument("--query-file", required=True, type=Path)
 
     args = parser.parse_args(argv)
-    if args.command == "scan-python":
+    if args.command in {"scan-source", "scan-python"}:
         codec = ContractCodec(_assets())
         batch = build_fact_batch(args.root, codec)
         digest = hashlib.sha256(
