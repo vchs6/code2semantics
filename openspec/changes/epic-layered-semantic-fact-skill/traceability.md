@@ -61,3 +61,10 @@
 - Query verifies a current complete scope inventory and, for node targets, verifies the target file belongs to the current scope and has its own complete direct inventory. The scope-to-file prerequisite counts as bounded progress; response projection returns only the requested target inventory.
 - Evidence: `tests/test_source_scanner.py`, `tests/test_query_orchestration.py`; CI https://github.com/vchs6/code2semantics/actions/runs/40269644416. Component suites and strict OpenSpec pass; product delivery gate remains blocked.
 - Boundary: this only implements the first-phase project-scope→source-file→syntax-declaration path. General semantic ancestor chains, multi-project/overlapping roots, dependency graph cycles and S1–S12 remain pending.
+
+
+## Cross-project Python/Rust acceptance increment (2026-10-26)
+
+- Added a test to `tests/test_acceptance.py` that executes the actual query/construction pipeline over two explicitly requested roots: one Python project and one Rust project, each defining a same-named `Engine`. It verifies distinct source/subject identities, schema-validated current-source facts, requested-field-only projection, and explicit out-of-catalog classification.
+- CI: https://github.com/vchs6/code2semantics/actions/runs/40297921776 — repository 53, matrix 15, parser 9, scanner 7, runtime acceptance 5, packaging 2, executor 3, producer dispatch 3, combined information-needs/constructor/induction/query 52 passed; strict OpenSpec passed.
+- This is additional root acceptance evidence, not completion of 8.1–8.5. The full S1–S12 matrix and runtime provider/induction path are still not fully covered, so the product delivery gate remains blocked.
