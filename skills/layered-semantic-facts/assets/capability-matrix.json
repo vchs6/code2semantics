@@ -94,11 +94,7 @@
       "tool_id": "python.compileall",
       "description": "Research candidate only: Python compile/bytecode syntax signal; not semantic or runtime evidence.",
       "information_need_ids": [
-        "source.f9.declaration",
-        "source.f9.scope",
-        "source.f9.language-semantics",
-        "source.f14.error-kind",
-        "source.f14.handling"
+        "source.f9.language-semantics"
       ],
       "output_kinds": [
         "compiler_diagnostics"
@@ -120,10 +116,9 @@
         "python.ast-source"
       ],
       "limitations": [
-        "DISABLED: native-output parser and invocation-profile acceptance not completed.",
-        "Compile success does not prove runtime behavior or semantic correctness.",
-        "Must avoid or isolate generated __pycache__ output.",
-        "Observed on Ubuntu 24.04 / Python 3.12.15: temporary syntax fixture compiled with exit 0 in https://github.com/vchs6/code2semantics/actions/runs/40319334019."
+        "DISABLED: compileall parser emits only a syntax/bytecode diagnostic observation mapped to source.f9.language-semantics; it does not prove type correctness or runtime behavior.",
+        "The constructor has not yet accepted a FactBatch mapping for source.f9.language-semantics.",
+        "Compilation success is not evidence that all project entrypoints execute or that runtime behavior is correct."
       ],
       "enabled": false,
       "research_basis": [
