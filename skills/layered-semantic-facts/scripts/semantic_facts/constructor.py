@@ -252,8 +252,21 @@ def execute_constructor_request(
                 matrix = CapabilityMatrix(assets / "capability-matrix.json")
                 parser_registry = ParserRegistry(assets)
                 executed_profiles: set[tuple[str, str, tuple[str, ...], tuple[str, ...]]] = set()
+                root_languages = {
+                    "python" if path.suffix == ".py" else "rust"
+                    for path in root.rglob("*")
+                    if path.is_file()
+                    and path.suffix in {".py", ".rs"}
+                    and not any(part in {".git", ".venv", "venv", "__pycache__", "node_modules", "dist", "build"} for part in path.relative_to(root).parts)
+                }
                 for item in plan_result["plan"]:
                     for profile in item.get("producer_profiles", []):
+                        profile_languages = {str(language).lower() for language in profile.get("languages", [])}
+                        if profile_languages and not (profile_languages & root_languages):
+                            # A request may span multiple projects/languages. A
+                            # producer selected for one source must not be run
+                            # against another source that lacks that language.
+                            continue
                         tool_id = profile["tool_id"]
                         if tool_id == "rust.cargo-metadata" and profile["environment"] == "subprocess":
                             manifest = root / "Cargo.toml"
