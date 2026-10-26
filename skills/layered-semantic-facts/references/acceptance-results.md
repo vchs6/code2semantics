@@ -4,15 +4,15 @@ Date: 2026-10-26
 
 ## Verified path
 
-The following bounded path is covered by `tests/test_acceptance.py`:
+The following bounded path is covered by `tests/test_acceptance.py` and CI run https://github.com/vchs6/code2semantics/actions/runs/40257745511:
 
 - Real Python source fixture under `tests/fixtures/scenarios/python_project/`
-- Python AST syntax inventory
-- Schema-validated F2 FactBatch with source evidence and content digests
+- Python AST syntax inventory through the registered `ParserRegistry`
+- Deterministic constructor maps parser observations to a Schema-validated F2 FactBatch with source evidence and content digests
 - SQLite write, close/reopen, and query
 - Repeating an identical scan preserves the number of stored fact rows
 
-The dedicated CI run is the source of truth for the pass/fail result.
+Observed CI results: repository 35 passed; capability matrix 14 passed; parser registry 6 passed; source scanner 4 passed; real-source acceptance 1 passed; strict OpenSpec passed. The product delivery gate intentionally remains blocked because the full end-to-end pipeline (tool selection/execution, induction, multi-layer construction, source-change invalidation, and full query response) is not yet implemented and verified.
 
 ## Scope limitation
 
