@@ -141,9 +141,16 @@ These tasks follow accepted pure parser adapters. They are prerequisites to enab
 
 ## 10. Minimum sufficient producer selection for a request
 
-- [ ] 10.1 Add RED tests where one accepted producer covers two unmet needs while two separate producers cover one each; assert the planner selects the single producer when its profile meets every constraint.
+- [x] 10.1 Add RED tests where one accepted producer covers two unmet needs while two separate producers cover one each; assert the planner selects the single producer when its profile meets every constraint.
 - [ ] 10.2 Add RED tests where no single producer covers all needs; assert a deterministic minimum combination is selected and uncovered needs remain explicit gaps.
 - [ ] 10.3 Add tests proving language/platform/environment, evidence-kind, completeness and limitations constraints cannot be traded away for fewer invocations.
 - [ ] 10.4 Implement request-level deterministic minimum sufficient producer selection over all unmet needs; keep a separate demand-to-selected-producer mapping and execute each selected invocation once.
 - [ ] 10.5 Test overlap handling: redundant same-value contribution is not duplicated; new fields/evidence survive; incompatible values create an explicit conflict/gap before FactBatch validation.
 - [ ] 10.6 Run constructor planning/execution, repository incremental enrichment, SQLite reopen/minimal query, strict OpenSpec and full CI. Only mark complete from observed evidence.
+
+### Minimum producer selection progress (2026-10-26)
+
+- Proposal/design/tasks were updated before implementation: proposal https://github.com/vchs6/code2semantics/commit/930ac0eca09cd215ebd3e918ffc2a3375e620a32; design https://github.com/vchs6/code2semantics/commit/4787fac6f4c58095a393a33164c96e245fb520fd; tasks https://github.com/vchs6/code2semantics/commit/ebdb195d43fe08a05dbeb331ad45df8dc00d41be.
+- Added helper-level and planner-level tests proving one accepted profile covering identity+names is preferred over two narrow profiles across the full request. Implementation now gathers all unmet need IDs per compatible language/environment group before selecting producers, then applies deterministic greedy set cover by maximum newly covered needs and stable tool-ID tie-break.
+- GREEN component evidence: https://github.com/vchs6/code2semantics/actions/runs/40338995823 — information-needs/constructor-plan group 65 passed; repository 63; transaction 6; transfer 8; repository acceptance 5; matrix 15; parser 14; scanner 8; runtime acceptance 11; executor 3; producer dispatch 3; constructor/query combined 65; quality gate 2; strict OpenSpec passed. Overall run remains blocked only by the full S1–S12 product gate.
+- Task 10.1 is complete. Tasks 10.2–10.6 remain pending: complementary minimum coverage, hard constraint tests, overlap conflict aggregation, and full integration acceptance are not yet proven.
