@@ -198,7 +198,9 @@ class Repository:
         def active(kind: str, key: str) -> bool:
             return event_states.get((kind, key), "current") == "current"
 
-        def is_current(assertion: dict[str, Any]) -> bool:
+        def is_current(
+            assertion: dict[str, Any], owner_key: str | None = None, visiting: set[str] | None = None,
+        ) -> bool:
             validity = assertion.get("validity", {})
             if validity.get("state") != "current":
                 return False
@@ -209,12 +211,45 @@ class Repository:
                 for item in validity_sources
             ):
                 return False
-            return all(
+            if not all(
                 item.get("source_id") in current_states
                 and item.get("content_state") == current_states[item.get("source_id")]
                 and active("evidence", evidence_key_by_identity.get((item.get("source_id"), item.get("evidence_id")), ""))
                 for item in assertion.get("basis", {}).get("evidence", [])
-            )
+            ):
+                return False
+            if owner_key is None:
+                return True
+            visiting = set() if visiting is None else visiting
+            if owner_key in visiting:
+                return False
+            visiting.add(owner_key)
+            try:
+                for premise_key, target_kind, target_key, premise_payload in self.connection.execute(
+                    "SELECT premise_key, target_kind, target_key, payload FROM premises WHERE owner_key = ?",
+                    (owner_key,),
+                ):
+                    if not active("premise", premise_key) or target_kind != "attribute":
+                        return False
+                    premise = json.loads(premise_payload)
+                    target_fact = self.connection.execute(
+                        "SELECT source_id FROM facts WHERE fact_key = ?", (target_key,)
+                    ).fetchone()
+                    if not target_fact or target_fact[0] not in current_states or not active("fact", target_key):
+                        return False
+                    if premise.get("content_state") != current_states[target_fact[0]]:
+                        return False
+                    target_attribute = self.connection.execute(
+                        "SELECT attribute_key, payload FROM attributes WHERE fact_key = ? AND field_name = ?",
+                        (target_key, premise.get("field")),
+                    ).fetchone()
+                    if not target_attribute or not active("field", target_attribute[0]):
+                        return False
+                    if not is_current(json.loads(target_attribute[1]), target_attribute[0], visiting):
+                        return False
+                return True
+            finally:
+                visiting.remove(owner_key)
 
         facts: list[dict[str, Any]] = []
         for fact_key, source_id, payload in self.connection.execute(
@@ -228,7 +263,7 @@ class Repository:
                 "SELECT attribute_key, field_name, payload FROM attributes WHERE fact_key = ?", (fact_key,)
             ):
                 assertion = json.loads(field_payload)
-                if active("field", attribute_key) and is_current(assertion):
+                if active("field", attribute_key) and is_current(assertion, attribute_key):
                     fields[name] = assertion
             if fields:
                 fact["fields"] = fields
@@ -251,7 +286,7 @@ class Repository:
             inventory = json.loads(payload)
             assertion = inventory.get("assertion", {})
             source_ids = set(assertion.get("context", {}).get("source_ids", []))
-            if source_ids.intersection(current_states) and is_current(assertion):
+            if source_ids.intersection(current_states) and is_current(assertion, inventory_key):
                 direct_nodes.append(inventory)
 
         conflicts = []
