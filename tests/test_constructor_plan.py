@@ -225,3 +225,38 @@ def test_producer_selection_prefers_minimum_sufficient_profile_covering_multiple
     assert chosen_ids == {"tool.all"}
     assert [item["tool_id"] for item in selected["syntax.f2.identity"]] == ["tool.all"]
     assert [item["tool_id"] for item in selected["syntax.f2.names"]] == ["tool.all"]
+
+def test_plan_chooses_one_multi_need_producer_for_the_whole_request(tmp_path):
+    import json
+    import shutil
+
+    shutil.copytree(ASSETS, tmp_path, dirs_exist_ok=True)
+    matrix_path = tmp_path / "capability-matrix.json"
+    base = {
+        "description": "accepted producer",
+        "output_kinds": ["structured-observations"],
+        "languages": ["python"],
+        "platforms": ["linux", "darwin", "windows"],
+        "environment": "in-process",
+        "invocation": ["test-producer"],
+        "combinations": [],
+        "limitations": ["declared source metadata only"],
+        "enabled": True,
+        "acceptance": {"actor": "parser_development", "evidence": ["tests/test_constructor_plan.py"]},
+        "research_basis": ["request-wide selection test"],
+    }
+    matrix = {
+        "contract_version": "1.0.0",
+        "entries": [
+            dict(base, tool_id="tool.all", information_need_ids=["syntax.f2.identity", "syntax.f2.names"]),
+            dict(base, tool_id="tool.identity", information_need_ids=["syntax.f2.identity"]),
+            dict(base, tool_id="tool.names", information_need_ids=["syntax.f2.names"]),
+        ],
+    }
+    matrix_path.write_text(json.dumps(matrix), encoding="utf-8")
+
+    value = request(("identity", "names"))
+    result = plan_constructor_request(value, tmp_path)
+
+    assert result["gaps"] == []
+    assert {profile["tool_id"] for item in result["plan"] for profile in item["producer_profiles"]} == {"tool.all"}
