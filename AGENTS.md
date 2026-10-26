@@ -116,3 +116,18 @@
 - 实现参考（Agent Skills 工作机制与渐进披露）：https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview
 - 实现参考（编写最佳实践，目录组织与渐进披露模式）：https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
 - 设计背景（Anthropic 工程博文）：https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills
+
+
+## 12. 产品交付与质量门禁（2026-10-26）
+
+AI MUST 区分组件正确性、契约正确性与产品行为验收。下列证据不得互相替代：
+
+- fixture 驱动的仓库读写测试，只证明仓库接口对预置输入的行为；
+- schema/strict OpenSpec 校验，只证明契约或工件符合对应校验器；
+- 产品交付必须证明真实输入经过声明的运行入口，产出契约有效的结果，并通过集成验收。
+
+每个功能任务 MUST 声明：真实交付路径、输入来源、可观察输出、运行命令、正反验收断言。路径不存在时，任务不得标为完成；没有真实运行证据时，不得宣称端到端完成。不得将“已有测试通过”“目录存在”“文档齐备”当作产品能力的替代证据。
+
+主质量门禁 MUST 在组件测试和契约检查之外，执行 `scripts/quality_gates/check_product_delivery.py`。该门禁对核心运行入口、真实来源场景、集成测试和运行验收记录缺失采用 fail-closed：缺一项就阻止整体 CI 通过。门禁通过仅代表必需产物存在；产品验收仍必须实际运行集成测试并记录结果。
+
+实现任务 MUST 先补充能暴露缺失行为的测试，再写最小实现；随后运行目标测试、相关回归和主门禁。任何失败都必须保留为失败，不得通过跳过步骤、改成仅存在性检查或调整预期来伪造通过。进度台账只能按已提交代码、实际测试输出和可复现的运行证据更新。
