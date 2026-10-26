@@ -29,8 +29,8 @@
 
 - [x] 5.0 仅在后续开发期公共目录/契约语义就绪后，先推进 `../add-semantic-fact-constructor/` 子规划及首阶段 apply，由该子产出面向本次未满足事实需求的可检查信息获取需求清单（具体路径、字段与生成/验证命令先在该子 tasks 落盘）；该阶段属于开发期子提案/设计/任务与 apply 交付，不是查询运行步骤，不等待工具、矩阵、解析器或完整构造器实现；交付固定清单，后续新增需求须通过开发期提案启动研究与解析器开发验收。主验收需求与事实目录/字段的映射、来源上下文和覆盖条件，再把此清单作为5.1输入；不得由主代写组件实现。
 - [ ] 5.1 以5.0构造器首阶段交付的信息获取需求清单为输入，推进 `../survey-info-acquisition-tools/` 的规划补齐与 apply，基于既有 `research/semantic-tooling-survey.md` 增量复核未点亮工具说明，接收输出种类/覆盖/限制/语言/环境/调用/组合证据；验收先覆盖与环境、再轻量简洁多语言偏好，研究不点亮。交付路径与执行命令须先写入其自身 tasks，再推进；主不实施工具研究组件。
-- [ ] 5.2 触发并推进 `../add-semantic-capability-matrix/` 的规划补齐与 apply，接收空矩阵初始化、工具说明读取和受控点亮状态接口及局部测试记录；验收初始为空、矩阵不生产/调度、研究与构造不可点亮。具体实现和测试路径以该子 tasks 交付为准，在 `traceability.md` 记录接收证据。
-- [ ] 5.3 在说明与矩阵接口就绪后推进 `../add-info-parser/` 的规划补齐与 apply，接收原生输出+调用描述纯转换及证据保留的实现、正反测试与解析开发完成后的受控点亮记录；验收不执行工具、不读取源项目/事实仓库、不选工具/归纳/维护矩阵，所有证据来自输入，缺失返回 gap，点亮即工具通过接入验收可供构造器使用，集成实证另记但不增加矩阵状态。
+- [x] 5.2 触发并推进 `../add-semantic-capability-matrix/` 的规划补齐与 apply，接收空矩阵初始化、工具说明读取和受控点亮状态接口及局部测试记录；验收初始为空、矩阵不生产/调度、研究与构造不可点亮。具体实现和测试路径以该子 tasks 交付为准，在 `traceability.md` 记录接收证据。
+- [x] 5.3 在说明与矩阵接口就绪后推进 `../add-info-parser/` 的规划补齐与 apply，接收原生输出+调用描述纯转换及证据保留的实现、正反测试与解析开发完成后的受控点亮记录；验收不执行工具、不读取源项目/事实仓库、不选工具/归纳/维护矩阵，所有证据来自输入，缺失返回 gap，点亮即工具通过接入验收可供构造器使用，集成实证另记但不增加矩阵状态。
 
 ## 6. 推进归纳、构造与仓库子交付（D2/D3/D5/D7）
 
@@ -56,3 +56,11 @@
 - 本轮仅修订文档并执行 OpenSpec 文档校验；后续实施由 apply 推进，先测试后实现。
 - 缺失子 design/tasks 应进入对应子规划流程创建；本次更新不创建这些缺失工件。
 - 本轮不归档；归档和发布应在实际交付及用户授权条件满足后处理。
+
+## First-phase Python + Rust progress evidence (2026-10-26)
+
+- 5.0 fixed needs catalogue and constructor child planning delivered: `skills/layered-semantic-facts/assets/information-needs.json`, `add-semantic-fact-constructor/design.md`, `tasks.md`.
+- 5.1 survey expanded for Python and Rust with exact current parser boundaries and unverified external toolchain availability: `survey-info-acquisition-tools/research/semantic-tooling-survey.md`.
+- 5.2 capability matrix now has only two accepted in-process parser profiles, each backed by parser/scanner/acceptance tests; cold-start empty matrix behavior remains schema-tested. No external cargo/rustc/rust-analyzer tool is claimed installed.
+- 5.3 parser has design/tasks, registry and deterministic Python/Rust parsing with explicit syntax-only limitations. Evidence is in `tests/test_info_parser.py`, `tests/test_source_scanner.py`, and the checked-in matrix acceptance evidence.
+- Constructor planning/execution and induction grouping/validation are being implemented; main full-system acceptance remains pending.
