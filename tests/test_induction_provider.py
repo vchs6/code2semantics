@@ -110,7 +110,7 @@ def test_provider_accepts_versioned_json_protocol_and_routes_result_through_indu
     assert result["execution_status"] == "completed"
     assert result["provider_id"] == "fixture-provider"
     assert result["induction_result"]["batch"]["facts"] == []
-    assert result["induction_result"]["gaps"] == []
+    assert result["induction_result"]["gaps"][0]["reason"] == "unknown"
 
 
 @pytest.mark.parametrize(
