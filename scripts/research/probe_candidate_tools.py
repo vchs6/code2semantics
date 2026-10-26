@@ -68,7 +68,7 @@ def main() -> int:
     with tempfile.TemporaryDirectory(prefix="semantic-fact-tool-probe-") as temp:
         root = Path(temp)
         py_file = root / "probe.py"
-        py_file.write_text("class Probe:\\n    def run(self):\\n        return 1\\n", encoding="utf-8")
+        py_file.write_text("class Probe:\n    def run(self):\n        return 1\n", encoding="utf-8")
         if report["tools"]["python"]["path"]:
             report["sample_probes"]["python_compileall"] = run(
                 [sys.executable, "-m", "compileall", "-q", str(py_file)], cwd=root
@@ -88,10 +88,10 @@ def main() -> int:
             project = root / "cargo-project"
             (project / "src").mkdir(parents=True)
             (project / "Cargo.toml").write_text(
-                '[package]\\nname = "probe-project"\\nversion = "0.1.0"\\nedition = "2021"\\n',
+                '[package]\nname = "probe-project"\nversion = "0.1.0"\nedition = "2021"\n',
                 encoding="utf-8",
             )
-            (project / "src" / "lib.rs").write_text("pub fn probe() {}\\n", encoding="utf-8")
+            (project / "src" / "lib.rs").write_text("pub fn probe() {}\n", encoding="utf-8")
             report["sample_probes"]["cargo_metadata"] = run(
                 [cargo, "metadata", "--no-deps", "--format-version", "1", "--manifest-path", str(project / "Cargo.toml")],
                 cwd=project,
