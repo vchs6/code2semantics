@@ -18,6 +18,18 @@ jobs:
         env:
           PYTHONPATH: skills/layered-semantic-facts/scripts
         run: python -m pytest tests/repository -q -ra -p no:cacheprovider
+      - name: Transaction tests
+        env:
+          PYTHONPATH: skills/layered-semantic-facts/scripts
+        run: python -m pytest tests/repository/test_transactions.py -q -ra -p no:cacheprovider
+      - name: Transfer tests
+        env:
+          PYTHONPATH: skills/layered-semantic-facts/scripts
+        run: python -m pytest tests/repository/test_transfer.py -q -ra -p no:cacheprovider
+      - name: Repository acceptance tests
+        env:
+          PYTHONPATH: skills/layered-semantic-facts/scripts
+        run: python -m pytest tests/repository/test_acceptance.py -q -ra -p no:cacheprovider
       - name: Capability matrix tests
         env:
           PYTHONPATH: skills/layered-semantic-facts/scripts
