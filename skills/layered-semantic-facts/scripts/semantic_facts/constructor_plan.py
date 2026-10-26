@@ -75,6 +75,37 @@ def plan_constructor_request(
     planned: dict[str, dict[str, Any]] = {}
     gaps: list[dict[str, Any]] = []
 
+    # Collect the whole request's unmet needs before choosing any producer.
+    # This lets one accepted profile cover several requested needs instead of
+    # independently selecting a narrow producer for every field.
+    platform = "windows" if sys.platform.startswith("win") else "darwin" if sys.platform == "darwin" else "linux"
+    matrix = CapabilityMatrix(root / "capability-matrix.json")
+    need_ids_by_profile: dict[tuple[str, str], set[str]] = {}
+    for selection in query["selections"]:
+        fact_type = selection["fact_type"]
+        for field in selection["fields"]:
+            matching_facts = facts_by_type.get(fact_type, [])
+            satisfied = any(
+                field in fact.get("fields", {})
+                and _supported_current_assertion(fact["fields"][field], current_states)
+                for fact in matching_facts
+                if fact.get("node", {}).get("source_id") in current_states
+            )
+            if satisfied:
+                continue
+            need = needs_index.get((fact_type, field))
+            if need is None:
+                continue
+            for language in need["languages"]:
+                for environment in need["environments"]:
+                    need_ids_by_profile.setdefault((language, environment), set()).add(need["need_id"])
+
+    selected_by_profile: dict[tuple[str, str], dict[str, list[dict[str, Any]]]] = {}
+    for (language, environment), ids in sorted(need_ids_by_profile.items()):
+        selected_by_profile[(language, environment)] = select_enabled_producers(
+            matrix, sorted(ids), language, platform, environment
+        )
+
     for selection in query["selections"]:
         fact_type = selection["fact_type"]
         for field in selection["fields"]:
@@ -101,18 +132,10 @@ def plan_constructor_request(
                 continue
 
             key = need["need_id"]
-            platform = "windows" if sys.platform.startswith("win") else "darwin" if sys.platform == "darwin" else "linux"
             producers_by_id: dict[str, dict[str, Any]] = {}
-            matrix = CapabilityMatrix(root / "capability-matrix.json")
             for language in need["languages"]:
                 for environment in need["environments"]:
-                    selected = select_enabled_producers(
-                        matrix,
-                        [key],
-                        language,
-                        platform,
-                        environment,
-                    )
+                    selected = selected_by_profile.get((language, environment), {})
                     for entry in selected.get(key, []):
                         producers_by_id[entry["tool_id"]] = entry
             if not producers_by_id:
