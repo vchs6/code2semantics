@@ -179,6 +179,15 @@ class Repository:
             if source_id in heads
         ]
         current_states = {source["source_id"]: source["content_state"] for source in current_sources}
+        event_states = self._validity_event_states()
+        evidence_key_by_identity = {
+            (item["source_id"], item["evidence_id"]): key
+            for key, payload in self.connection.execute("SELECT evidence_key, payload FROM evidence")
+            for item in [json.loads(payload)]
+        }
+
+        def active(kind: str, key: str) -> bool:
+            return event_states.get((kind, key), "current") == "current"
 
         def is_current(assertion: dict[str, Any]) -> bool:
             validity = assertion.get("validity", {})
@@ -194,6 +203,7 @@ class Repository:
             return all(
                 item.get("source_id") in current_states
                 and item.get("content_state") == current_states[item.get("source_id")]
+                and active("evidence", evidence_key_by_identity.get((item.get("source_id"), item.get("evidence_id")), ""))
                 for item in assertion.get("basis", {}).get("evidence", [])
             )
 
@@ -201,15 +211,15 @@ class Repository:
         for fact_key, source_id, payload in self.connection.execute(
             "SELECT fact_key, source_id, payload FROM facts"
         ):
-            if source_id not in current_states:
+            if source_id not in current_states or not active("fact", fact_key):
                 continue
             fact = json.loads(payload)
             fields: dict[str, Any] = {}
-            for name, field_payload in self.connection.execute(
-                "SELECT field_name, payload FROM attributes WHERE fact_key = ?", (fact_key,)
+            for attribute_key, name, field_payload in self.connection.execute(
+                "SELECT attribute_key, field_name, payload FROM attributes WHERE fact_key = ?", (fact_key,)
             ):
                 assertion = json.loads(field_payload)
-                if is_current(assertion):
+                if active("field", attribute_key) and is_current(assertion):
                     fields[name] = assertion
             if fields:
                 fact["fields"] = fields
