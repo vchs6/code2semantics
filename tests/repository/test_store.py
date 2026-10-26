@@ -257,3 +257,39 @@ def test_identical_incremental_fact_field_replay_is_idempotent(batch, db_path):
     assert repository.connection.execute("SELECT COUNT(*) FROM attributes").fetchone()[0] == 1
     assert repository.connection.execute("SELECT COUNT(*) FROM evidence_links").fetchone()[0] == 1
     repository.close()
+
+def test_existing_field_can_be_enriched_with_new_evidence_without_replacing_old_evidence(batch, db_path):
+    import copy
+    from semantic_facts.repository.store import Repository
+
+    first = copy.deepcopy(batch)
+    first["facts"] = [fact for fact in first["facts"] if fact["fact_id"] == "fact-a"]
+    first["facts"][0]["fields"] = {"strategy": first["facts"][0]["fields"]["strategy"]}
+    first["navigation"] = []
+    first["direct_nodes"] = []
+    first["conflicts"] = []
+
+    second = copy.deepcopy(first)
+    assertion = second["facts"][0]["fields"]["strategy"]
+    new_evidence = copy.deepcopy(assertion["basis"]["evidence"][0])
+    new_evidence.update({
+        "evidence_id": "ev-new-tool",
+        "kind": "observation",
+        "locator": "tool-output:cargo-metadata",
+        "content_digest": "sha256:" + "b" * 64,
+        "relation": "supports",
+    })
+    assertion["basis"]["evidence"].append(new_evidence)
+
+    repository = Repository(db_path)
+    repository.write(first, "entity-evidence-first")
+    repository.write(second, "entity-evidence-second")
+
+    query = make_query(fields=("strategy",))
+    result = repository.read(query)
+    fact = next(item for item in result["facts"] if item["fact_id"] == "fact-a")
+    evidence_ids = {item["evidence_id"] for item in fact["fields"]["strategy"]["basis"]["evidence"]}
+    assert "ev-0" in evidence_ids
+    assert "ev-new-tool" in evidence_ids
+    assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == 1
+    repository.close()
