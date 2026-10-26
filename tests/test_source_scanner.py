@@ -74,3 +74,24 @@ def test_scan_fails_when_no_python_sources_exist(tmp_path, codec):
         assert "no Python source files" in str(error)
     else:
         raise AssertionError("empty source scope must not silently produce an empty fact batch")
+
+def test_scans_mixed_python_and_rust_project(tmp_path, codec):
+    project = tmp_path / "mixed-project"
+    (project / "src").mkdir(parents=True)
+    (project / "src" / "lib.rs").write_text(
+        "pub struct Engine;\npub enum Mode { Fast, Safe }\nimpl Engine { pub fn run() {} }\n",
+        encoding="utf-8",
+    )
+    (project / "src" / "main.py").write_text(
+        "class Runner:\n    def start(self):\n        return True\n",
+        encoding="utf-8",
+    )
+
+    batch = build_fact_batch(project, codec)
+    assert len(batch["facts"]) == 2
+    by_file = {fact["fields"]["identity"]["value"]["ref"]["node_id"]: fact for fact in batch["facts"]}
+    names = [fact["fields"]["names"]["value"]["text"] for fact in batch["facts"]]
+    assert any("struct Engine" in value and "enum Mode" in value for value in names)
+    assert any("class Runner" in value and "function start" in value for value in names)
+    assert all(fact["fields"]["names"]["basis"]["evidence"] for fact in batch["facts"])
+    assert all(fact["fields"]["names"]["context"]["environment"]["language"] in {"Python", "Rust"} for fact in batch["facts"])
