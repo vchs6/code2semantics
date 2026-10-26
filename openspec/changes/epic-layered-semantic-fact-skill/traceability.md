@@ -53,3 +53,11 @@
 - Query child design/tasks: `openspec/changes/add-semantic-fact-query/design.md`, `tasks.md`. Existing query loop and tests are recorded as partial implementation; direct-node completeness, ancestor obligations, multi-project/cycle acceptance and S1–S12 remain pending.
 - Packaging child design/tasks: `openspec/changes/define-skill-packaging/design.md`, `tasks.md`. Independent copied-install test `tests/test_packaging.py` is now in CI; it is not a substitute for full main-change acceptance.
 - The induction child tasks are checked only for the deterministic batching/validation boundary, not for a cognitive provider. The main full-system tasks remain pending.
+
+
+## Direct-node completeness and current query boundary (2026-10-26)
+
+- Scope and file direct inventories are now constructed from current Python/Rust source: scope inventory lists supported source-file nodes; file inventory lists parser declaration nodes. Inventory records include current validity, coverage and evidence and are append-only across source versions.
+- Query verifies a current complete scope inventory and, for node targets, verifies the target file belongs to the current scope and has its own complete direct inventory. The scope-to-file prerequisite counts as bounded progress; response projection returns only the requested target inventory.
+- Evidence: `tests/test_source_scanner.py`, `tests/test_query_orchestration.py`; CI https://github.com/vchs6/code2semantics/actions/runs/40269644416. Component suites and strict OpenSpec pass; product delivery gate remains blocked.
+- Boundary: this only implements the first-phase project-scope→source-file→syntax-declaration path. General semantic ancestor chains, multi-project/overlapping roots, dependency graph cycles and S1–S12 remain pending.
