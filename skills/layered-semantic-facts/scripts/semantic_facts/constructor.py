@@ -135,7 +135,7 @@ def execute_constructor_request(
             sources.append(actual_source)
 
             # Consume accepted subprocess producers selected by the fixed plan.
-            if external_executor is not None and any(
+            if any(
                 profile["environment"] == "subprocess"
                 for item in plan_result["plan"]
                 for profile in item.get("producer_profiles", [])
