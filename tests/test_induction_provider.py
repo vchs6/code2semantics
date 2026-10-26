@@ -12,6 +12,7 @@ from semantic_facts.induction_provider import (
     InductionProviderRegistry,
     ProviderConfigurationError,
     invoke_induction_provider,
+    run_induction_requests,
 )
 
 
@@ -215,3 +216,36 @@ def test_provider_discards_output_when_source_changes_during_execution(tmp_path)
     assert result["execution_status"] == "source_modified"
     assert result["induction_result"]["batch"]["facts"] == []
     assert any(gap["reason"] == "source_modified" for gap in result["induction_result"]["gaps"])
+
+def test_provider_orchestration_groups_requests_and_keeps_empty_proposal_unmet(tmp_path):
+    from test_induction import ASSETS, fixture
+
+    batch, observation, gap = fixture(tmp_path)
+    script = tmp_path / "empty-provider.py"
+    script.write_text(
+        "import json,sys\\n"
+        "request=json.load(sys.stdin)\\n"
+        "json.dump({'provider_id':'fixture-provider','protocol_version':'1.0.0','proposed_batch':"
+        "{'contract_version':'1.0.0','catalog_id':'semantic-facts-20261025',"
+        "'sources':request['existing_valid_facts']['sources'],'facts':[],"
+        "'navigation':[],'direct_nodes':[],'conflicts':[]}},sys.stdout)\\n",
+        encoding="utf-8",
+    )
+    registry = InductionProviderRegistry({
+        "fixture-provider": {
+            "argv": [sys.executable, str(script)],
+            "timeout_seconds": 2,
+            "max_stdout_bytes": 8192,
+            "max_stderr_bytes": 1024,
+        }
+    })
+
+    result = run_induction_requests(
+        [observation], batch, [gap], "fixture-provider", registry, ASSETS
+    )
+
+    assert len(result["requests"]) == 1
+    assert len(result["results"]) == 1
+    assert result["results"][0]["execution_status"] == "completed"
+    assert result["results"][0]["induction_result"]["batch"]["facts"] == []
+    assert any(item["reason"] == "insufficient_evidence" for item in result["gaps"])
