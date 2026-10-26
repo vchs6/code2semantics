@@ -107,3 +107,11 @@
 - CI GREEN: https://github.com/vchs6/code2semantics/actions/runs/40298437864 — repository 55 passed; focused transaction 6; transfer 6; repository acceptance 3; matrix 15; parser 9; scanner 7; source acceptance 5; packaging 2; executor 3; producer dispatch 3; combined planning/constructor/induction/query 52; strict OpenSpec passed.
 - The workflow now runs dedicated transaction, transfer and repository acceptance suites in addition to the complete repository suite. This improves gate granularity but does not substitute for the pending root S1–S12 acceptance.
 - Root task 6.3 remains pending until the remaining repository acceptance and import/local-mutation policy are complete; root 7.1 and 8.1–8.5 also remain pending.
+
+
+## Source deletion and import conflict safety (2026-10-26)
+
+- Added real-source acceptance coverage for deleting a Python source file: rescan appends a new source snapshot; historical fact rows remain stored; current queries exclude facts from the deleted file and preserve unaffected current facts.
+- Added transfer coverage for importing a conflicting immutable fact identity; the import is rejected and normalized rows/submission receipts remain unchanged.
+- CI: https://github.com/vchs6/code2semantics/actions/runs/40298718500 — repository 56 passed; transaction 6; transfer 7; repository acceptance 3; matrix 15; parser 9; scanner 7; runtime acceptance 6; packaging 2; executor 3; producer dispatch 3; combined planning/constructor/induction/query 52 passed; strict OpenSpec passed.
+- These checks strengthen the append-only/current-head boundary, but root 6.3, 7.1 and 8.1–8.5 remain pending until child acceptance gaps and full S1–S12 are closed. The product delivery gate remains blocked by design.
