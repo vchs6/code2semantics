@@ -61,27 +61,22 @@ def test_cli_query_invokes_cargo_once_and_returns_distinct_membership_and_depend
         "budget": {"max_rounds": 2, "max_new_assertions": 20},
     }
 
-    class CountingExecutor:
-        def __init__(self):
-            self.delegate = SubprocessToolExecutor({
-                "rust.cargo-metadata": ["cargo", "metadata", "--no-deps", "--format-version", "1"],
-            })
-            self.calls = []
+    calls = []
+    original_execute = SubprocessToolExecutor.execute
 
-        def execute(self, tool_id, args, *, cwd, timeout_seconds):
-            self.calls.append((tool_id, tuple(args), str(cwd)))
-            return self.delegate.execute(tool_id, args, cwd=cwd, timeout_seconds=timeout_seconds)
+    def traced_execute(self, tool_id, args, *, cwd, timeout_seconds):
+        calls.append((tool_id, tuple(args), str(cwd)))
+        return original_execute(self, tool_id, args, cwd=cwd, timeout_seconds=timeout_seconds)
 
-    executor = CountingExecutor()
+    monkeypatch.setattr(SubprocessToolExecutor, "execute", traced_execute)
     database = tmp_path / "runtime-workspace.sqlite"
     query_path = tmp_path / "runtime-query.json"
     query_path.write_text(json.dumps(query), encoding="utf-8")
     monkeypatch.setattr(cli, "_assets", lambda: assets)
-    monkeypatch.setattr(cli, "build_default_tool_executor", lambda: executor)
 
     assert cli.main(["query", "--db", str(database), "--query-file", str(query_path)]) == 0
     response = json.loads(capsys.readouterr().out)
-    assert response["termination"] == "satisfied", {"gaps": [(gap["reason"], gap["detail"]) for gap in response["gaps"]], "calls": executor.calls}
+    assert response["termination"] == "satisfied", {"gaps": [(gap["reason"], gap["detail"]) for gap in response["gaps"]], "calls": calls}
     assert {fact["fact_type"] for fact in response["results"]} == {"F4", "F6"}
     assert all(set(fact["fields"]) == {"kind"} for fact in response["results"])
     values = [fact["fields"]["kind"]["value"].get("text", "") for fact in response["results"]]
@@ -89,11 +84,11 @@ def test_cli_query_invokes_cargo_once_and_returns_distinct_membership_and_depend
     assert any("workspace member: runtime-core" in value for value in values)
     assert any("runtime-app -> runtime-core" in value for value in values)
     assert all(fact["fields"]["kind"]["basis"]["evidence"] for fact in response["results"])
-    assert len(executor.calls) == 1, executor.calls
+    assert len(calls) == 1, calls
 
     reopened = Repository(database, assets)
     try:
-        replay = execute_query_with_construction(query, reopened, assets, external_executor=executor)
+        replay = execute_query_with_construction(query, reopened, assets, external_executor=cli.build_default_tool_executor())
         assert replay["termination"] == "satisfied", replay
         assert all(set(fact["fields"]) == {"kind"} for fact in replay["results"])
         assert len(executor.calls) == 1, executor.calls
