@@ -268,7 +268,7 @@ def _native_observation(
             "source_ids": [source_id],
             "conditions": [],
             "environment": profile["environment"],
-            "language_semantics": ["Native tool output only; no unsupported semantics inferred"],
+            "language_semantics": [("Python compileall diagnostic only; no runtime behavior inferred" if profile["tool_id"] == "python.compileall" else "Cargo manifest metadata only; membership is not dependency and no runtime semantics inferred" if profile["tool_id"] == "rust.cargo-metadata" else "Native tool output only; no unsupported semantics inferred")],
         },
         "coverage": profile["coverage"],
     }
