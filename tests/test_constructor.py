@@ -270,3 +270,36 @@ def test_constructor_discards_manifest_observations_if_source_changes_during_too
 
     assert not any(fact["fact_type"] == "F4" for fact in result["batch"]["facts"])
     assert any(gap["reason"] == "source_modified" for gap in result["gaps"])
+
+def test_constructor_reports_gap_when_subprocess_profile_is_accepted_but_executor_missing(tmp_path):
+    import json
+    import shutil
+
+    project = tmp_path / "manifest-no-executor"
+    (project / "src").mkdir(parents=True)
+    (project / "Cargo.toml").write_text(
+        '[package]\nname = "manifest-no-executor"\nversion = "0.1.0"\nedition = "2021"\n',
+        encoding="utf-8",
+    )
+    (project / "src" / "lib.rs").write_text("pub fn run() {}\n", encoding="utf-8")
+    assets = tmp_path / "assets"
+    shutil.copytree(ASSETS, assets)
+    matrix_path = assets / "capability-matrix.json"
+    matrix = json.loads(matrix_path.read_text(encoding="utf-8"))
+    candidate = next(entry for entry in matrix["entries"] if entry["tool_id"] == "rust.cargo-metadata")
+    candidate["enabled"] = True
+    candidate["acceptance"] = {
+        "actor": "parser_development",
+        "evidence": ["tests/test_info_parser.py::test_cargo_metadata_parser_emits_workspace_and_dependency_observations_separately"],
+    }
+    matrix_path.write_text(json.dumps(matrix), encoding="utf-8")
+    value = _request_for_project(project)
+    value["query"]["selections"] = [
+        {"fact_type": "F2", "fields": ["identity", "names"]},
+        {"fact_type": "F4", "fields": ["kind"]},
+    ]
+
+    result = execute_constructor_request(value, assets)
+
+    assert not any(fact["fact_type"] == "F4" for fact in result["batch"]["facts"])
+    assert any(gap["reason"] == "unavailable_tool" and "executor" in gap["detail"].lower() for gap in result["gaps"])
