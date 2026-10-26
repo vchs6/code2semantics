@@ -165,7 +165,7 @@ def test_restore_rejects_wrong_repository_schema_without_changing_fact_history(b
 
     malformed = tmp_path / "malformed-repository-schema.db"
     with sqlite3.connect(malformed) as connection:
-        for table in ("sources", "entities", "facts", "attributes", "relations", "submissions", "source_heads"):
+        for table in ("sources", "entities", "facts", "attributes", "attribute_versions", "validity_events", "relations", "submissions", "source_heads", "evidence", "evidence_links", "premises", "inventories", "conflicts", "conflict_links"):
             connection.execute(f"CREATE TABLE {table} (id INTEGER PRIMARY KEY)")
 
     repository = Repository(db_path)
