@@ -3,7 +3,7 @@ from pathlib import Path
 
 from semantic_facts.cli import main
 from semantic_facts.repository.store import Repository
-from semantic_facts.query_engine import execute_query
+from semantic_facts.query_engine import execute_query, execute_query_with_construction
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -239,3 +239,52 @@ def test_partial_fact_updates_append_missing_attributes_and_reject_conflicts(tmp
     assert after == before
     assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == fact_count
     repository.close()
+
+def test_first_phase_acceptance_combines_python_and_rust_projects_without_identity_collision(tmp_path):
+    python_project = tmp_path / "python-project"
+    rust_project = tmp_path / "rust-project"
+    python_project.mkdir()
+    (rust_project / "src").mkdir(parents=True)
+    (python_project / "engine.py").write_text("class Engine:\n    pass\n", encoding="utf-8")
+    (rust_project / "src" / "lib.rs").write_text("pub struct Engine;\n", encoding="utf-8")
+
+    query = {
+        "contract_version": "1.0.0",
+        "catalog_id": "semantic-facts-20261025",
+        "request_id": "multi-project-first-phase",
+        "scope": {
+            "scope_id": "python-rust-scope",
+            "directories": [str(python_project.resolve()), str(rust_project.resolve())],
+            "excludes": [],
+            "defaulted": False,
+        },
+        "target": {"kind": "scope"},
+        "granularity": "L3",
+        "selections": [{"fact_type": "F2", "fields": ["identity", "names", "purpose"]}],
+        "budget": {"max_rounds": 2, "max_new_assertions": 30},
+    }
+    database = tmp_path / "multi-project.db"
+    repository = Repository(database, ROOT / "skills" / "layered-semantic-facts" / "assets")
+    try:
+        response = execute_query_with_construction(
+            query, repository, ROOT / "skills" / "layered-semantic-facts" / "assets"
+        )
+        assert response["termination"] == "satisfied", response
+        assert len(response["sources"]) == 2
+        same_named = [
+            fact for fact in response["results"]
+            if "Engine" in fact["fields"]["names"]["value"]["text"]
+        ]
+        assert len(same_named) == 2
+        assert len({fact["node"]["source_id"] for fact in same_named}) == 2
+        assert len({fact["node"]["subject_id"] for fact in same_named}) == 2
+        assert response["out_of_catalog"] == [{
+            "fact_type": "F2",
+            "fields": ["purpose"],
+            "reason": "No fixed first-phase information need covers these fields.",
+        }]
+        assert response["gaps"] == []
+        assert all(set(fact["fields"]) <= {"identity", "names"} for fact in response["results"])
+        assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] >= 2
+    finally:
+        repository.close()
