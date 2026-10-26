@@ -117,10 +117,16 @@ These tasks follow accepted pure parser adapters. They are prerequisites to enab
 
 ## 8. Request-level producer deduplication
 
-- [ ] 8.1 Add a RED test proving one selected producer covering multiple requested needs is invoked once and its observations satisfy all matching fields.
+- [x] 8.1 Add a RED test proving one selected producer covering multiple requested needs is invoked once and its observations satisfy all matching fields.
 - [ ] 8.2 Add a RED test proving matching values from multiple producers become one fact with merged evidence.
 - [ ] 8.3 Add a RED test proving disagreeing values become an explicit conflict and do not silently overwrite one another.
 - [ ] 8.4 Build a canonical execution-task list keyed by source snapshot, tool ID, invocation profile and arguments; execute each unique task once and fan its observations out to matching needs.
 - [ ] 8.5 Aggregate by repository fact identity before FactBatch validation. Keep repository duplicate-identity validation strict.
 - [ ] 8.6 Test source changes during execution and verify outputs from the stale snapshot are discarded.
 - [ ] 8.7 Run focused tests, repository/query regressions, strict OpenSpec and full CI. Keep new profiles disabled until accepted.
+
+### Request-level deduplication evidence
+
+- Proposal/design/tasks were updated before applying the fix: https://github.com/vchs6/code2semantics/commit/3308646ae7694008e1840f1840d06a6fa1cac1c9 and https://github.com/vchs6/code2semantics/commit/ee514155192597eb59b186b82897f8307274a932.
+- The regression test selects Cargo metadata for both F4.kind and F6.kind and asserts the executor call count is exactly one. CI run https://github.com/vchs6/code2semantics/actions/runs/40333047820 passed all component test steps; overall failure was only the expected product delivery gate.
+- A further fix keys the execution guard by tool ID, environment, invocation profile and normalized arguments rather than tool ID alone: https://github.com/vchs6/code2semantics/commit/fc95c520a8f8ba4d0d9c5d42e89f2762a5cb8a0d. Its CI run is pending at https://github.com/vchs6/code2semantics/actions/runs/40333512425; do not mark task 8.4 or the whole issue complete until that run is inspected.
