@@ -98,3 +98,28 @@ def plan_constructor_request(
         "catalogue_mutated": False,
         "matrix_mutated": False,
     }
+
+
+def select_enabled_producers(
+    matrix: Any,
+    need_ids: list[str],
+    language: str,
+    platform: str,
+    environment: str,
+) -> dict[str, list[dict[str, Any]]]:
+    """Select only accepted, enabled producers; union partial producers by need.
+
+    Matrix candidate discovery is read-only. Disabled or unaccepted entries are
+    never eligible, even if the generic matrix query returns them as candidates.
+    """
+    selected: dict[str, list[dict[str, Any]]] = {}
+    for need_id in sorted(set(need_ids)):
+        candidates = matrix.query([need_id], language.lower(), platform.lower(), environment)
+        eligible = [
+            item for item in candidates
+            if item.get("enabled") is True
+            and item.get("acceptance", {}).get("actor") == "parser_development"
+            and item.get("acceptance", {}).get("evidence")
+        ]
+        selected[need_id] = sorted(eligible, key=lambda item: item["tool_id"])
+    return selected
