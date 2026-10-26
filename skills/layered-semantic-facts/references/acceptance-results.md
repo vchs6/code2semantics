@@ -140,3 +140,24 @@ CI run: https://github.com/vchs6/code2semantics/actions/runs/40277635793
 - Restore hardening now validates both the required normalized table names and required columns before copying a backup. Regressions cover empty SQLite files and malformed databases that reuse expected table names with wrong columns.
 - CI: https://github.com/vchs6/code2semantics/actions/runs/40299401934 — repository 57 passed; transaction 6; transfer 8; repository acceptance 3; matrix 15; parser 9; scanner 7; runtime acceptance 8; packaging 2; executor 3; producer dispatch 3; combined planning/constructor/induction/query 52 passed; strict OpenSpec passed.
 - Full S1–S12 acceptance remains NOT_YET_PASSED. The product gate is intentionally blocked until the complete provider/tool acquisition → parsing → construction/induction → repository re-read → final response workflow and the entire scenario matrix are verified.
+
+## Query acceptance update (2026-10-26)
+
+CI run: https://github.com/vchs6/code2semantics/actions/runs/40311963317
+
+- Repository: 59 passed.
+- Transactions: 6 passed.
+- Transfer: 8 passed.
+- Repository acceptance: 5 passed.
+- Capability matrix: 15 passed.
+- Parser: 9 passed.
+- Source scanner: 7 passed.
+- Runtime acceptance: 9 passed.
+- Packaging: 2 passed.
+- Bounded executor: 3 passed.
+- Producer dispatch: 3 passed.
+- Combined information-needs/constructor/binding/induction/query orchestration: 55 passed.
+- Strict OpenSpec validation: passed.
+- Product delivery gate: BLOCKED as intended; full S1–S12 acceptance has not passed.
+
+New query checks cover a closed repository returning explicit `repository_unavailable` gaps without fallback or fabricated results, and preservation of `budget_exhausted` when the final allowed construction round makes partial progress but still has gaps. Source-deletion acceptance also verifies that old fact rows remain stored while current queries exclude deleted-file facts and retain unaffected current facts.
