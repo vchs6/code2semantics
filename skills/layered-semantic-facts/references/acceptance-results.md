@@ -38,3 +38,20 @@ Latest CI run: https://github.com/vchs6/code2semantics/actions/runs/40259119661
 - Product delivery gate: BLOCKED by design; full orchestration, induction, higher-layer semantic construction, and dependency-aware incremental invalidation are still missing.
 
 Rust parsing is intentionally a lightweight deterministic declaration inventory with delimiter checks, not rustc/rust-analyzer type checking. Do not describe this as full Rust semantic analysis.
+
+## Expanded component and packaging regression (2026-10-26)
+
+Latest completed CI: https://github.com/vchs6/code2semantics/actions/runs/40268487627
+
+- Repository: 39 passed.
+- Capability matrix: 15 passed.
+- Parser registry / Python / Rust: 9 passed.
+- Mixed-language source scanner: 5 passed.
+- Runtime source-to-query acceptance: 4 passed.
+- Copied Skill packaging: 2 passed; copied-install test uses only the installed Skill directory for runtime code and assets.
+- Bounded tool executor: 3 passed.
+- Information-needs + constructor planning + constructor + induction + query orchestration: 30 passed.
+- Public contract validation and strict OpenSpec: passed.
+- Product delivery gate: BLOCKED by design because full S1–S12 acceptance, direct-node completeness/ancestor obligations, full dependency-aware invalidation, and configured induction-provider/tool orchestration are still incomplete.
+
+This is strong evidence for the implemented component boundaries, not a claim that the full semantic-facts product is complete.
