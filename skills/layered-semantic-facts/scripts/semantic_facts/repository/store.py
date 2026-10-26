@@ -162,36 +162,80 @@ class Repository:
             )
 
     def _insert_record(self, record: StoredRecord) -> None:
+        # Every persisted row is immutable. Repeated observations may append missing
+        # attributes, but a conflicting identity/payload is rejected, never replaced.
         for row in record.sources:
             value = row.value
             self.connection.execute(
                 "INSERT OR IGNORE INTO sources(source_id, payload) VALUES (?, ?)",
                 (value["source_id"], row.payload),
             )
+            existing = self.connection.execute(
+                "SELECT payload FROM sources WHERE source_id = ?", (value["source_id"],)
+            ).fetchone()
+            if not existing or existing[0] != row.payload:
+                raise WriteConflict(None, f"source identity conflict: {value['source_id']}")
+
         self._mark_current_sources(record.sources)
+
         for row in record.entities:
             value = row.value
+            values = (row.key, value["source_id"], value["subject_id"], value.get("node_id"), row.payload)
             self.connection.execute(
                 "INSERT OR IGNORE INTO entities(entity_key, source_id, subject_id, node_id, payload) VALUES (?, ?, ?, ?, ?)",
-                (row.key, value["source_id"], value["subject_id"], value.get("node_id"), row.payload),
+                values,
             )
+            existing = self.connection.execute(
+                "SELECT entity_key, source_id, subject_id, node_id, payload FROM entities WHERE entity_key = ?",
+                (row.key,),
+            ).fetchone()
+            if not existing or tuple(existing) != values:
+                raise WriteConflict(None, f"entity identity conflict: {row.key}")
+
         for row in record.facts:
             value = row.value
             node = value["node"]
-            self.connection.execute(
-                "INSERT INTO facts(fact_key, source_id, subject_id, node_id, fact_id, fact_type, payload) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                (row.key, node["source_id"], node["subject_id"], node["node_id"], value["fact_id"], value["fact_type"], row.payload),
+            values = (
+                row.key, node["source_id"], node["subject_id"], node["node_id"],
+                value["fact_id"], value["fact_type"], row.payload,
             )
+            self.connection.execute(
+                "INSERT OR IGNORE INTO facts(fact_key, source_id, subject_id, node_id, fact_id, fact_type, payload) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                values,
+            )
+            existing = self.connection.execute(
+                "SELECT fact_key, source_id, subject_id, node_id, fact_id, fact_type, payload FROM facts WHERE fact_key = ?",
+                (row.key,),
+            ).fetchone()
+            if not existing or tuple(existing) != values:
+                raise WriteConflict(None, f"fact identity conflict: {row.key}")
+
         for row in record.attributes:
+            field_name = row.field_path.removeprefix("/fields/")
+            values = (row.key, row.fact_key, field_name, row.payload)
             self.connection.execute(
-                "INSERT INTO attributes(attribute_key, fact_key, field_name, payload) VALUES (?, ?, ?, ?)",
-                (row.key, row.fact_key, row.field_path.removeprefix("/fields/"), row.payload),
+                "INSERT OR IGNORE INTO attributes(attribute_key, fact_key, field_name, payload) VALUES (?, ?, ?, ?)",
+                values,
             )
+            existing = self.connection.execute(
+                "SELECT attribute_key, fact_key, field_name, payload FROM attributes WHERE attribute_key = ?",
+                (row.key,),
+            ).fetchone()
+            if not existing or tuple(existing) != values:
+                raise WriteConflict(None, f"attribute conflict: {row.key}")
+
         for row in record.relations:
+            values = (row.key, row.owner_key, row.payload)
             self.connection.execute(
-                "INSERT INTO relations(relation_key, owner_key, payload) VALUES (?, ?, ?)",
-                (row.key, row.owner_key, row.payload),
+                "INSERT OR IGNORE INTO relations(relation_key, owner_key, payload) VALUES (?, ?, ?)",
+                values,
             )
+            existing = self.connection.execute(
+                "SELECT relation_key, owner_key, payload FROM relations WHERE relation_key = ?",
+                (row.key,),
+            ).fetchone()
+            if not existing or tuple(existing) != values:
+                raise WriteConflict(None, f"relation conflict: {row.key}")
 
     def read(self, query: dict[str, Any]) -> dict[str, Any]:
         self._validate_query(query)
