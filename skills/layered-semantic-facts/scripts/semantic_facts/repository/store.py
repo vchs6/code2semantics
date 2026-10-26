@@ -549,6 +549,20 @@ class Repository:
                     (submission_key, digest, _canonical(receipt)),
                 )
         except sqlite3.IntegrityError as error:
+            # Two connections may both observe an absent submission key before
+            # either transaction commits. If the winner committed identical
+            # content, treat the loser as an idempotent replay, not a conflict.
+            concurrent = self.connection.execute(
+                "SELECT digest, receipt FROM submissions WHERE submission_key = ?",
+                (submission_key,),
+            ).fetchone()
+            if concurrent is not None:
+                if concurrent[0] == digest:
+                    payload = json.loads(concurrent[1])
+                    with self.connection:
+                        self._mark_current_sources(record.sources)
+                    return CommitReceipt(submission_key, payload["digest"], tuple())
+                raise WriteConflict(None, "submission key already has different content") from error
             raise WriteConflict(None, str(error)) from error
         return CommitReceipt(submission_key, digest, affected)
 
