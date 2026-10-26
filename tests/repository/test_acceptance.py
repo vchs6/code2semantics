@@ -87,3 +87,37 @@ def test_repository_acceptance_conflict_rolls_back_without_deleting_facts(batch,
         "SELECT submission_key, digest FROM submissions ORDER BY submission_key"
     ).fetchall() == before_submissions
     repository.close()
+
+def test_repository_acceptance_invalidation_revalidation_and_export_import_roundtrip(batch, db_path, tmp_path):
+    from semantic_facts.repository.store import Repository
+
+    query = _query()
+    imported_path = tmp_path / "imported-current.db"
+    repository = Repository(db_path)
+    repository.write(batch, "acceptance-validity")
+    before_fact_rows = repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
+    fact_key = repository.connection.execute("SELECT fact_key FROM facts WHERE fact_id = ?", ("fact-a",)).fetchone()[0]
+    field_key = repository.connection.execute(
+        "SELECT attribute_key FROM attributes WHERE fact_key = ? AND field_name = ?",
+        (fact_key, "strategy"),
+    ).fetchone()[0]
+
+    repository.invalidate_field("fact-a", "strategy", "acceptance source changed")
+    invalidated = repository.read(query)
+    assert invalidated["facts"] == []
+    assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == before_fact_rows
+
+    repository.record_validity_event("field", field_key, "current", "revalidated against current source evidence")
+    current = repository.read(query)
+    assert {fact["fact_id"] for fact in current["facts"]} == {"fact-a", "fact-b"}
+
+    exported = repository.export_current()
+    imported = Repository(imported_path)
+    receipt = imported.import_current(exported, "acceptance-import")
+    assert receipt.submission_key == "acceptance-import"
+    imported_result = imported.read(query)
+    assert {fact["fact_id"] for fact in imported_result["facts"]} == {"fact-a", "fact-b"}
+    assert imported.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == 2
+    assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == before_fact_rows
+    imported.close()
+    repository.close()
