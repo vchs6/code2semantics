@@ -404,3 +404,28 @@ def test_query_reports_repository_unavailable_without_fabricating_results(tmp_pa
     assert response["gaps"]
     assert all(gap["reason"] == "repository_unavailable" for gap in response["gaps"])
     assert before == 0
+
+
+def test_query_reports_repository_unavailable_without_falling_back_or_writing(tmp_path):
+    project = tmp_path / "repository-unavailable-project"
+    project.mkdir()
+    (project / "engine.py").write_text("class Engine:\\n    pass\\n", encoding="utf-8")
+    database = tmp_path / "repository-unavailable.db"
+    repository = Repository(database, ASSETS)
+    repository.close()
+
+    try:
+        response = execute_query_with_construction(make_query(project), repository, ASSETS)
+    except Exception as error:
+        raise AssertionError("unavailable repository must return a contract-shaped gap response") from error
+
+    assert response["termination"] == "unavailable"
+    assert any(gap["reason"] == "repository_unavailable" for gap in response["gaps"])
+    assert response["results"] == []
+    assert response["sources"][0]["root"] == str(project.resolve())
+
+    reopened = Repository(database, ASSETS)
+    try:
+        assert reopened.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == 0
+    finally:
+        reopened.close()
