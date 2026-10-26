@@ -8,6 +8,7 @@ import subprocess
 from typing import Any, Mapping, Sequence
 
 from .induction import _validate, _validators, validate_induction_result
+from .source_scanner import inspect_source
 
 
 class ProviderConfigurationError(ValueError):
@@ -53,6 +54,29 @@ class InductionProviderRegistry:
 
 def _empty_failed_result(request: dict[str, Any], asset_root: str | Path | None) -> dict[str, Any]:
     return validate_induction_result(request, None, asset_root)
+
+
+def _source_state_changed(request: dict[str, Any]) -> bool:
+    """Revalidate every source snapshot after provider execution."""
+    for expected in request["existing_valid_facts"]["sources"]:
+        try:
+            current = inspect_source(expected["root"])
+        except (OSError, ValueError):
+            return True
+        if (
+            current["source_id"] != expected["source_id"]
+            or current["content_state"] != expected["content_state"]
+        ):
+            return True
+    return False
+
+
+def _source_modified_result(request: dict[str, Any], asset_root: str | Path | None) -> dict[str, Any]:
+    result = _empty_failed_result(request, asset_root)
+    for gap in result["gaps"]:
+        gap["reason"] = "source_modified"
+        gap["detail"] = "A source changed or became unavailable while the induction provider was running; proposal output was discarded."
+    return result
 
 
 def invoke_induction_provider(
@@ -101,11 +125,12 @@ def invoke_induction_provider(
             "induction_result": _empty_failed_result(request, asset_root),
         }
     except subprocess.TimeoutExpired:
+        changed = _source_state_changed(request)
         return {
             "provider_id": provider_id,
-            "execution_status": "timeout",
-            "detail": f"Induction provider exceeded {timeout} seconds.",
-            "induction_result": _empty_failed_result(request, asset_root),
+            "execution_status": "source_modified" if changed else "timeout",
+            "detail": "Source state changed during provider execution." if changed else f"Induction provider exceeded {timeout} seconds.",
+            "induction_result": _source_modified_result(request, asset_root) if changed else _empty_failed_result(request, asset_root),
         }
     except (OSError, UnicodeError) as error:
         return {
@@ -113,6 +138,14 @@ def invoke_induction_provider(
             "execution_status": "unavailable_tool",
             "detail": f"Induction provider could not execute or decode output: {error}",
             "induction_result": _empty_failed_result(request, asset_root),
+        }
+
+    if _source_state_changed(request):
+        return {
+            "provider_id": provider_id,
+            "execution_status": "source_modified",
+            "detail": "Source state changed during provider execution; proposal output was discarded.",
+            "induction_result": _source_modified_result(request, asset_root),
         }
 
     stdout_bytes = completed.stdout.encode("utf-8")
