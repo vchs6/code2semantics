@@ -21,7 +21,7 @@ TDD rule: each behavior task starts with a failing test, then the smallest imple
 - [x] 3.1 Validate the final response against output-schema and include requested fields, evidence, context, coverage, gaps and termination.
 - [x] 3.2 Ensure constructor plans and raw repository envelopes are not returned as final responses.
 - [x] 3.3 Project only the requested target and required direct nodes; verify completeness before treating a partial direct-node result as sufficient.
-- [ ] 3.4 Add tests for multiple projects, same-name subjects, multi-parent relations, dependency cycles, external references, conflicts and out-of-catalog items.
+- [x] 3.4 Add tests for multiple projects, same-name subjects, multi-parent relations, dependency cycles, external references, conflicts and out-of-catalog items.
 
 ## 4. CLI and integration
 
@@ -62,3 +62,10 @@ For the supported F2/L3 model, a node-target query now verifies both (a) the cur
 - Tests cover mixed supported/out-of-catalog selections, same-named nodes in distinct roots, nested roots, unavailable sources without fallback, out-of-scope node references rejected before repository reads, and projection of external references plus conflict evidence.
 - CI run `https://github.com/vchs6/code2semantics/actions/runs/40276135137`: all component suites and strict OpenSpec passed; combined planning/constructor/binding/induction/query suite 51 passed. Product delivery gate still blocks full acceptance.
 - Task 3.4 remains pending for graph semantics beyond the current syntax-only F2/L3 boundary: multi-parent relation and dependency-cycle semantics, plus complete S1–S12 coverage. The added tests do not claim those semantics are implemented.
+
+## Graph-boundary query acceptance evidence (2026-10-26)
+
+- Added `test_query_handles_multi_parent_cycle_and_external_edges_without_recursive_expansion` to `tests/test_query_orchestration.py`. It stores a real-schema-validated mixed Python source FactBatch with multi-parent navigation, a dependency cycle and an external terminal reference, then verifies bounded traversal terminates and query output remains limited to requested identity/name fields.
+- Repository graph traversal has separate coverage in `tests/repository/test_store.py` for duplicate edge deduplication, multi-parent edges, cycles, external terminal references, depth/edge budget truncation, and immutable fact-row counts.
+- CI: https://github.com/vchs6/code2semantics/actions/runs/40297691458 — repository 53 passed; matrix 15; parser 9; scanner 7; source acceptance 4; packaging 2; executor 3; producer dispatch 3; combined information-needs/constructor/induction/query suite 52 passed; strict OpenSpec passed.
+- Task 4.4 remains pending: complete S1–S12 integration across the full runtime tool→parser→constructor/induction→FactBatch→repository→response path is not yet demonstrated. Product delivery gate remains blocked.
