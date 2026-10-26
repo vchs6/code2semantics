@@ -63,8 +63,9 @@ def test_real_source_scan_store_reopen_and_query(tmp_path, capsys):
     query_with_missing_field = dict(query)
     query_with_missing_field["selections"] = [{"fact_type": "F2", "fields": ["purpose"]}]
     incomplete = execute_query(query_with_missing_field, reopened, ROOT / "skills" / "layered-semantic-facts" / "assets")
-    assert incomplete["termination"] == "no_progress"
-    assert incomplete["gaps"][0]["fields"] == ["purpose"]
+    assert incomplete["termination"] == "satisfied"
+    assert incomplete["gaps"] == []
+    assert incomplete["out_of_catalog"][0]["fields"] == ["purpose"]
     counts_before = reopened.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
     reopened.close()
 
