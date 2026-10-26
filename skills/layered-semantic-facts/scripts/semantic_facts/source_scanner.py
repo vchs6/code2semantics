@@ -12,6 +12,8 @@ from .fact_constructor import construct_fact_batch
 from .constructor_plan import select_enabled_producers
 from .capability_matrix import CapabilityMatrix
 from .info_parser import ParserRegistry
+from .producer_dispatch import dispatch_registered_producer
+from .tool_executor import SubprocessToolExecutor
 from .repository.contract import ContractCodec
 
 
@@ -68,7 +70,7 @@ def inspect_source(root: str | Path) -> dict[str, Any]:
     }
 
 
-def build_fact_batch_with_gaps(root: str | Path, codec: ContractCodec) -> dict[str, Any]:
+def build_fact_batch_with_gaps(root: str | Path, codec: ContractCodec, *, external_executor: SubprocessToolExecutor | None = None) -> dict[str, Any]:
     """Read current Python source, parse it, and construct a validated FactBatch."""
     project_root = Path(root).resolve()
     if not project_root.is_dir():
@@ -132,6 +134,10 @@ def build_fact_batch_with_gaps(root: str | Path, codec: ContractCodec) -> dict[s
             producer_gaps.append({"path": relative, "reason": "unavailable_tool", "detail": str(error)})
             continue
         tool_id = sorted(common_tool_ids)[0]
+        selected_entry = next(
+            entry for entry in selected_by_need[required_need_ids[0]]
+            if entry["tool_id"] == tool_id
+        )
         coverage = {
             "domain": language + " syntax in " + relative,
             "checked": [relative],
@@ -153,7 +159,14 @@ def build_fact_batch_with_gaps(root: str | Path, codec: ContractCodec) -> dict[s
             },
         }
         try:
-            parsed = parser_registry.parse(request)
+            parsed = dispatch_registered_producer(
+                selected_entry,
+                request,
+                parser_registry,
+                external_executor=external_executor,
+                cwd=project_root,
+                args=[relative],
+            )
             if parsed.get("gaps"):
                 first_gap = parsed["gaps"][0]
                 producer_gaps.append({
@@ -174,9 +187,9 @@ def build_fact_batch_with_gaps(root: str | Path, codec: ContractCodec) -> dict[s
     return {"batch": batch, "gaps": producer_gaps}
 
 
-def build_fact_batch(root: str | Path, codec: ContractCodec) -> dict[str, Any]:
+def build_fact_batch(root: str | Path, codec: ContractCodec, *, external_executor: SubprocessToolExecutor | None = None) -> dict[str, Any]:
     """Strict scan helper: fail if any source file could not be parsed."""
-    result = build_fact_batch_with_gaps(root, codec)
+    result = build_fact_batch_with_gaps(root, codec, external_executor=external_executor)
     if result["gaps"]:
         first = result["gaps"][0]
         raise ValueError(f"cannot construct facts for {first['path']}: {first['detail']}")
