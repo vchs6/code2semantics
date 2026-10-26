@@ -92,8 +92,32 @@ def build_fact_batch_with_gaps(root: str | Path, codec: ContractCodec, *, extern
             raise ValueError(f"Python source is not UTF-8: {path.relative_to(project_root)}") from error
         raw.append((path.relative_to(project_root).as_posix(), source_text))
 
+    # Source identity must include project manifests/configuration as well
+    # as parsed source files; otherwise Cargo.toml/pyproject.toml changes could
+    # leave manifest-derived facts falsely current.
+    state_inputs = list(raw)
+    manifest_names = {
+        "Cargo.toml", "Cargo.lock", "pyproject.toml", "poetry.lock",
+        "Pipfile", "Pipfile.lock", "setup.cfg", "setup.py",
+        "requirements.txt", "package.json", "package-lock.json",
+        "Makefile", "CMakeLists.txt",
+    }
+    for manifest in sorted(project_root.rglob("*")):
+        if not manifest.is_file():
+            continue
+        relative = manifest.relative_to(project_root).as_posix()
+        if any(part in EXCLUDED_DIRS for part in manifest.relative_to(project_root).parts):
+            continue
+        if manifest.name not in manifest_names and not (
+            manifest.name.startswith("requirements-") and manifest.suffix == ".txt"
+        ):
+            continue
+        try:
+            state_inputs.append((relative, manifest.read_text(encoding="utf-8")))
+        except UnicodeDecodeError as error:
+            raise ValueError(f"project manifest is not UTF-8: {relative}") from error
     snapshot_digest = hashlib.sha256()
-    for relative, source_text in raw:
+    for relative, source_text in sorted(set(state_inputs), key=lambda item: item[0]):
         snapshot_digest.update(relative.encode("utf-8"))
         snapshot_digest.update(b"\\0")
         snapshot_digest.update(hashlib.sha256(source_text.encode("utf-8")).digest())
