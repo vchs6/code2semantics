@@ -107,3 +107,11 @@
 - RED case: https://github.com/vchs6/code2semantics/actions/runs/40298339861 failed because an empty SQLite database was accepted as a backup. The target database could have been replaced by a schema-less database.
 - GREEN: unconditional required-table validation in `Repository.restore` now rejects empty or foreign SQLite files before restore. The focused transfer suite passed 6 tests, transaction suite passed 6, repository acceptance passed 3, and the full repository suite passed 55 in https://github.com/vchs6/code2semantics/actions/runs/40298437864.
 - Full product acceptance remains blocked and repository task 6.2/6.4 remain pending; this transfer fix does not close the broader repository lifecycle acceptance.
+
+
+## Malformed-but-same-table-name backup schema RED/GREEN (2026-10-26)
+
+- RED: https://github.com/vchs6/code2semantics/actions/runs/40298997297 — a SQLite backup containing all expected table names but only dummy `id` columns was accepted, exposing that table-name checks alone were insufficient.
+- Fix: `Repository.restore` now validates the required columns for every normalized repository table (sources, entities, facts, attributes, attribute_versions, validity_events, relations, submissions, source_heads, evidence, evidence_links, premises, inventories, conflicts, conflict_links) before copying the backup into the live connection.
+- GREEN: https://github.com/vchs6/code2semantics/actions/runs/40299139228 — repository 57 passed; focused transaction 6; transfer 8; repository acceptance 3; matrix 15; parser 9; scanner 7; runtime acceptance 6; packaging 2; executor 3; producer dispatch 3; combined planning/constructor/induction/query 52 passed; strict OpenSpec passed.
+- The empty SQLite and malformed same-table-name backup tests both assert existing fact/source rows remain unchanged on rejection. Product delivery gate remains blocked for full-system acceptance.
