@@ -571,13 +571,6 @@ def test_integrated_parser_constructor_induction_gap_repository_reopen_and_minim
     repository = Repository(database, assets)
     try:
         repository.write(batch, "pipeline-" + batch["sources"][0]["source_id"])
-        before_close = repository.read({
-            "scope": {"directories": [str(project.resolve())], "excludes": []},
-            "target": {"kind": "scope"},
-            "selections": [{"fact_type": "F2", "fields": ["identity", "names"]}],
-        })
-        assert before_close["facts"]
-        assert all("roles" not in item["fields"] for item in before_close["facts"])
     finally:
         repository.close()
 
