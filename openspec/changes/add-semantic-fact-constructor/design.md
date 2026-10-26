@@ -74,3 +74,17 @@ For each need, the catalogue must state the expected output kind, evidence sourc
 4. Only after parser acceptance may the capability matrix enable the corresponding producer profile. Then connect the selected profiles to the constructor runtime and run cross-component acceptance.
 
 The currently enabled in-process Python/Rust syntax parsers remain valid for F2/L3 only. No external profile is enabled merely because a candidate appears in the survey.
+
+## Native-output producer integration (required before enabling new matrix profiles)
+
+The new pure adapters for `rust.cargo-metadata` and `python.compileall` are parser-development components only. The current constructor plan selects `environment="in-process"`, and the current scanner/fact-constructor maps only F2 syntax observations. Therefore these adapters must remain disabled in the capability matrix until the constructor runtime consumes their need IDs and produces validated facts for the corresponding fact types.
+
+The next implementation increment must:
+
+- Plan producer profiles per unmet need, language, platform and environment, retaining multiple complementary producer IDs rather than requiring one tool to cover all needs.
+- Execute only enabled/accepted profiles through the existing bounded argv-only executor; command prefixes are fixed by the host configuration, and manifest paths/arguments are passed as individual argv items. Never invoke a shell or execute project source as part of metadata discovery.
+- Build invocation profiles from the exact current source snapshot and manifest/configuration content state. Recheck source state after external execution; stale or failed output becomes an explicit gap.
+- Convert manifest observations into only the matching F1/F3/F4/F6 fact fields for which the public fact schema and evidence contract can be satisfied. Keep workspace membership, physical containment and dependency edges as distinct relation kinds. Unsupported fields remain gaps.
+- Add integration tests using a real temporary Cargo workspace and a Python `pyproject.toml`, run the actual approved command, parse its native output, build a nonempty FactBatch, write/read SQLite, and assert the minimal query response does not leak unrequested fields.
+
+A parser being registered is not enough to enable a matrix entry. Matrix enablement follows constructor-consumer acceptance for the exact invocation profile; it must not be used to claim the entire S1–S12 chain is complete.
