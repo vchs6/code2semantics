@@ -162,7 +162,5 @@ def test_provider_rejects_untrusted_commands_from_request_payload():
         }
     })
 
-    result = invoke_induction_provider("fixture-provider", request, registry)
-
-    assert result["execution_status"] == "provider_identity_mismatch"
-    assert result["induction_result"]["batch"]["facts"] == []
+    with pytest.raises(ValueError, match="provider_command"):
+        invoke_induction_provider("fixture-provider", request, registry)
