@@ -371,7 +371,7 @@ def execute_constructor_request(
                             })
 
             if any(
-                profile["environment"] == "subprocess"
+                profile["environment"] == "subprocess" or profile["tool_id"] == "python.pyproject-toml"
                 for item in plan_result["plan"]
                 for profile in item.get("producer_profiles", [])
             ):
