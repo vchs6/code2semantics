@@ -161,3 +161,40 @@ def _gap_result(
     if error:
         raise ParserContractError(f"parser produced invalid gap {list(error.absolute_path)}: {error.message}")
     return result
+
+
+class ParserRegistry:
+    """Explicit registry for deterministic native-output parsers."""
+
+    def __init__(self, asset_root: str | Path | None = None):
+        self.asset_root = Path(asset_root) if asset_root else Path(__file__).resolve().parents[2] / "assets"
+        self._request_validator, self._result_validator = _validators(self.asset_root)
+        self._parsers: dict[str, Any] = {}
+        self.register("python.ast-source", lambda request: parse_python_request(request, self.asset_root))
+
+    def register(self, tool_id: str, parser: Any) -> None:
+        if not isinstance(tool_id, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]*", tool_id):
+            raise ValueError("tool_id must match the public identifier pattern")
+        if not callable(parser):
+            raise TypeError("parser must be callable")
+        if tool_id in self._parsers:
+            raise ValueError(f"parser already registered: {tool_id}")
+        self._parsers[tool_id] = parser
+
+    def supported_tools(self) -> tuple[str, ...]:
+        return tuple(sorted(self._parsers))
+
+    def parse(self, request: dict[str, Any]) -> dict[str, Any]:
+        error = next(self._request_validator.iter_errors(request), None)
+        if error:
+            raise ParserContractError(f"parse request {list(error.absolute_path)}: {error.message}")
+        tool_id = request["invocation_profile"]["tool_id"]
+        parser = self._parsers.get(tool_id)
+        if parser is None:
+            result = _unsupported(request["invocation_profile"], self._result_validator)
+        else:
+            result = parser(request)
+        error = next(self._result_validator.iter_errors(result), None)
+        if error:
+            raise ParserContractError(f"parser result {list(error.absolute_path)}: {error.message}")
+        return result
