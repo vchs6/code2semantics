@@ -36,6 +36,38 @@ def _git_state(root: Path) -> tuple[bool, bool]:
     untracked = any(line.startswith("??") for line in status)
     return dirty, untracked
 
+
+def inspect_source(root: str | Path) -> dict[str, Any]:
+    """Compute current source identity/state without parsing or constructing facts."""
+    project_root = Path(root).resolve()
+    if not project_root.is_dir():
+        raise ValueError(f"source root is not a directory: {project_root}")
+    files = sorted(
+        path for path in project_root.rglob("*")
+        if not any(part in EXCLUDED_DIRS for part in path.relative_to(project_root).parts)
+        and path.is_file() and path.suffix in {".py", ".rs"}
+    )
+    snapshot_digest = hashlib.sha256()
+    for path in files:
+        relative = path.relative_to(project_root).as_posix()
+        content = path.read_bytes()
+        snapshot_digest.update(relative.encode("utf-8"))
+        snapshot_digest.update(b"\\0")
+        snapshot_digest.update(hashlib.sha256(content).digest())
+    snapshot_hash = snapshot_digest.hexdigest()
+    root_hash = hashlib.sha256(str(project_root).encode("utf-8")).hexdigest()[:20]
+    dirty, has_untracked = _git_state(project_root)
+    return {
+        "source_id": "src-" + root_hash + "-" + snapshot_hash[:20],
+        "root": str(project_root),
+        "content_state": "sha256:" + snapshot_hash,
+        "status": "available",
+        "dirty": dirty,
+        "has_untracked": has_untracked,
+        "excludes": sorted(EXCLUDED_DIRS),
+    }
+
+
 def build_fact_batch(root: str | Path, codec: ContractCodec) -> dict[str, Any]:
     """Read current Python source, parse it, and construct a validated FactBatch."""
     project_root = Path(root).resolve()
