@@ -14,6 +14,7 @@ from .query_engine import execute_query_with_construction
 from .constructor_plan import plan_constructor_request
 from .constructor import execute_constructor_request
 from .tool_executor import build_default_tool_executor
+from .induction_provider import load_induction_provider_from_environment
 
 
 def _assets() -> Path:
@@ -47,7 +48,8 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "construct":
         request_document = json.loads(args.request_file.read_text(encoding="utf-8"))
-        result = execute_constructor_request(request_document, _assets(), external_executor=build_default_tool_executor())
+        provider_registry, provider_id = load_induction_provider_from_environment()
+        result = execute_constructor_request(request_document, _assets(), external_executor=build_default_tool_executor(), induction_provider_registry=provider_registry, induction_provider_id=provider_id)
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
 
@@ -78,7 +80,8 @@ def main(argv: list[str] | None = None) -> int:
     query_document = json.loads(args.query_file.read_text(encoding="utf-8"))
     repository = Repository(args.db, _assets())
     try:
-        result = execute_query_with_construction(query_document, repository, _assets(), external_executor=build_default_tool_executor())
+        provider_registry, provider_id = load_induction_provider_from_environment()
+        result = execute_query_with_construction(query_document, repository, _assets(), external_executor=build_default_tool_executor(), induction_provider_registry=provider_registry, induction_provider_id=provider_id)
     finally:
         repository.close()
     print(json.dumps(result, ensure_ascii=False, indent=2))
