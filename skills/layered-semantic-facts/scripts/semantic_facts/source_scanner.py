@@ -90,7 +90,7 @@ def build_fact_batch(root: str | Path, codec: ContractCodec) -> dict[str, Any]:
         observations = parsed["observations"]
         names = [item["payload"]["text"] for item in observations]
         evidence_by_id = {
-            item["evidence"]["evidence_id"]: item["evidence"]
+            item["evidence_id"]: item
             for observation in observations
             for item in observation["evidence"]
         }
