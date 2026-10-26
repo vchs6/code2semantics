@@ -54,10 +54,12 @@ def test_producer_selection_filters_disabled_and_combines_partial_coverage(tmp_p
         "acceptance": {"actor": "parser_development", "evidence": ["tests/test_info_parser.py::test_registry_discovers_builtin_parser_and_reports_unknown_profiles"]},
         "research_basis": ["built-in Python AST parser and first-phase acceptance fixture"],
     }
+    disabled = dict(base, tool_id="tool.disabled", information_need_ids=["syntax.f2.boundary"], enabled=False)
+    disabled.pop("acceptance")
     matrix.replace([
         dict(base, tool_id="tool.identity", information_need_ids=["syntax.f2.identity"]),
         dict(base, tool_id="tool.names", information_need_ids=["syntax.f2.names"]),
-        dict(base, tool_id="tool.disabled", information_need_ids=["syntax.f2.boundary"], enabled=False, acceptance=None),
+        disabled,
     ])
     selected = select_enabled_producers(
         matrix,
