@@ -78,3 +78,8 @@
 2. ����ʵ��д�롢��ȡ���ֲ�ά������Ч�ԡ���ϵ�����ʹ���ָ���ÿ���� RED �� GREEN��
 3. ͨ���ֿ�������պ���������������ѯ/���������ɣ�������������˵�����ɡ�
 
+## Clarification: subject existence is not whole-submission duplication
+
+Repository incremental storage is keyed at the appropriate record granularity, not by a coarse rule that skips an entire subject whenever that subject already exists. An identical existing subject/node/fact/field/relation/evidence row is not inserted again. A previously unseen fact field, relation, or evidence link for an existing subject is still a valid incremental addition and must be persisted according to the existing immutable-row contract. Existing unrelated facts are retained.
+
+The repository does not care which producer emitted a record. It validates the submitted FactBatch and stable identities, performs an atomic incremental write, returns an idempotent receipt for an identical submission key and digest, and rejects incompatible payloads under the same immutable identity. Producer selection and suppression of redundant observations are upstream acquisition concerns; persistent idempotency and incremental field/evidence storage remain repository concerns.
