@@ -134,7 +134,141 @@ def execute_constructor_request(
 
             sources.append(actual_source)
 
-            # Consume accepted subprocess producers selected by the fixed plan.
+            # Consume only selected, enabled, accepted producer profiles.
+            if any(
+                profile["environment"] == "subprocess" or profile["tool_id"] == "python.pyproject-toml"
+                for item in plan_result["plan"]
+                for profile in item.get("producer_profiles", [])
+            ):
+                matrix = CapabilityMatrix(assets / "capability-matrix.json")
+                parser_registry = ParserRegistry(assets)
+                executed_profiles: set[str] = set()
+                for item in plan_result["plan"]:
+                    for profile in item.get("producer_profiles", []):
+                        tool_id = profile["tool_id"]
+                        if tool_id in executed_profiles:
+                            continue
+                        if tool_id == "rust.cargo-metadata" and profile["environment"] == "subprocess":
+                            manifest = root / "Cargo.toml"
+                            if not manifest.is_file():
+                                gaps.append({
+                                    "fact_type": item["fact_type"], "fields": item["fields"],
+                                    "target": request["query"]["target"], "reason": "unavailable_tool",
+                                    "detail": f"Cargo manifest not found: {manifest}",
+                                    "context": context, "coverage": coverage,
+                                })
+                                continue
+                            native_output = ""
+                            command_args = ["--manifest-path", str(manifest)]
+                            language = "Rust"
+                            checked = ["Cargo.toml"]
+                        elif tool_id == "python.pyproject-toml" and profile["environment"] == "in-process":
+                            manifest = root / "pyproject.toml"
+                            if not manifest.is_file():
+                                gaps.append({
+                                    "fact_type": item["fact_type"], "fields": item["fields"],
+                                    "target": request["query"]["target"], "reason": "unavailable_tool",
+                                    "detail": f"Python project manifest not found: {manifest}",
+                                    "context": context, "coverage": coverage,
+                                })
+                                continue
+                            try:
+                                native_output = manifest.read_text(encoding="utf-8")
+                            except (OSError, UnicodeDecodeError) as error:
+                                gaps.append({
+                                    "fact_type": item["fact_type"], "fields": item["fields"],
+                                    "target": request["query"]["target"], "reason": "unparseable",
+                                    "detail": f"Cannot read pyproject.toml: {error}",
+                                    "context": context, "coverage": coverage,
+                                })
+                                continue
+                            command_args = []
+                            language = "Python"
+                            checked = ["pyproject.toml"]
+                        else:
+                            continue
+
+                        executed_profiles.add(tool_id)
+                        entry = next(entry for entry in matrix.load()["entries"] if entry["tool_id"] == tool_id)
+                        parse_request = {
+                            "kind": "parse_request",
+                            "tool_native_output": {"encoding": "utf-8", "text": native_output},
+                            "invocation_profile": {
+                                "tool_id": tool_id,
+                                "tool_version": "observed-by-execution",
+                                "command": list(profile["invocation"]),
+                                "environment": {"language": language, "platform": sys.platform},
+                                "sources": [actual_source],
+                                "coverage": {
+                                    "domain": f"{manifest.name} metadata for the explicit project root",
+                                    "checked": checked,
+                                    "excluded": list(actual_source.get("excludes", [])),
+                                    "completeness": "complete",
+                                    "method": "read-only manifest parser",
+                                },
+                                "evidence": [],
+                            },
+                        }
+                        parsed = dispatch_registered_producer(
+                            entry, parse_request, parser_registry,
+                            external_executor=external_executor if profile["environment"] == "subprocess" else None,
+                            cwd=root if profile["environment"] == "subprocess" else None,
+                            args=command_args, timeout_seconds=20.0,
+                        )
+                        if parsed.get("gaps"):
+                            for parser_gap in parsed["gaps"]:
+                                gaps.append({**parser_gap, "target": request["query"]["target"]})
+                            continue
+                        mapping = {
+                            "source.f3.runtime": ("F3", "runtime"),
+                            "source.f3.environment": ("F3", "environment"),
+                            "source.f4.kind": ("F4", "kind"),
+                            "source.f6.kind": ("F6", "kind"),
+                        }
+                        for observation in parsed["observations"]:
+                            need_id = observation["information_need_id"]
+                            mapped = mapping.get(need_id)
+                            if mapped is None:
+                                if any(
+                                    need_id == need["need_id"] and need["fact_type"] in requested_fields
+                                    and any(field in requested_fields[need["fact_type"]] for field in need["fields"])
+                                    for need in __import__("semantic_facts.information_needs", fromlist=["load_information_needs"]).load_information_needs(assets)["needs"]
+                                ):
+                                    gaps.append({
+                                        "fact_type": item["fact_type"], "fields": item["fields"],
+                                        "target": request["query"]["target"], "reason": "uncovered_need",
+                                        "detail": f"No accepted FactBatch mapping for observation need {need_id}.",
+                                        "context": observation["context"], "coverage": observation["coverage"],
+                                    })
+                                continue
+                            fact_type, field_name = mapped
+                            if field_name not in requested_fields.get(fact_type, set()):
+                                continue
+                            assertion = {
+                                "origin": "observed", "knowledge": "supported",
+                                "context": observation["context"], "coverage": observation["coverage"],
+                                "basis": {
+                                    "evidence": observation["evidence"], "premises": [],
+                                    "method": f"native {tool_id} parser",
+                                    "limitations": [
+                                        "Manifest declaration only; does not prove runtime behavior.",
+                                        "Workspace membership and package dependency are distinct relation kinds.",
+                                    ],
+                                },
+                                "value": observation["payload"],
+                                "validity": {"state": "current", "sources": [{
+                                    "source_id": actual_source["source_id"],
+                                    "content_state": actual_source["content_state"],
+                                }]},
+                            }
+                            produced["facts"].append({
+                                "fact_id": "fact-" + hashlib.sha256(
+                                    (observation["observation_id"] + ":" + fact_type + ":" + field_name).encode("utf-8")
+                                ).hexdigest()[:24],
+                                "node": observation["subject"], "fact_type": fact_type,
+                                "granularities": ["L2"], "fields": {field_name: assertion},
+                            })
+
             if any(
                 profile["environment"] == "subprocess"
                 for item in plan_result["plan"]
