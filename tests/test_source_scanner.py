@@ -145,3 +145,25 @@ def test_source_state_changes_when_project_manifest_changes(tmp_path, codec):
 
     assert first["sources"][0]["content_state"] != second["sources"][0]["content_state"]
     assert first["sources"][0]["source_id"] != second["sources"][0]["source_id"]
+
+def test_inspect_source_and_fact_batch_share_manifest_aware_snapshot_identity(tmp_path, codec):
+    project = tmp_path / "manifest-bound-snapshot"
+    (project / "src").mkdir(parents=True)
+    (project / "src" / "lib.rs").write_text("pub fn run() {}\\n", encoding="utf-8")
+    (project / "Cargo.toml").write_text(
+        '[package]\\nname = "snapshot-test"\\nversion = "0.1.0"\\nedition = "2021"\\n',
+        encoding="utf-8",
+    )
+
+    inspected = inspect_source(project)
+    constructed = build_fact_batch(project, codec)["sources"][0]
+
+    assert inspected["source_id"] == constructed["source_id"]
+    assert inspected["content_state"] == constructed["content_state"]
+    (project / "Cargo.toml").write_text(
+        '[package]\\nname = "snapshot-changed"\\nversion = "0.1.0"\\nedition = "2021"\\n',
+        encoding="utf-8",
+    )
+    changed = inspect_source(project)
+    assert changed["source_id"] != inspected["source_id"]
+    assert changed["content_state"] != inspected["content_state"]
