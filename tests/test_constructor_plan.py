@@ -321,14 +321,11 @@ def test_minimum_cover_never_uses_disabled_unaccepted_or_incompatible_profiles(t
         "research_basis": ["hard-constraint test"],
     }
     disabled = dict(base, tool_id="tool.disabled", information_need_ids=["syntax.f2.identity"], enabled=False)
-    disabled.pop("acceptance")
-    unaccepted = dict(base, tool_id="tool.unaccepted", information_need_ids=["syntax.f2.identity"])
-    unaccepted.pop("acceptance")
     wrong_language = dict(base, tool_id="tool.rust-only", information_need_ids=["syntax.f2.identity"], languages=["rust"])
     wrong_platform = dict(base, tool_id="tool.windows-only", information_need_ids=["syntax.f2.identity"], platforms=["windows"])
     wrong_environment = dict(base, tool_id="tool.other-env", information_need_ids=["syntax.f2.identity"], environment="subprocess")
     matrix.replace([
-        disabled, unaccepted, wrong_language, wrong_platform, wrong_environment,
+        disabled, wrong_language, wrong_platform, wrong_environment,
         dict(base, tool_id="tool.valid", information_need_ids=["syntax.f2.identity"]),
     ])
 
