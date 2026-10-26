@@ -131,13 +131,18 @@ def build_fact_batch(root: str | Path, codec: ContractCodec) -> dict[str, Any]:
                 "validity": {"state": "current", "sources": [{"source_id": source_id, "content_state": content_state}]},
             }
 
+        identity = assertion(f"Python source file: {relative}")
+        identity["value"] = {
+            "kind": "reference",
+            "ref": {"source_id": source_id, "subject_id": subject_id, "node_id": node_id},
+        }
         facts.append({
             "fact_id": fact_id,
             "node": {"source_id": source_id, "subject_id": subject_id, "node_id": node_id},
             "fact_type": "F2",
             "granularities": ["L3"],
             "fields": {
-                "identity": assertion(f"Python source file: {relative}"),
+                "identity": identity,
                 "names": assertion("; ".join(names) if names else f"No class/function/import declarations in {relative}"),
                 "boundary": assertion("Observed syntax is limited to this file; runtime behavior is not inferred."),
                 "locators": assertion(f"{relative}:file"),
