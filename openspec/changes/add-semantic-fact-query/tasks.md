@@ -20,19 +20,28 @@ TDD rule: each behavior task starts with a failing test, then the smallest imple
 
 - [x] 3.1 Validate the final response against output-schema and include requested fields, evidence, context, coverage, gaps and termination.
 - [x] 3.2 Ensure constructor plans and raw repository envelopes are not returned as final responses.
-- [ ] 3.3 Project only the requested target and required direct nodes; verify completeness before treating a partial direct-node result as sufficient.
+- [x] 3.3 Project only the requested target and required direct nodes; verify completeness before treating a partial direct-node result as sufficient.
 - [ ] 3.4 Add tests for multiple projects, same-name subjects, multi-parent relations, dependency cycles, external references, conflicts and out-of-catalog items.
 
 ## 4. CLI and integration
 
 - [x] 4.1 Provide the query CLI using the public Query JSON and schema-validated response.
 - [x] 4.2 Exercise Python and Rust source → FactBatch → SQLite → close/reopen → query in real-source tests.
-- [ ] 4.3 Run all query tests and strict OpenSpec validation after each implementation change; record actual output in acceptance-results.md.
+- [x] 4.3 Run all query tests and strict OpenSpec validation after each implementation change; record actual output in acceptance-results.md.
 - [ ] 4.4 Complete full S1–S12 integration acceptance before declaring this component fully complete.
 
 ## Evidence (2026-10-26)
 
 - Implementation: semantic_facts/query_engine.py, semantic_facts/cli.py, semantic_facts/repository/store.py.
 - Tests: tests/test_query_orchestration.py, tests/test_acceptance.py, repository tests.
-- CI: https://github.com/vchs6/code2semantics/actions/runs/40268078346 — query/constructor/induction suite and strict OpenSpec passed; product delivery gate intentionally blocks full-system completion.
+- CI: https://github.com/vchs6/code2semantics/actions/runs/40269286038 — query/constructor/induction suite and strict OpenSpec passed; product delivery gate intentionally blocks full-system completion.
 - Full dependency-aware invalidation, direct-node completeness, multi-project/cycle acceptance and S1–S12 remain pending.
+
+
+## Direct-node completeness implementation update (2026-10-26)
+
+- FactBatch construction now emits two bounded inventory levels: the exact project scope lists supported Python/Rust source-file nodes; each file node lists its direct parser declaration nodes. Inventory assertions carry current source state, coverage and evidence.
+- Query projection requires a current, evidence-backed, complete inventory for the requested scope/node before it can report the boundary as satisfied. Missing inventory is an explicit coverage_incomplete gap and triggers construction.
+- Constructor output is restricted to the requested node for node-target queries. Direct inventory is appended to the repository; old inventory/fact rows are retained. Inventory identity includes validity/source state so a changed source snapshot appends a new inventory instead of conflicting with or replacing old history.
+- Tests: source scanner inventory test; query tests for scope inventory, missing inventory repair without deleting facts, and node-target scoping. Latest CI run https://github.com/vchs6/code2semantics/actions/runs/40269286038: repository 39, matrix 15, parser 9, scanner 6, source acceptance 4, packaging 2, executor 3, combined planning/constructor/induction/query 37 passed; strict OpenSpec passed.
+- Still pending: necessary ancestor-path progress, dependency-aware invalidation, multi-project/overlapping-root and graph-cycle acceptance, and full S1–S12. Product delivery gate remains blocked.
