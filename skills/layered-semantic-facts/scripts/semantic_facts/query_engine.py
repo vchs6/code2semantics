@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import hashlib
+import sqlite3
 from pathlib import Path
 from typing import Any
 
@@ -295,7 +296,59 @@ def execute_query_with_construction(
             raise QueryContractError(f"response {list(error.absolute_path)}: {error.message}")
         return response
 
-    stored = repository.read(query)
+    try:
+        stored = repository.read(query)
+    except (OSError, sqlite3.Error) as error:
+        context = {
+            "source_ids": sorted(current_ids),
+            "conditions": [],
+            "environment": {},
+            "language_semantics": ["Repository unavailable; no alternate store was selected"],
+        }
+        coverage = {
+            "domain": "explicitly requested project roots",
+            "checked": list(query["scope"]["directories"]),
+            "excluded": list(query["scope"]["excludes"]),
+            "completeness": "unknown",
+            "method": "repository access check",
+        }
+        detail = f"Fact repository is unavailable: {error}"
+        gaps = [{
+            "fact_type": selection["fact_type"],
+            "fields": list(selection["fields"]),
+            "target": query["target"],
+            "reason": "repository_unavailable",
+            "detail": detail,
+            "context": context,
+            "coverage": coverage,
+        } for selection in query["selections"]]
+        gaps.append({
+            "fact_type": "F2",
+            "fields": ["direct_nodes"],
+            "target": query["target"],
+            "reason": "repository_unavailable",
+            "detail": detail,
+            "context": context,
+            "coverage": coverage,
+        })
+        response = {
+            "contract_version": "1.0.0",
+            "catalog_id": "semantic-facts-20261025",
+            "query": query,
+            "sources": current_sources,
+            "results": [],
+            "direct_nodes": [],
+            "premise_checks": [],
+            "conflicts": [],
+            "gaps": gaps,
+            "out_of_catalog": [],
+            "termination": "unavailable",
+        }
+        error = next(response_validator.iter_errors(response), None)
+        if error:
+            raise QueryContractError(f"response {list(error.absolute_path)}: {error.message}")
+        return response
+
     stored = {**stored, "facts": [fact for fact in stored["facts"] if fact["node"]["source_id"] in current_ids]}
     if any(source["status"] != "available" for source in current_sources):
         response = execute_query(query, repository, assets, stored_result=stored, source_override=current_sources)
