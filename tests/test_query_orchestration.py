@@ -394,6 +394,7 @@ def test_query_reports_repository_unavailable_without_fabricating_results(tmp_pa
     project.mkdir()
     (project / "engine.py").write_text("class Engine:\\n    pass\\n", encoding="utf-8")
     repository = Repository(tmp_path / "closed.db", ASSETS)
+    repository._ensure_schema()
     before = repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
     repository.close()
 
