@@ -14,7 +14,7 @@ TDD rule: each behavior task starts with a failing test, then the smallest imple
 - [x] 2.1 Add tests for missing fields causing construction, write followed by re-read, unknown needs returning gaps, no progress stopping, and source changes appending new fact versions.
 - [x] 2.2 Implement deterministic read → coverage → ConstructRequest → append write → re-read loop with bounded rounds.
 - [x] 2.3 Stop when satisfied, no coverage progress, source unavailable, or budget exhausted; preserve explicit gaps and never infer facts.
-- [ ] 2.4 Count necessary ancestor-path and direct-node-completeness obligations as bounded progress; unrelated facts must not extend the loop.
+- [x] 2.4 Count necessary ancestor-path and direct-node-completeness obligations as bounded progress; unrelated facts must not extend the loop.
 
 ## 3. Public response projection
 
@@ -34,7 +34,7 @@ TDD rule: each behavior task starts with a failing test, then the smallest imple
 
 - Implementation: semantic_facts/query_engine.py, semantic_facts/cli.py, semantic_facts/repository/store.py.
 - Tests: tests/test_query_orchestration.py, tests/test_acceptance.py, repository tests.
-- CI: https://github.com/vchs6/code2semantics/actions/runs/40269286038 — query/constructor/induction suite and strict OpenSpec passed; product delivery gate intentionally blocks full-system completion.
+- CI: https://github.com/vchs6/code2semantics/actions/runs/40269644416 — query/constructor/induction suite and strict OpenSpec passed; product delivery gate intentionally blocks full-system completion.
 - Full dependency-aware invalidation, direct-node completeness, multi-project/cycle acceptance and S1–S12 remain pending.
 
 
@@ -45,3 +45,8 @@ TDD rule: each behavior task starts with a failing test, then the smallest imple
 - Constructor output is restricted to the requested node for node-target queries. Direct inventory is appended to the repository; old inventory/fact rows are retained. Inventory identity includes validity/source state so a changed source snapshot appends a new inventory instead of conflicting with or replacing old history.
 - Tests: source scanner inventory test; query tests for scope inventory, missing inventory repair without deleting facts, and node-target scoping. Latest CI run https://github.com/vchs6/code2semantics/actions/runs/40269286038: repository 39, matrix 15, parser 9, scanner 6, source acceptance 4, packaging 2, executor 3, combined planning/constructor/induction/query 37 passed; strict OpenSpec passed.
 - Still pending: necessary ancestor-path progress, dependency-aware invalidation, multi-project/overlapping-root and graph-cycle acceptance, and full S1–S12. Product delivery gate remains blocked.
+
+
+### Ancestor-path progress (first-phase boundary)
+
+For the supported F2/L3 model, a node-target query now verifies both (a) the current project-scope inventory contains the requested file node and (b) that file has a current direct-declaration inventory. Scope-to-file prerequisite completion is included in the bounded progress set; final response projection returns only the requested node inventory. Tests cover node-target scoping and direct inventory persistence. This does not yet implement arbitrary semantic ancestor chains for higher-layer fact types; those remain outside the current syntax-only support boundary and require later component work.
