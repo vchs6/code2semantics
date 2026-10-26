@@ -438,7 +438,7 @@ def test_query_rebuild_after_source_deletion_keeps_unaffected_current_facts_and_
     repository = Repository(tmp_path / "query-delete-rebuild.db", ASSETS)
     try:
         first = execute_query_with_construction(make_query(project), repository, ASSETS)
-        assert first["termination"] == "satisfied", first
+        assert first["termination"] == "satisfied", json.dumps(first, ensure_ascii=False, indent=2)
         assert any("class Stable" in fact["fields"]["names"]["value"]["text"] for fact in first["results"])
         assert any("class Removed" in fact["fields"]["names"]["value"]["text"] for fact in first["results"])
         old_fact_keys = {
