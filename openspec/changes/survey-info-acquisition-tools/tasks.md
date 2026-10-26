@@ -20,3 +20,14 @@
 - Survey updated at `research/semantic-tooling-survey.md`; external toolchain availability remains explicitly unverified and no matrix entries were enabled.
 - Parser/scanner/acceptance tests passed in CI run `https://github.com/vchs6/code2semantics/actions/runs/40261330788`; strict OpenSpec passed.
 - Scope is F2/L3 syntax inventory only. Semantic/type analysis and external tool execution are pending later component tasks.
+
+## 3. Dependency gate for expanded S1–S12 information needs
+
+The existing survey acceptance covers the initial F2/L3 catalogue only. It is not sufficient for the expanded source/project information requirements. These tasks must remain pending until constructor tasks 6.1–6.4 are accepted.
+
+- [ ] 3.1 Read the expanded, validated constructor needs catalogue and map every need to one or more candidate producer families, required native output, supported language/environment and evidence coverage. Do not infer the needed tools from the existing matrix.
+- [ ] 3.2 For candidates that can be safely probed in the approved CI/runtime environment, execute version/help/fixture probes and record exact command, exit code, version and representative output. Mark unavailable or untested environments as unverified; never infer availability from documentation alone.
+- [ ] 3.3 Record per-need coverage, blind spots, output format, invocation profile, composition strategy and unsupported cases. Explicitly distinguish manifest-only, syntax-only, compiler/type-checking, reference/call-graph and cognitive-inference needs.
+- [ ] 3.4 Produce a coverage matrix (need → candidate tools → native output → parser work → gaps) and identify needs requiring tool combinations. Research must not edit/enable capability-matrix entries.
+- [ ] 3.5 Add or update research tests/validation where applicable, strict-validate this change, and hand the accepted candidate/output coverage to `add-info-parser`. No parser implementation or matrix enablement is implied by survey completion.
+
