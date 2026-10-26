@@ -213,3 +213,19 @@ def test_inventory_invalidation_filters_projection_without_deleting_inventory(ba
         ("inventory", inventory_key),
     ).fetchone()[0] == "modified"
     repository.close()
+def test_export_current_uses_same_transitive_premise_closure_as_read(batch, db_path):
+    from semantic_facts.repository.store import Repository
+
+    repository = Repository(db_path)
+    repository.write(batch, "premise-export")
+    fact_rows_before = repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
+    repository.invalidate_field("fact-a", "strategy", "source evidence changed")
+
+    exported = repository.export_current()
+    exported_by_id = {fact["fact_id"]: fact for fact in exported["facts"]}
+    assert "fact-a" not in exported_by_id
+    assert "fact-b" in exported_by_id
+    assert "strategy" not in exported_by_id["fact-b"]["fields"]
+    assert "open_items" in exported_by_id["fact-b"]["fields"]
+    assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == fact_rows_before
+    repository.close()
