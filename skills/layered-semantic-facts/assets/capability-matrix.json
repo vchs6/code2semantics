@@ -88,6 +88,290 @@
         "Not rustc or rust-analyzer.",
         "No type checking, macro expansion, borrow checking or runtime behavior inference."
       ]
+    },
+    {
+      "tool_id": "python.compileall",
+      "description": "Research candidate only: Python compile/bytecode syntax signal; not semantic or runtime evidence.",
+      "information_need_ids": [
+        "source.f9.declaration",
+        "source.f9.scope",
+        "source.f9.language-semantics",
+        "source.f14.error-kind",
+        "source.f14.handling"
+      ],
+      "output_kinds": [
+        "compiler_diagnostics"
+      ],
+      "languages": [
+        "python"
+      ],
+      "platforms": [
+        "linux",
+        "darwin",
+        "windows"
+      ],
+      "environment": "subprocess",
+      "invocation": [
+        "python -m compileall",
+        "explicit root and exclude policy required"
+      ],
+      "combinations": [
+        "python.ast-source"
+      ],
+      "limitations": [
+        "DISABLED: native-output parser and invocation-profile acceptance not completed.",
+        "Compile success does not prove runtime behavior or semantic correctness.",
+        "Must avoid or isolate generated __pycache__ output."
+      ],
+      "enabled": false,
+      "research_basis": [
+        "openspec/changes/survey-info-acquisition-tools/research/semantic-tooling-survey.md#5.1",
+        "skills/layered-semantic-facts/assets/information-needs.json"
+      ]
+    },
+    {
+      "tool_id": "rust.cargo-metadata",
+      "description": "Research candidate only: Cargo workspace/member/target/dependency metadata JSON.",
+      "information_need_ids": [
+        "source.f1.included",
+        "source.f1.excluded",
+        "source.f1.observation",
+        "source.f3.entries",
+        "source.f3.runtime",
+        "source.f3.deployment",
+        "source.f3.environment",
+        "source.f4.source",
+        "source.f4.target",
+        "source.f4.kind",
+        "source.f4.member-scope",
+        "source.f4.enumeration",
+        "source.f6.source",
+        "source.f6.target",
+        "source.f6.kind",
+        "source.f6.direction",
+        "source.f6.scope",
+        "source.f6.necessity",
+        "source.f6.resolution"
+      ],
+      "output_kinds": [
+        "cargo_metadata_json"
+      ],
+      "languages": [
+        "rust"
+      ],
+      "platforms": [
+        "linux",
+        "darwin",
+        "windows"
+      ],
+      "environment": "subprocess",
+      "invocation": [
+        "cargo metadata --no-deps --format-version 1",
+        "explicit manifest path and timeout required"
+      ],
+      "combinations": [
+        "rust.syntax-source"
+      ],
+      "limitations": [
+        "DISABLED: cargo availability/version/output probe and parser acceptance are pending.",
+        "Manifest graph does not prove source-level runtime calls or logical responsibility.",
+        "Workspace membership must remain distinct from dependency edges."
+      ],
+      "enabled": false,
+      "research_basis": [
+        "openspec/changes/survey-info-acquisition-tools/research/semantic-tooling-survey.md#5.2",
+        "skills/layered-semantic-facts/assets/information-needs.json"
+      ]
+    },
+    {
+      "tool_id": "rust.cargo-check",
+      "description": "Research candidate only: compiler diagnostics and type-check evidence for opted-in Rust projects.",
+      "information_need_ids": [
+        "source.f9.type",
+        "source.f9.type-relations",
+        "source.f9.language-semantics"
+      ],
+      "output_kinds": [
+        "compiler_diagnostics"
+      ],
+      "languages": [
+        "rust"
+      ],
+      "platforms": [
+        "linux",
+        "darwin",
+        "windows"
+      ],
+      "environment": "subprocess",
+      "invocation": [
+        "cargo check",
+        "explicit opt-in, target, features, network policy and timeout required"
+      ],
+      "combinations": [
+        "rust.syntax-source",
+        "rust.cargo-metadata"
+      ],
+      "limitations": [
+        "DISABLED: rustc/cargo availability, project opt-in policy, native-output parser and acceptance pending.",
+        "Build scripts/dependencies may execute or access network; sandbox policy required.",
+        "Type-check diagnostics do not prove runtime behavior."
+      ],
+      "enabled": false,
+      "research_basis": [
+        "openspec/changes/survey-info-acquisition-tools/research/semantic-tooling-survey.md#5.2",
+        "skills/layered-semantic-facts/assets/information-needs.json"
+      ]
+    },
+    {
+      "tool_id": "rust.rust-analyzer",
+      "description": "Research candidate only: semantic symbols, references, implementations and call hierarchy via LSP.",
+      "information_need_ids": [
+        "source.f9.type",
+        "source.f9.type-relations",
+        "source.f9.visibility",
+        "source.f9.language-semantics",
+        "source.f10.targets",
+        "source.f10.resolution",
+        "source.f10.target-conditions",
+        "source.f10.completeness",
+        "source.f11.targets",
+        "source.f11.dispatch",
+        "source.f11.continuations",
+        "source.f7.participants",
+        "source.f7.ordering",
+        "source.f7.paths"
+      ],
+      "output_kinds": [
+        "lsp_semantic_results"
+      ],
+      "languages": [
+        "rust"
+      ],
+      "platforms": [
+        "linux",
+        "darwin",
+        "windows"
+      ],
+      "environment": "subprocess",
+      "invocation": [
+        "LSP initialize/initialized + document/workspace requests",
+        "project readiness and server lifecycle required"
+      ],
+      "combinations": [
+        "rust.cargo-metadata",
+        "rust.syntax-source"
+      ],
+      "limitations": [
+        "DISABLED: installation/version and LSP integration probe pending.",
+        "Workspace readiness, macros, dynamic dispatch and incomplete indexes must be represented explicitly.",
+        "No acceptance evidence for a ParseResult adapter."
+      ],
+      "enabled": false,
+      "research_basis": [
+        "openspec/changes/survey-info-acquisition-tools/research/semantic-tooling-survey.md#5.2",
+        "skills/layered-semantic-facts/assets/information-needs.json"
+      ]
+    },
+    {
+      "tool_id": "multi.ctags",
+      "description": "Research candidate only: multi-language symbol/tag inventory with optional signature and scope fields.",
+      "information_need_ids": [
+        "source.f2.roles",
+        "syntax.f2.names",
+        "syntax.f2.locators",
+        "source.f9.identity",
+        "source.f9.name",
+        "source.f9.declaration",
+        "source.f9.scope",
+        "source.f9.visibility",
+        "source.f10.site",
+        "source.f10.targets"
+      ],
+      "output_kinds": [
+        "ctags_json"
+      ],
+      "languages": [
+        "python",
+        "rust"
+      ],
+      "platforms": [
+        "linux",
+        "darwin",
+        "windows"
+      ],
+      "environment": "subprocess",
+      "invocation": [
+        "ctags --output-format=json --fields=+S --extras=+q",
+        "exact version and supported language kinds must be probed"
+      ],
+      "combinations": [
+        "python.ast-source",
+        "rust.syntax-source"
+      ],
+      "limitations": [
+        "DISABLED: binary availability/version and output-format probe pending.",
+        "Tag output may not resolve semantic binding, dynamic dispatch or runtime behavior.",
+        "Need parser fixture for each accepted version/profile."
+      ],
+      "enabled": false,
+      "research_basis": [
+        "openspec/changes/survey-info-acquisition-tools/research/semantic-tooling-survey.md#5.1",
+        "openspec/changes/survey-info-acquisition-tools/research/semantic-tooling-survey.md#5.2",
+        "skills/layered-semantic-facts/assets/information-needs.json"
+      ]
+    },
+    {
+      "tool_id": "multi.ast-grep",
+      "description": "Research candidate only: structural pattern matching for syntax and call-site candidates across supported languages.",
+      "information_need_ids": [
+        "source.f9.name",
+        "source.f9.declaration",
+        "source.f9.scope",
+        "source.f10.site",
+        "source.f10.targets",
+        "source.f11.site",
+        "source.f11.source",
+        "source.f11.targets",
+        "source.f11.arguments",
+        "source.f14.error-kind",
+        "source.f14.propagation",
+        "source.f14.handling",
+        "source.f15.operation",
+        "source.f15.successors",
+        "source.f15.guards",
+        "source.f15.back-edges"
+      ],
+      "output_kinds": [
+        "ast_grep_json"
+      ],
+      "languages": [
+        "python",
+        "rust"
+      ],
+      "platforms": [
+        "linux",
+        "darwin",
+        "windows"
+      ],
+      "environment": "subprocess",
+      "invocation": [
+        "ast-grep run --json=stream",
+        "grammar/version and exact rule files must be pinned"
+      ],
+      "combinations": [
+        "python.ast-source",
+        "rust.syntax-source"
+      ],
+      "limitations": [
+        "DISABLED: binary availability/version and JSON output probe pending.",
+        "Pattern matches are syntax candidates, not resolved semantic references or proof of runtime execution.",
+        "Rules and native output need acceptance fixtures."
+      ],
+      "enabled": false,
+      "research_basis": [
+        "openspec/changes/survey-info-acquisition-tools/research/semantic-tooling-survey.md#5.1",
+        "skills/layered-semantic-facts/assets/information-needs.json"
+      ]
     }
   ]
 }
