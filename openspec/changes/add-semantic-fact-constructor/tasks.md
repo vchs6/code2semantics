@@ -165,9 +165,18 @@ These tasks follow accepted pure parser adapters. They are prerequisites to enab
 
 ## 11. Query-runtime subprocess integration
 
-- [ ] 11.1 Add a RED integration test calling `execute_query_with_construction` with a temporary accepted Cargo profile and a real multi-member workspace; assert current runtime does not invoke the executor or return F4/F6 facts yet.
-- [ ] 11.2 Add optional executor injection to query orchestration and pass it to `execute_constructor_request` without changing the pure `execute_query` read/projection path.
-- [ ] 11.3 Add a host-owned default executor factory with fixed argv prefixes for specifically accepted tool IDs; never build commands from query or matrix input. Wire CLI `query` and `construct` entrypoints to this factory.
-- [ ] 11.4 Verify real Cargo metadata invocation through query runtime produces distinct workspace-membership F4 and dependency F6 facts, writes SQLite, survives close/reopen and returns only requested fields/evidence.
+- [x] 11.1 Add a RED integration test calling `execute_query_with_construction` with a temporary accepted Cargo profile and a real multi-member workspace; assert current runtime does not invoke the executor or return F4/F6 facts yet.
+- [x] 11.2 Add optional executor injection to query orchestration and pass it to `execute_constructor_request` without changing the pure `execute_query` read/projection path.
+- [x] 11.3 Add a host-owned default executor factory with fixed argv prefixes for specifically accepted tool IDs; never build commands from query or matrix input. Wire CLI `query` and `construct` entrypoints to this factory.
+- [x] 11.4 Verify real Cargo metadata invocation through query runtime produces distinct workspace-membership F4 and dependency F6 facts, writes SQLite, survives close/reopen and returns only requested fields/evidence.
 - [ ] 11.5 Verify missing Cargo, timeout, non-zero exit, malformed output and source mutation all fail closed with explicit gaps and no fabricated facts.
 - [ ] 11.6 Keep production matrix entries disabled until the full runtime invocation profile and failure modes pass; run strict OpenSpec and all component suites, then continue root S1–S12 scenarios.
+
+### Query-runtime producer wiring evidence (2026-10-26)
+
+- RED: https://github.com/vchs6/code2semantics/actions/runs/40345588518 — query runtime rejected executor injection; after signature change, https://github.com/vchs6/code2semantics/actions/runs/40345950065 exposed source-state mismatch and zero producer calls.
+- Root fix: `inspect_source` now includes the same recognized project manifests as FactBatch construction, so source IDs/content states match when only Cargo.toml/pyproject.toml contributes to state. Regression test compares both APIs and checks manifest-only changes alter identity.
+- Implementation: `execute_query_with_construction` accepts and forwards an optional bounded executor. `build_default_tool_executor()` owns a fixed argv allowlist for Cargo metadata; CLI query/construct/scan-source use this host-owned executor. Query payloads and matrix invocation descriptions cannot provide command prefixes.
+- GREEN CLI-level runtime acceptance: https://github.com/vchs6/code2semantics/actions/runs/40346686809 — runtime acceptance 13 passed, including a real two-member Cargo workspace; F4 workspace membership and F6 dependency are separately returned; SQLite write/close/reopen and minimal `kind` projection with evidence passed; Cargo was invoked once for both needs and not rerun on an already-satisfied replay. Source scanner 9 passed; constructor/query group 70 passed; repository 63; transactions 6; transfer 8; repository acceptance 5; matrix 15; parser 14; packaging 2; executor 3; producer dispatch 3; quality gate unit tests 2; strict OpenSpec passed.
+- Task 11.5 remains pending: constructor/runtime-specific tests for missing Cargo, timeout, nonzero exit, malformed output and source mutation must be demonstrated as one explicit failure-mode acceptance set. Task 11.6 remains pending until those tests pass; production manifest profiles remain disabled.
+- Full S1–S12 tasks 10.6 and root 8.1–8.5 remain pending. The full product gate correctly remains blocked; do not add the full acceptance marker yet.
