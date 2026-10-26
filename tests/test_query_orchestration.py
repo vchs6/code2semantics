@@ -437,6 +437,14 @@ def test_query_rebuild_after_source_deletion_keeps_unaffected_current_facts_and_
         assert first["termination"] == "satisfied", first
         assert any("class Stable" in fact["fields"]["names"]["value"]["text"] for fact in first["results"])
         assert any("class Removed" in fact["fields"]["names"]["value"]["text"] for fact in first["results"])
+        old_fact_keys = {
+            row[0] for row in repository.connection.execute(
+                "SELECT fact_key FROM facts WHERE source_id IN ({})".format(
+                    ",".join("?" for _ in first["sources"])
+                ),
+                tuple(source["source_id"] for source in first["sources"]),
+            )
+        }
         fact_rows_before = repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
         prior_source_ids = {source["source_id"] for source in first["sources"]}
 
@@ -447,10 +455,12 @@ def test_query_rebuild_after_source_deletion_keeps_unaffected_current_facts_and_
         assert any("class Stable" in fact["fields"]["names"]["value"]["text"] for fact in second["results"])
         assert all("class Removed" not in fact["fields"]["names"]["value"]["text"] for fact in second["results"])
         assert prior_source_ids.isdisjoint({source["source_id"] for source in second["sources"]})
+        assert {fact["node"]["source_id"] for fact in second["results"]} <= {
+            source["source_id"] for source in second["sources"]
+        }
         assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] > fact_rows_before
-        assert all(
-            repository.connection.execute("SELECT 1 FROM facts WHERE fact_key = ?", (key,)).fetchone()
-            for key, in repository.connection.execute("SELECT fact_key FROM facts")
-        )
+        assert old_fact_keys <= {
+            row[0] for row in repository.connection.execute("SELECT fact_key FROM facts")
+        }
     finally:
         repository.close()
