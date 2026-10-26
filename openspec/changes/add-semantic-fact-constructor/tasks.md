@@ -138,3 +138,12 @@ These tasks follow accepted pure parser adapters. They are prerequisites to enab
 - [ ] 9.3 Keep cross-request incremental writes, submission-key idempotency, existing-record reuse and evidence/field additions owned by the repository; add no duplicate persistent identity cache in the constructor.
 - [ ] 9.4 Add/retain repository acceptance tests proving repeated identical submissions do not duplicate rows, changed submissions with the same key are rejected, and new evidence/fields are incrementally stored without deleting unrelated facts.
 - [ ] 9.5 Run constructor and repository suites independently, then the integrated write/reopen/minimal-query acceptance. Report execution reuse, FactBatch validity and repository idempotency as separate results.
+
+## 10. Minimum sufficient producer selection for a request
+
+- [ ] 10.1 Add RED tests where one accepted producer covers two unmet needs while two separate producers cover one each; assert the planner selects the single producer when its profile meets every constraint.
+- [ ] 10.2 Add RED tests where no single producer covers all needs; assert a deterministic minimum combination is selected and uncovered needs remain explicit gaps.
+- [ ] 10.3 Add tests proving language/platform/environment, evidence-kind, completeness and limitations constraints cannot be traded away for fewer invocations.
+- [ ] 10.4 Implement request-level deterministic minimum sufficient producer selection over all unmet needs; keep a separate demand-to-selected-producer mapping and execute each selected invocation once.
+- [ ] 10.5 Test overlap handling: redundant same-value contribution is not duplicated; new fields/evidence survive; incompatible values create an explicit conflict/gap before FactBatch validation.
+- [ ] 10.6 Run constructor planning/execution, repository incremental enrichment, SQLite reopen/minimal query, strict OpenSpec and full CI. Only mark complete from observed evidence.
