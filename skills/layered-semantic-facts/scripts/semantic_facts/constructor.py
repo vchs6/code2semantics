@@ -119,6 +119,10 @@ def execute_constructor_request(
             for inventory in produced["direct_nodes"]:
                 if query_target["kind"] == "scope":
                     direct_nodes.append(inventory)
+                elif inventory["target"]["kind"] == "scope":
+                    # Establish the current project-to-file path before accepting
+                    # a node-target inventory.
+                    direct_nodes.append(inventory)
                 elif inventory["target"]["kind"] == "node" and inventory["target"]["node"] == query_target["node"]:
                     direct_nodes.append(inventory)
             for fact in produced["facts"]:
