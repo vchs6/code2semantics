@@ -189,3 +189,10 @@ These tasks follow accepted pure parser adapters. They are prerequisites to enab
 
 
 Per-profile enablement rule: a profile's own accepted real-runtime evidence can authorize that narrow profile; it does not authorize any unrelated profile or the full S1–S12 success marker.
+
+## 12. Restrict producer selection to actual source languages
+
+- [ ] 12.1 Add a RED test for a Python-only project whose F6 need is catalogued for both Python and Rust; assert the plan does not select the Rust Cargo producer or report a missing Cargo.toml gap.
+- [ ] 12.2 Implement bounded language discovery from authorized source roots and intersect each need's declared languages with languages actually present before request-wide set cover.
+- [ ] 12.3 Add mixed Python/Rust scope coverage proving both language producers remain eligible only when both languages are present, while language/platform/environment constraints stay hard constraints.
+- [ ] 12.4 Run planner, CLI Python/Rust manifest acceptance, failure modes, strict OpenSpec and all component suites; only then enable the exact Python manifest profile.
