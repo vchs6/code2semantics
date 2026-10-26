@@ -14,7 +14,7 @@ from referencing import Registry, Resource
 
 from .constructor_plan import plan_constructor_request
 from .repository.contract import ContractCodec
-from .source_scanner import build_fact_batch
+from .source_scanner import build_fact_batch_with_gaps
 
 
 def _validate_result(result: dict[str, Any], asset_root: Path) -> None:
@@ -88,7 +88,18 @@ def execute_constructor_request(
         for current_source in current_sources:
             root = Path(current_source["root"])
             try:
-                produced = build_fact_batch(root, codec)
+                scan_result = build_fact_batch_with_gaps(root, codec)
+                produced = scan_result["batch"]
+                for scan_gap in scan_result["gaps"]:
+                    gaps.append({
+                        "fact_type": "F2",
+                        "fields": sorted(set().union(*requested_fields.values())) if requested_fields else [],
+                        "target": request["query"]["target"],
+                        "reason": scan_gap["reason"],
+                        "detail": scan_gap["path"] + ": " + scan_gap["detail"],
+                        "context": context,
+                        "coverage": {**coverage, "completeness": "partial", "checked": [scan_gap["path"]]},
+                    })
             except (OSError, ValueError) as error:
                 gaps.append({
                     "fact_type": "F2",
