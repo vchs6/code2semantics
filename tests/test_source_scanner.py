@@ -100,7 +100,10 @@ def test_scanner_records_scope_and_file_direct_node_completeness(tmp_path, codec
     project = tmp_path / "inventory-project"
     project.mkdir()
     (project / "app.py").write_text(
-        "class Engine:\\n    def run(self):\\n        return True\\n",
+        """class Engine:
+    def run(self):
+        return True
+""",
         encoding="utf-8",
     )
 
