@@ -41,3 +41,16 @@
 5. 完成真实端到端执行、严格校验及独立评审后才将主变更标记为可验收。
 
 本台账的 CI 与静态审计不代表已执行新增产品实现。
+
+
+## 2026-10-26 补充：运行时事实保留约束
+
+用户明确要求：系统运行时生成的语义事实记录不得删除。
+
+- 备份恢复测试已改为恢复到独立临时数据库，原始测试库不再通过 DELETE 模拟数据丢失。
+- `Repository._insert_record` 不再对事实/属性/关系使用 SQLite `INSERT OR REPLACE`，避免 SQLite REPLACE 隐式删除并重插已有记录；来源和实体使用 `INSERT OR IGNORE` 保留已存在行。遇到重复事实键的不同提交应由事务冲突拒绝，不能覆盖既有事实。
+- 新增测试验证新提交不能替换已存事实，失败后原事实与提交记录不变。
+- 当前 main CI：https://github.com/vchs6/code2semantics/actions/runs/40255196104
+- 本次结果：repository 35 passed；capability matrix 14 passed；严格 OpenSpec 通过；公共设计契约输出仍为 `runtime_verified=false`。
+
+边界：这落实了当前 SQLite 写入路径的防覆盖/保留约束，不等于已实现所有历史版本、失效传播、局部更新或端到端语义生命周期；这些仍需按任务契约继续实现和验证。
