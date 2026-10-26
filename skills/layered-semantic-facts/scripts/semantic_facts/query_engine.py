@@ -487,9 +487,13 @@ def execute_query_with_construction(
         digest = hashlib.sha256(
             json.dumps(batch, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
         ).hexdigest()
-        repository.write(batch, "query-construct-" + digest)
-
-        refreshed = repository.read(query)
+        try:
+            repository.write(batch, "query-construct-" + digest)
+            refreshed = repository.read(query)
+        except (OSError, sqlite3.Error) as error:
+            return _repository_unavailable_response(
+                query, current_sources, f"Fact repository is unavailable: {error}", response_validator
+            )
         refreshed = {**refreshed, "facts": [fact for fact in refreshed["facts"] if fact["node"]["source_id"] in current_ids]}
         after_coverage = {
             (fact["fact_type"], field)
