@@ -58,6 +58,7 @@ def parse_python_request(request: dict[str, Any], asset_root: str | Path | None 
     command = profile["command"]
     source_path = command[-1] if command else root
     source_text = request["tool_native_output"]["text"]
+    file_node_id = "file-" + hashlib.sha256(source_path.encode("utf-8")).hexdigest()[:20]
     digest = "sha256:" + hashlib.sha256(source_text.encode("utf-8")).hexdigest()
     context = {
         "source_ids": [source_id],
@@ -85,7 +86,7 @@ def parse_python_request(request: dict[str, Any], asset_root: str | Path | None 
         end = end_lineno or lineno
         observations.append({
             "observation_id": _slug("obs-" + node_id),
-            "subject": {"source_id": source_id, "subject_id": _slug(root), "node_id": node_id},
+            "subject": {"source_id": source_id, "subject_id": _slug(root), "node_id": file_node_id},
             "information_need_id": "python.syntax_inventory",
             "payload": {"kind": "text", "text": detail},
             "evidence": [{
