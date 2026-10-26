@@ -38,7 +38,7 @@ def _validators(asset_root: Path) -> tuple[Draft202012Validator, Draft202012Vali
 def parse_python_request(request: dict[str, Any], asset_root: str | Path | None = None) -> dict[str, Any]:
     """Parse supplied Python source text into contract-shaped observations."""
     if asset_root is None:
-        asset_root = Path(__file__).resolve().parents[1] / "assets"
+        asset_root = Path(__file__).resolve().parents[2] / "assets"
     request_validator, result_validator = _validators(Path(asset_root))
     error = next(request_validator.iter_errors(request), None)
     if error:
