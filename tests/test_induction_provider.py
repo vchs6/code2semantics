@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import json
 import sys
+from pathlib import Path
+
+from semantic_facts.source_scanner import inspect_source
 
 import pytest
 
@@ -12,20 +15,29 @@ from semantic_facts.induction_provider import (
 )
 
 
-def _request():
+def _request(root: Path):
+    root.mkdir(parents=True, exist_ok=True)
+    source_file = root / "app.py"
+    if not source_file.exists():
+        source_file.write_text("def current():\\n    return 1\\n", encoding="utf-8")
+    source = inspect_source(root)
+    source_id = source["source_id"]
+    content_state = source["content_state"]
+    subject = {"source_id": source_id, "subject_id": "subject-fixture", "node_id": "node-fixture"}
+    context = {"source_ids": [source_id], "conditions": [], "environment": {}, "language_semantics": ["fixture"]}
     return {
         "kind": "induction_request",
         "request_id": "induction-fixture",
         "group": {
             "fact_type": "F16",
             "subject": {
-                "source_id": "src-fixture",
+                "source_id": source_id,
                 "subject_id": "subject-fixture",
                 "node_id": "node-fixture",
             },
-            "content_states": [{"source_id": "src-fixture", "content_state": "sha256:" + "a" * 64}],
+            "content_states": [{"source_id": source_id, "content_state": content_state}],
             "context": {
-                "source_ids": ["src-fixture"],
+                "source_ids": [source_id],
                 "conditions": [],
                 "environment": {},
                 "language_semantics": ["fixture"],
@@ -36,15 +48,7 @@ def _request():
         "existing_valid_facts": {
             "contract_version": "1.0.0",
             "catalog_id": "semantic-facts-20261025",
-            "sources": [{
-                "source_id": "src-fixture",
-                "root": "/fixture",
-                "content_state": "sha256:" + "a" * 64,
-                "status": "available",
-                "dirty": False,
-                "has_untracked": False,
-                "excludes": [],
-            }],
+            "sources": [source],
             "facts": [],
             "navigation": [],
             "direct_nodes": [],
@@ -54,14 +58,14 @@ def _request():
             "fact_type": "F16",
             "fields": ["strategy"],
             "target": {"kind": "node", "node": {
-                "source_id": "src-fixture",
+                "source_id": source_id,
                 "subject_id": "subject-fixture",
                 "node_id": "node-fixture",
             }},
             "reason": "unknown",
             "detail": "fixture need is not yet satisfied",
             "context": {
-                "source_ids": ["src-fixture"],
+                "source_ids": [source_id],
                 "conditions": [],
                 "environment": {},
                 "language_semantics": ["fixture"],
@@ -151,7 +155,7 @@ def test_provider_failure_modes_fail_closed(tmp_path, program, timeout, stdout_l
 
 
 def test_provider_rejects_untrusted_commands_from_request_payload():
-    request = _request()
+    request = _request(tmp_path / "source")
     request["provider_command"] = [sys.executable, "-c", "print('injected')"]
     registry = InductionProviderRegistry({
         "fixture-provider": {
