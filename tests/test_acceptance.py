@@ -341,3 +341,65 @@ def test_deleted_source_file_is_excluded_from_current_query_but_history_is_retai
     assert any("class First" in fact["fields"]["names"]["value"]["text"] for fact in current["results"])
     assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] > old_fact_count
     repository.close()
+
+def test_root_acceptance_unavailable_source_never_falls_back(tmp_path):
+    missing = tmp_path / "not-created-project"
+    query = {
+        "contract_version": "1.0.0",
+        "catalog_id": "semantic-facts-20261025",
+        "request_id": "unavailable-root-acceptance",
+        "scope": {"scope_id": "unavailable-scope", "directories": [str(missing)], "excludes": [], "defaulted": False},
+        "target": {"kind": "scope"},
+        "granularity": "L3",
+        "selections": [{"fact_type": "F2", "fields": ["identity", "names"]}],
+        "budget": {"max_rounds": 1, "max_new_assertions": 10},
+    }
+    repository = Repository(tmp_path / "unavailable-root.db", ROOT / "skills" / "layered-semantic-facts" / "assets")
+    try:
+        response = execute_query_with_construction(
+            query, repository, ROOT / "skills" / "layered-semantic-facts" / "assets"
+        )
+        assert response["termination"] == "unavailable"
+        assert response["sources"][0]["status"] == "unavailable"
+        assert any(gap["reason"] == "source_unavailable" for gap in response["gaps"])
+        assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == 0
+    finally:
+        repository.close()
+
+
+def test_root_acceptance_rejects_out_of_scope_target_before_repository_read(tmp_path):
+    from semantic_facts.repository.contract import ContractCodec
+    from semantic_facts.source_scanner import build_fact_batch
+
+    allowed = tmp_path / "allowed-project"
+    foreign = tmp_path / "foreign-project"
+    allowed.mkdir()
+    foreign.mkdir()
+    (allowed / "allowed.py").write_text("class Allowed:\n    pass\n", encoding="utf-8")
+    (foreign / "foreign.py").write_text("class SecretOutsideScope:\n    pass\n", encoding="utf-8")
+    assets = ROOT / "skills" / "layered-semantic-facts" / "assets"
+    codec = ContractCodec(assets)
+    foreign_batch = build_fact_batch(foreign, codec)
+
+    repository = Repository(tmp_path / "scope-boundary.db", assets)
+    try:
+        repository.write(foreign_batch, "foreign-seed")
+        foreign_node = foreign_batch["facts"][0]["node"]
+        query = {
+            "contract_version": "1.0.0",
+            "catalog_id": "semantic-facts-20261025",
+            "request_id": "out-of-scope-target-acceptance",
+            "scope": {"scope_id": "allowed-only", "directories": [str(allowed.resolve())], "excludes": [], "defaulted": False},
+            "target": {"kind": "node", "node": foreign_node},
+            "granularity": "L3",
+            "selections": [{"fact_type": "F2", "fields": ["identity", "names"]}],
+            "budget": {"max_rounds": 1, "max_new_assertions": 10},
+        }
+        response = execute_query_with_construction(query, repository, assets)
+        assert response["termination"] == "no_progress"
+        assert any(gap["reason"] == "invalid_reference" for gap in response["gaps"])
+        assert all(source["root"] == str(allowed.resolve()) for source in response["sources"])
+        assert all(fact["node"]["source_id"] != foreign_node["source_id"] for fact in response["results"])
+        assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == len(foreign_batch["facts"])
+    finally:
+        repository.close()
