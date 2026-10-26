@@ -244,7 +244,6 @@ class Repository:
             assertion = inventory.get("assertion", {})
             source_ids = set(assertion.get("context", {}).get("source_ids", []))
             if source_ids.intersection(current_states) and is_current(assertion):
-                if assertion_is_current(inventory.get("assertion", {}), inventory_key):
                 direct_nodes.append(inventory)
 
         conflicts = []
