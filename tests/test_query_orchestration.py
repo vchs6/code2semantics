@@ -318,3 +318,73 @@ def test_query_projection_preserves_external_reference_and_conflict_evidence(tmp
         assert response["conflicts"][0]["evidence"][0]["evidence_id"] == evidence["evidence_id"]
     finally:
         repository.close()
+def test_query_handles_multi_parent_cycle_and_external_edges_without_recursive_expansion(tmp_path):
+    import copy
+    from semantic_facts.repository.contract import ContractCodec
+    from semantic_facts.source_scanner import build_fact_batch
+
+    project = tmp_path / "graph-query-project"
+    project.mkdir()
+    (project / "a.py").write_text("class Alpha:\n    pass\n", encoding="utf-8")
+    (project / "b.py").write_text("class Beta:\n    pass\n", encoding="utf-8")
+    (project / "c.py").write_text("class Gamma:\n    pass\n", encoding="utf-8")
+    codec = ContractCodec(ASSETS)
+    batch = build_fact_batch(project, codec)
+    by_file = {fact["fields"]["identity"]["value"]["ref"]["node_id"]: fact for fact in batch["facts"]}
+    nodes = list(by_file.values())
+    root_node, child_node, second_parent = (fact["node"] for fact in nodes[:3])
+    template = nodes[0]["fields"]["names"]
+    context = copy.deepcopy(template["context"])
+    coverage = copy.deepcopy(template["coverage"])
+    assertion = copy.deepcopy(template)
+    assertion["basis"]["method"] = "test graph edge; not an inferred code fact"
+    assertion["basis"]["limitations"] = ["Only validates bounded graph projection"]
+    assertion["value"] = {"kind": "text", "text": "fixture graph edge"}
+    def edge(edge_id, source, target):
+        return {
+            "edge_id": edge_id,
+            "source": source,
+            "target": target,
+            "relation": "dependency",
+            "assertion": copy.deepcopy(assertion),
+        }
+
+    external = {
+        "kind": "external",
+        "reference_id": "outside-package",
+        "label": "package outside authorized scope",
+        "reason": "outside_authorized_scope",
+        "boundary": "Only the explicitly requested project root is scanned.",
+        "observed_in": {
+            "kind": "subject",
+            "source_id": batch["sources"][0]["source_id"],
+            "subject_id": root_node["subject_id"],
+        },
+    }
+    batch["navigation"] = [
+        edge("root-to-child", root_node, child_node),
+        edge("root-to-parent-b", root_node, second_parent),
+        edge("parent-b-to-child", second_parent, child_node),
+        edge("child-cycle-to-root", child_node, root_node),
+        edge("child-to-external", child_node, external),
+    ]
+    codec.validate_batch(batch)
+
+    database = tmp_path / "graph-query.db"
+    repository = Repository(database, ASSETS)
+    try:
+        repository.write(batch, "graph-query-seed")
+        graph = repository.traverse_navigation(root_node, max_depth=8, max_edges=20)
+        assert len(graph["nodes"]) == 3
+        assert len(graph["edges"]) == 5
+        assert len(graph["terminal_references"]) == 1
+        assert graph["truncated"] is False
+
+        response = execute_query_with_construction(make_query(project), repository, ASSETS)
+        assert response["termination"] == "satisfied", response
+        assert len(response["results"]) == 3
+        assert all(set(fact["fields"]) <= {"identity", "names"} for fact in response["results"])
+        assert all("outside-package" not in json.dumps(fact) for fact in response["results"])
+        assert all("fixture graph edge" not in json.dumps(fact) for fact in response["results"])
+    finally:
+        repository.close()
