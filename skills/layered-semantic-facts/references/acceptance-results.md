@@ -123,3 +123,11 @@ CI run: https://github.com/vchs6/code2semantics/actions/runs/40277635793
 - CI run: https://github.com/vchs6/code2semantics/actions/runs/40297921776
 - Runtime acceptance suite: 5 passed. The new case runs the real query/construction pipeline across two explicitly authorized roots (Python and Rust), where both define a same-named `Engine`; it verifies source/subject identity separation, minimal requested-field projection, and explicit out-of-catalog fields.
 - Full S1–S12 system acceptance remains NOT_YET_PASSED. The delivery gate is still intentionally blocked because the full provider-backed semantic construction/induction workflow and complete scenario matrix have not been demonstrated.
+
+
+## Deleted-source retention and import-conflict regression (2026-10-26)
+
+- Added a real-source acceptance case that deletes one Python file, rescans the project, and verifies: the deleted file's prior fact rows remain in SQLite; the current source head points to the new snapshot; current query output excludes the deleted file's facts; unaffected file facts remain available.
+- Added a transfer test that rejects importing a different payload under an existing immutable fact identity and verifies all normalized row counts and submission receipts remain unchanged.
+- CI run: https://github.com/vchs6/code2semantics/actions/runs/40298718500 — repository 56 passed; transaction 6; transfer 7; repository acceptance 3; matrix 15; parser 9; scanner 7; runtime acceptance 6; packaging 2; executor 3; producer dispatch 3; combined planning/constructor/induction/query 52 passed; strict OpenSpec passed.
+- Full S1–S12 acceptance remains NOT_YET_PASSED. The delivery gate remains blocked until the full runtime acquisition/parse/constructor/induction/repository/query-response path and all root scenarios are demonstrated.
