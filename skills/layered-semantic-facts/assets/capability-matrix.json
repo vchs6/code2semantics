@@ -134,27 +134,10 @@
     },
     {
       "tool_id": "rust.cargo-metadata",
-      "description": "Research candidate only: Cargo workspace/member/target/dependency metadata JSON.",
+      "description": "Accepted Cargo metadata JSON producer for explicit Rust workspace membership and declared package dependencies.",
       "information_need_ids": [
-        "source.f1.included",
-        "source.f1.excluded",
-        "source.f1.observation",
-        "source.f3.entries",
-        "source.f3.runtime",
-        "source.f3.deployment",
-        "source.f3.environment",
-        "source.f4.source",
-        "source.f4.target",
         "source.f4.kind",
-        "source.f4.member-scope",
-        "source.f4.enumeration",
-        "source.f6.source",
-        "source.f6.target",
-        "source.f6.kind",
-        "source.f6.direction",
-        "source.f6.scope",
-        "source.f6.necessity",
-        "source.f6.resolution"
+        "source.f6.kind"
       ],
       "output_kinds": [
         "cargo_metadata_json"
@@ -176,17 +159,27 @@
         "rust.syntax-source"
       ],
       "limitations": [
-        "DISABLED: cargo availability/version/output probe and parser acceptance are pending.",
+        "Only F4.kind workspace-membership and F6.kind declared package-dependency observations are accepted; other Cargo metadata observations remain uncovered.",
         "Manifest graph does not prove source-level runtime calls or logical responsibility.",
         "Workspace membership must remain distinct from dependency edges.",
-        "Observed on Ubuntu 24.04 / Cargo 1.99.0: temporary minimal Cargo project returned valid metadata JSON with exit 0 in https://github.com/vchs6/code2semantics/actions/runs/40319334019."
+        "Cargo must be installed on the host; invocation uses a fixed argv prefix, explicit manifest path, bounded timeout and shell=False."
       ],
-      "enabled": false,
+      "enabled": true,
       "research_basis": [
         "openspec/changes/survey-info-acquisition-tools/research/semantic-tooling-survey.md#5.2",
         "skills/layered-semantic-facts/assets/information-needs.json",
         "https://github.com/vchs6/code2semantics/actions/runs/40319334019"
-      ]
+      ],
+      "acceptance": {
+        "actor": "parser_development",
+        "evidence": [
+          "tests/test_info_parser.py::test_cargo_metadata_parser_emits_workspace_and_dependency_observations_separately",
+          "tests/test_constructor.py::test_constructor_manifest_facts_survive_repository_reopen_and_minimal_query",
+          "tests/test_runtime_producer_acceptance.py::test_cli_query_invokes_cargo_once_and_returns_distinct_membership_and_dependency",
+          "tests/test_runtime_producer_failures.py",
+          "https://github.com/vchs6/code2semantics/actions/runs/40347148315"
+        ]
+      }
     },
     {
       "tool_id": "rust.cargo-check",
