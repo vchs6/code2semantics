@@ -27,8 +27,8 @@ def test_scans_real_python_source_into_valid_fact_batch(tmp_path, codec):
     assert len(batch["facts"]) == 1
     fact = batch["facts"][0]
     assert fact["fact_type"] == "F2"
-    assert "class:Service" in fact["fields"]["names"]["value"]["text"]
-    assert "function:execute" in fact["fields"]["names"]["value"]["text"]
+    assert "class Service" in fact["fields"]["names"]["value"]["text"]
+    assert "function execute" in fact["fields"]["names"]["value"]["text"]
     assert fact["fields"]["names"]["basis"]["evidence"][0]["locator"] == "service.py:file"
     codec.validate_batch(batch)
 
@@ -56,7 +56,7 @@ def test_scan_rejects_invalid_python_instead_of_inventing_facts(tmp_path, codec)
     try:
         build_fact_batch(project, codec)
     except ValueError as error:
-        assert "cannot parse bad.py" in str(error)
+        assert "cannot construct facts for bad.py" in str(error)
     else:
         raise AssertionError("invalid Python must not produce facts")
 
