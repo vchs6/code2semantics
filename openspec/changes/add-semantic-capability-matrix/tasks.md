@@ -44,6 +44,14 @@
 - [x] 6.1 Add a small set of disabled research-candidate profiles mapped to the expanded F1–F18 need IDs: `python.compileall`, `python.pyproject-toml`, `rust.cargo-metadata`, `rust.cargo-check`, `rust.rust-analyzer`, `multi.ctags`, and `multi.ast-grep`. These are candidates for grouped coverage, not one tool per field.
 - [x] 6.2 Keep every new candidate disabled and without `acceptance`; add a matrix test asserting that only the two initial Python/Rust syntax parser profiles are enabled and each research candidate remains disabled until parser-development acceptance.
 - [x] 6.3 After CI probe evidence is recorded by `survey-info-acquisition-tools`, update candidate descriptions, versions, platform/environment constraints and native output formats. Do not enable any candidate in this task.
-- [ ] 6.4 Enable a candidate only after the exact native-output parser and invocation profile pass parser-development acceptance; update the matrix entry with test/fixture evidence and verify constructor selection and failure gaps.
+- [x] 6.4 Enable only candidates whose exact native-output parser and invocation profile passed parser-development acceptance; narrow each enabled entry to proven information needs and verify constructor selection and failure gaps.
 
 Matrix candidate evidence: corrected CI probe run https://github.com/vchs6/code2semantics/actions/runs/40319334019. Python compileall and Cargo metadata temporary fixtures passed; Cargo/rustc versions were observed; rust-analyzer was not runnable; ctags/ast-grep/tree-sitter were absent. All six candidate entries remain disabled and have no acceptance evidence. Enabling remains pending parser-development acceptance.
+
+
+### Narrow production profile enablement evidence (2026-10-26)
+
+- `rust.cargo-metadata` is enabled only for `source.f4.kind` and `source.f6.kind`, with parser fixture, constructor persistence/reopen, CLI runtime acceptance and failure-mode evidence.
+- `python.pyproject-toml` is enabled only for `source.f3.runtime` and `source.f6.kind`, with parser fixture, source-to-store/reopen and CLI runtime acceptance evidence.
+- `tests/capability_matrix/test_contract.py` was updated to enforce these exact narrow acceptance records. CI https://github.com/vchs6/code2semantics/actions/runs/40353817807: capability matrix 15 passed, root/runtime acceptance 21 passed, induction/provider group 86 passed, strict OpenSpec passed. The product delivery gate remains blocked for full S1–S12.
+- All remaining research candidates remain disabled. Per-profile acceptance does not certify unimplemented fields or the root production chain.
