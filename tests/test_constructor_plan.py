@@ -260,3 +260,44 @@ def test_plan_chooses_one_multi_need_producer_for_the_whole_request(tmp_path):
 
     assert result["gaps"] == []
     assert {profile["tool_id"] for item in result["plan"] for profile in item["producer_profiles"]} == {"tool.all"}
+
+def test_producer_selection_uses_complementary_minimum_cover_when_no_single_tool_suffices(tmp_path):
+    from semantic_facts.capability_matrix import CapabilityMatrix
+    from semantic_facts.constructor_plan import select_enabled_producers
+
+    matrix = CapabilityMatrix(tmp_path / "matrix.json")
+    base = {
+        "description": "accepted producer",
+        "output_kinds": ["structured-observations"],
+        "languages": ["python"],
+        "platforms": ["linux"],
+        "environment": "in-process",
+        "invocation": ["producer"],
+        "combinations": [],
+        "limitations": ["bounded source evidence"],
+        "enabled": True,
+        "acceptance": {"actor": "parser_development", "evidence": ["fixture.json"]},
+        "research_basis": ["complementary coverage test"],
+    }
+    matrix.replace([
+        dict(base, tool_id="tool.ab", information_need_ids=["syntax.f2.identity", "syntax.f2.names"]),
+        dict(base, tool_id="tool.c", information_need_ids=["syntax.f2.boundary"]),
+        dict(base, tool_id="tool.a", information_need_ids=["syntax.f2.identity"]),
+        dict(base, tool_id="tool.b", information_need_ids=["syntax.f2.names"]),
+    ])
+
+    selected = select_enabled_producers(
+        matrix,
+        ["syntax.f2.identity", "syntax.f2.names", "syntax.f2.boundary"],
+        "Python", "Linux", "in-process",
+    )
+
+    chosen = {
+        item["tool_id"]
+        for entries in selected.values()
+        for item in entries
+    }
+    assert chosen == {"tool.ab", "tool.c"}
+    assert [item["tool_id"] for item in selected["syntax.f2.identity"]] == ["tool.ab"]
+    assert [item["tool_id"] for item in selected["syntax.f2.names"]] == ["tool.ab"]
+    assert [item["tool_id"] for item in selected["syntax.f2.boundary"]] == ["tool.c"]
