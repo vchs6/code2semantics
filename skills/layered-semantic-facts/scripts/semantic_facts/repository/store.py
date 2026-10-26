@@ -315,6 +315,119 @@ class Repository:
         self.codec.validate_batch(batch)
         return self.write(batch, submission_key)
 
+
+    def traverse_navigation(
+        self,
+        start: dict[str, Any],
+        *,
+        max_depth: int = 8,
+        max_edges: int = 500,
+    ) -> dict[str, Any]:
+        """Traverse current in-scope navigation edges with cycle and budget handling.
+
+        External and cross-source references are terminal and never expanded.
+        Historical fact rows are not modified.
+        """
+        required = {"source_id", "subject_id", "node_id"}
+        if not isinstance(start, dict) or not required.issubset(start):
+            raise ValueError("start must be a node reference")
+        if max_depth < 0 or max_edges < 1:
+            raise ValueError("max_depth must be >= 0 and max_edges must be >= 1")
+
+        self._ensure_schema()
+        row = self.connection.execute(
+            "SELECT payload FROM sources WHERE source_id = ?", (start["source_id"],)
+        ).fetchone()
+        if row is None:
+            return {"start": start, "nodes": [start], "edges": [], "terminal_references": [], "truncated": False, "reason": None}
+        source = json.loads(row[0])
+        root = str(Path(source["root"]).resolve())
+        head = self.connection.execute("SELECT source_id FROM source_heads WHERE root = ?", (root,)).fetchone()
+        if head is None or head[0] != start["source_id"]:
+            return {"start": start, "nodes": [start], "edges": [], "terminal_references": [], "truncated": False, "reason": None}
+
+        query = {
+            "contract_version": "1.0.0",
+            "catalog_id": "semantic-facts-20261025",
+            "request_id": "repository-graph-traversal",
+            "scope": {"scope_id": "repository-graph-scope", "directories": [root], "excludes": [], "defaulted": False},
+            "target": {"kind": "scope"},
+            "granularity": "L3",
+            "selections": [{"fact_type": "F2", "fields": ["identity"]}],
+            "budget": {"max_rounds": 1, "max_new_assertions": 0},
+        }
+        snapshot = self.read(query)
+        allowed_sources = {item["source_id"] for item in snapshot["sources"]}
+
+        def node_key(ref: dict[str, Any]) -> tuple[str, str, str] | None:
+            if not isinstance(ref, dict) or ref.get("kind") == "external":
+                return None
+            if not {"source_id", "subject_id", "node_id"}.issubset(ref):
+                return None
+            return (ref["source_id"], ref["subject_id"], ref["node_id"])
+
+        start_key = node_key(start)
+        if start_key is None or start_key[0] not in allowed_sources:
+            raise ValueError("start node is not in the current authorized source scope")
+
+        adjacency: dict[tuple[str, str, str], list[dict[str, Any]]] = {}
+        for edge in snapshot["navigation"]:
+            key = node_key(edge.get("source", {}))
+            if key is not None and key[0] in allowed_sources:
+                adjacency.setdefault(key, []).append(edge)
+        for outgoing in adjacency.values():
+            outgoing.sort(key=lambda edge: edge.get("edge_id", ""))
+
+        nodes: list[dict[str, Any]] = [start]
+        node_by_key = {start_key: start}
+        visited_depth = {start_key: 0}
+        terminal: dict[str, dict[str, Any]] = {}
+        selected_edges: list[dict[str, Any]] = []
+        selected_edge_ids: set[str] = set()
+        queue: list[tuple[tuple[str, str, str], int]] = [(start_key, 0)]
+        truncated = False
+        reason: str | None = None
+
+        while queue:
+            current_key, depth = queue.pop(0)
+            for edge in adjacency.get(current_key, []):
+                edge_id = edge.get("edge_id") or _canonical(edge)
+                target_ref = edge.get("target", {})
+                target_key = node_key(target_ref)
+                if edge_id not in selected_edge_ids:
+                    if len(selected_edges) >= max_edges:
+                        truncated, reason = True, "edges"
+                        queue.clear()
+                        break
+                    selected_edges.append(edge)
+                    selected_edge_ids.add(edge_id)
+
+                if target_key is None or target_key[0] not in allowed_sources:
+                    terminal[_canonical(target_ref)] = target_ref
+                    continue
+                if target_key not in node_by_key:
+                    node_by_key[target_key] = target_ref
+                    nodes.append(target_ref)
+                if target_key in visited_depth:
+                    continue
+                if depth >= max_depth:
+                    truncated = True
+                    reason = reason or "depth"
+                    continue
+                visited_depth[target_key] = depth + 1
+                queue.append((target_key, depth + 1))
+            if truncated and reason == "edges":
+                break
+
+        return {
+            "start": start,
+            "nodes": nodes,
+            "edges": selected_edges,
+            "terminal_references": [terminal[key] for key in sorted(terminal)],
+            "truncated": truncated,
+            "reason": reason,
+        }
+
     def _ensure_schema(self) -> None:
         if self._initialized:
             return
