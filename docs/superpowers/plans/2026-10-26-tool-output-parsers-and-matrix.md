@@ -109,3 +109,11 @@
 - RED/GREEN for environment-aware producer planning: RED https://github.com/vchs6/code2semantics/actions/runs/40321016282; GREEN https://github.com/vchs6/code2semantics/actions/runs/40321130067. The plan now records accepted producer profiles across declared environments.
 - Ruling: Do not enable Cargo metadata or compileall yet. Although the pure output adapters pass tests, current runtime FactBatch construction only maps F2 syntax observations; enabling manifest candidates now would advertise a production capability that cannot yet yield F1/F3/F4/F6 facts. Cost if wrong: users would receive unavailable/gap-only results or misleading matrix coverage.
 - Next task is constructor execution and fact mapping, then end-to-end repository re-read/minimal response acceptance. Matrix enablement remains gated on that consumer acceptance.
+
+## Constructor integration execution ledger (2026-10-26)
+
+- RED: https://github.com/vchs6/code2semantics/actions/runs/40323258026 exposed missing F4/F6 FactBatch production from Cargo metadata; after correcting the test import, the feature assertion failed as intended.
+- RED: https://github.com/vchs6/code2semantics/actions/runs/40324281385 exposed acceptance of stale manifest output after source mutation.
+- GREEN: https://github.com/vchs6/code2semantics/actions/runs/40324323776. The suite confirms accepted Cargo metadata execution, mapping to F4/F6 facts, source-state binding, rejection of stale outputs, SQLite close/reopen and minimal query response. 61 constructor/query tests passed, 12 parser tests passed, 15 matrix tests passed, and strict OpenSpec passed.
+- Ruling: production matrix entries remain disabled because the integration test enables a candidate only in a copied temporary matrix. This avoids advertising a capability before broader failure-mode tests and complete field coverage are accepted; cost if wrong is delayed availability, preferable to falsely claiming production support.
+- Remaining: broaden native manifest field mapping and tests; add missing-tool/timeout/failed-command integration cases; add Python pyproject reader/parser and end-to-end acceptance; only then enable exact profiles and proceed through S1–S12.
