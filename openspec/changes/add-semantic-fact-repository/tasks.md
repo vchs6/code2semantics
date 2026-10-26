@@ -33,8 +33,8 @@
 - [x] 4.1 ��д��Ч�Ժ�ǰ����ԣ�ʧЧ��ʵ��������Ч�������Ҫǰ�ᰴ���ύ״̬��飬֤�ݺ� coverage ԭ���������ֿⲻ������Դ�ļ���
 - [x] 4.2 ���� `python -m pytest tests/repository/test_validity.py -q` RED��
 - [x] 4.3 ʵ����ȷǰ��հ���ʧЧ״̬���ˡ�ά����ȡ�� token ��飻������δ����������Ӱ�죬�����Ϳս����
-- [ ] 4.4 ��дͼ���ԣ��ุ���رߡ���ϵȥ�ء����/��Ԥ�㡢external �˵����С��ʵ��ͶӰ��
-- [ ] 4.5 ������Ч�ԡ�ͼ������ʹ洢���� GREEN���ύʵ�֡����Ժ��ĵ���
+- [x] 4.4 ��дͼ���ԣ��ุ���رߡ���ϵȥ�ء����/��Ԥ�㡢external �˵����С��ʵ��ͶӰ��
+- [x] 4.5 ������Ч�ԡ�ͼ������ʹ洢���� GREEN���ύʵ�֡����Ժ��ĵ���
 
 ## 5. ���������롢������ָ�
 
@@ -73,3 +73,12 @@
 - Normalized evidence/premise/inventory/conflict rows and navigation classification are persisted and read back.
 - Validation record: `implementation-validation.md`. CI run https://github.com/vchs6/code2semantics/actions/runs/40269799051: repository 41 passed; strict OpenSpec and all component test groups passed. Product delivery gate intentionally remains blocked.
 - Still pending: RED-first evidence for newest transfer tests; public local mutation/invalidation API; complete premise propagation, graph-cycle/ancestor traversal and broader import conflict policy. Do not infer these from export/import tests.
+
+
+## Bounded graph traversal evidence (2026-10-26)
+
+- Implemented `Repository.traverse_navigation(start, max_depth, max_edges)` in `skills/layered-semantic-facts/scripts/semantic_facts/repository/store.py`.
+- Traversal starts only from a current source-head node, reads current in-scope navigation edges, uses visited-node and visited-edge sets to terminate cycles, preserves distinct parent edges, deduplicates equivalent edges via repository read semantics, returns external/cross-source references as terminal references without expanding them, and reports explicit depth/edge truncation.
+- RED was observed in CI run https://github.com/vchs6/code2semantics/actions/runs/40297171108 because the API did not yet exist. The first implementation run exposed a disconnected multi-parent test fixture; the fixture was corrected to connect the second parent from the root rather than weakening the assertion.
+- GREEN evidence: https://github.com/vchs6/code2semantics/actions/runs/40297475469 — repository suite 53 passed; matrix 15, parser 9, scanner 7, source acceptance 4, packaging 2, executor 3, producer dispatch 3, combined information-needs/constructor/induction/query 51 passed; strict OpenSpec passed. Product delivery gate remains blocked for full S1–S12 acceptance.
+- This completes bounded repository graph traversal tests for cycles, multi-parent edges, equivalent-edge deduplication, external terminal references, and budget truncation. It does not complete query-level S1–S12 or the full product lifecycle.
