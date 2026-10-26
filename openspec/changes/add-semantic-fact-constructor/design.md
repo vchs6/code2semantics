@@ -88,3 +88,11 @@ The next implementation increment must:
 - Add integration tests using a real temporary Cargo workspace and a Python `pyproject.toml`, run the actual approved command, parse its native output, build a nonempty FactBatch, write/read SQLite, and assert the minimal query response does not leak unrequested fields.
 
 A parser being registered is not enough to enable a matrix entry. Matrix enablement follows constructor-consumer acceptance for the exact invocation profile; it must not be used to claim the entire S1–S12 chain is complete.
+
+## Request-level producer execution and fact identity
+
+The constructor plan is demand-oriented, but execution is task-oriented. A query may have several unmet fields or needs covered by the same producer. Build a demand-to-producer mapping first, then derive canonical execution tasks keyed by source ID, source content state, tool ID, invocation profile and normalized arguments. Execute each unique task once, parse once, and fan observations out to every matching requested need. A local executed-profile set is only a defensive guard; it is not the source of truth for scheduling and must not collapse genuinely different invocations.
+
+Aggregate FactBatch contributions by repository fact identity, not by observation ID alone. If several producers support the same field and values agree, merge evidence deterministically into one fact. If values disagree, preserve both contributions in a conflict record and emit a structured gap; do not append duplicate facts or silently choose a winner. Repository duplicate-identity validation remains strict.
+
+Execution records must make the selected source snapshot, tool profile, normalized arguments, invocation count and output digest observable in tests. If source content changes while a producer is running, discard all outputs and facts derived from that snapshot. An execution error is represented once per unique task and fanned out to affected needs without rerunning the same command per need.
