@@ -118,3 +118,53 @@ def test_relation_and_conflict_invalidation_filters_projection_only(batch, db_pa
     assert repository.connection.execute("SELECT COUNT(*) FROM relations").fetchone()[0] == relation_rows_before
     assert repository.connection.execute("SELECT COUNT(*) FROM conflicts").fetchone()[0] == conflict_rows_before
     repository.close()
+
+def test_invalidated_premise_target_hides_dependent_assertion_without_deleting_rows(batch, db_path):
+    from semantic_facts.repository.store import Repository
+    from test_store import make_query
+
+    repository = Repository(db_path)
+    repository.write(batch, "premise-closure")
+    fact_rows_before = repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
+    dependent = next(item for item in batch["facts"] if item["fact_id"] == "fact-b")
+    assert dependent["fields"]["strategy"]["basis"]["premises"]
+
+    repository.invalidate_field("fact-a", "strategy", "premise target changed")
+    query = make_query()
+    query["selections"] = [{"fact_type": "F16", "fields": ["strategy"]}]
+    result = repository.read(query)
+
+    returned_ids = {fact["fact_id"] for fact in result["facts"]}
+    assert "fact-a" not in returned_ids
+    assert "fact-b" not in returned_ids
+    assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == fact_rows_before
+    assert repository.connection.execute("SELECT COUNT(*) FROM premises").fetchone()[0] >= 1
+    repository.close()
+
+
+def test_cyclic_premise_closure_is_rejected_without_recursion_or_deletion(batch, db_path):
+    import copy
+    from semantic_facts.repository.store import Repository
+    from test_store import make_query
+
+    cyclic = copy.deepcopy(batch)
+    fact_a = next(item for item in cyclic["facts"] if item["fact_id"] == "fact-a")
+    fact_b = next(item for item in cyclic["facts"] if item["fact_id"] == "fact-b")
+    fact_a["fields"]["strategy"]["basis"]["premises"].append({
+        "node": fact_b["node"],
+        "fact_id": "fact-b",
+        "field": "strategy",
+        "content_state": "content-a",
+    })
+    repository = Repository(db_path)
+    repository.write(cyclic, "cyclic-premise-closure")
+    fact_rows_before = repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
+    query = make_query()
+    query["selections"] = [{"fact_type": "F16", "fields": ["strategy"]}]
+
+    result = repository.read(query)
+    returned_ids = {fact["fact_id"] for fact in result["facts"]}
+    assert "fact-a" not in returned_ids
+    assert "fact-b" not in returned_ids
+    assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == fact_rows_before
+    repository.close()
