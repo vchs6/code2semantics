@@ -130,3 +130,11 @@ These tasks follow accepted pure parser adapters. They are prerequisites to enab
 - Proposal/design/tasks were updated before applying the fix: https://github.com/vchs6/code2semantics/commit/3308646ae7694008e1840f1840d06a6fa1cac1c9 and https://github.com/vchs6/code2semantics/commit/ee514155192597eb59b186b82897f8307274a932.
 - The regression test selects Cargo metadata for both F4.kind and F6.kind and asserts the executor call count is exactly one. CI run https://github.com/vchs6/code2semantics/actions/runs/40333047820 passed all component test steps; overall failure was only the expected product delivery gate.
 - A further fix keys the execution guard by tool ID, environment, invocation profile and normalized arguments rather than tool ID alone: https://github.com/vchs6/code2semantics/commit/fc95c520a8f8ba4d0d9c5d42e89f2762a5cb8a0d. Its CI run is pending at https://github.com/vchs6/code2semantics/actions/runs/40333512425; do not mark task 8.4 or the whole issue complete until that run is inspected.
+
+## 9. Component-boundary acceptance for duplicate contributions
+
+- [ ] 9.1 Verify the constructor execution plan groups only equivalent tool tasks for the same source snapshot, invocation profile and normalized arguments; do not add persistent deduplication state to the constructor.
+- [ ] 9.2 Verify compatible observations contributing to the same fact field produce one FactBatch fact with merged evidence, and conflicting values produce an explicit conflict/gap before batch validation.
+- [ ] 9.3 Keep cross-request incremental writes, submission-key idempotency, existing-record reuse and evidence/field additions owned by the repository; add no duplicate persistent identity cache in the constructor.
+- [ ] 9.4 Add/retain repository acceptance tests proving repeated identical submissions do not duplicate rows, changed submissions with the same key are rejected, and new evidence/fields are incrementally stored without deleting unrelated facts.
+- [ ] 9.5 Run constructor and repository suites independently, then the integrated write/reopen/minimal-query acceptance. Report execution reuse, FactBatch validity and repository idempotency as separate results.
