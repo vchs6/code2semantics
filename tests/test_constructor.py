@@ -81,3 +81,22 @@ def test_constructor_supports_rust_source_with_syntax_only_evidence(tmp_path):
     assertion = result["batch"]["facts"][0]["fields"]["names"]
     assert assertion["context"]["environment"]["language"] == "Rust"
     assert any("No type checking" in limitation or "type checking" in limitation for limitation in assertion["basis"]["limitations"])
+def test_constructor_preserves_valid_file_when_another_producer_fails(tmp_path):
+    from semantic_facts.source_scanner import inspect_source
+
+    project = tmp_path / "mixed-validity-project"
+    project.mkdir()
+    (project / "valid.py").write_text("class ValidEngine:\n    pass\n", encoding="utf-8")
+    (project / "broken.py").write_text("def broken(:\n    pass\n", encoding="utf-8")
+    value = request()
+    value["query"]["scope"]["directories"] = [str(project.resolve())]
+    source = inspect_source(project)
+    value["existing_valid_facts"]["sources"] = [source]
+    value["current_source_context"]["sources"] = [source]
+
+    result = execute_constructor_request(value, ASSETS)
+
+    assert any("class ValidEngine" in fact["fields"]["names"]["value"]["text"] for fact in result["batch"]["facts"])
+    assert any(gap["reason"] == "unparseable" and "broken.py" in gap["detail"] for gap in result["gaps"])
+    scope_inventory = next(item for item in result["batch"]["direct_nodes"] if item["target"]["kind"] == "scope")
+    assert scope_inventory["assertion"]["coverage"]["completeness"] == "partial"
