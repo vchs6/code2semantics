@@ -126,7 +126,7 @@ def test_stale_existing_assertion_does_not_satisfy_current_request(tmp_path):
 
     project = tmp_path / "stale-project"
     project.mkdir()
-    (project / "service.py").write_text("class Example:\\n    pass\\n", encoding="utf-8")
+    (project / "service.py").write_text("class Example:\n    pass\n", encoding="utf-8")
     batch = build_fact_batch(project, ContractCodec(ASSETS))
     source = batch["sources"][0]
     stale_fact = dict(batch["facts"][0])
