@@ -173,17 +173,44 @@ class Repository:
         self._ensure_schema()
         target = query["target"].get("node")
         selections = query["selections"]
+
+        # Resolve the current source version for each exact requested project root.
+        # Older source versions remain stored, but current-scope reads do not mix them.
+        if target:
+            current_source_ids = {target["source_id"]}
+        else:
+            directories = {
+                str(Path(directory).resolve())
+                for directory in query["scope"].get("directories", [])
+            }
+            current_source_ids: set[str] = set()
+            seen_roots: set[str] = set()
+            for _, source_id, payload in self.connection.execute(
+                "SELECT rowid, source_id, payload FROM sources ORDER BY rowid DESC"
+            ):
+                source = json.loads(payload)
+                root = str(Path(source["root"]).resolve())
+                if root in directories and root not in seen_roots:
+                    current_source_ids.add(source_id)
+                    seen_roots.add(root)
+
         params: list[Any] = []
         sql = "SELECT fact_key, source_id, subject_id, node_id, fact_id, fact_type, payload FROM facts WHERE 1=1"
         if target:
             sql += " AND source_id = ? AND subject_id = ? AND node_id = ?"
             params.extend((target["source_id"], target["subject_id"], target["node_id"]))
+        elif current_source_ids:
+            placeholders = ",".join("?" for _ in current_source_ids)
+            sql += f" AND source_id IN ({placeholders})"
+            params.extend(sorted(current_source_ids))
+        else:
+            sql += " AND 1=0"
+
         types = tuple(selection["fact_type"] for selection in selections)
         sql += " AND fact_type IN (" + ",".join("?" for _ in types) + ")"
         params.extend(types)
         rows = self.connection.execute(sql, params).fetchall()
         selected: list[dict[str, Any]] = []
-        source_ids: set[str] = set()
         for row in rows:
             value = json.loads(row[6])
             selection = next(item for item in selections if item["fact_type"] == row[5])
@@ -197,28 +224,15 @@ class Repository:
             if fields:
                 value["fields"] = fields
                 selected.append(value)
-                source_ids.add(row[1])
-        # Preserve source context even when a valid query has no matching facts.
-        requested_source_ids = set(source_ids)
-        if target:
-            requested_source_ids.add(target["source_id"])
-        else:
-            directories = {
-                str(Path(directory).resolve())
-                for directory in query["scope"].get("directories", [])
-            }
-            for source_id, payload in self.connection.execute("SELECT source_id, payload FROM sources"):
-                source = json.loads(payload)
-                if str(Path(source["root"]).resolve()) in directories:
-                    requested_source_ids.add(source_id)
+
         sources = []
-        if requested_source_ids:
-            placeholders = ",".join("?" for _ in requested_source_ids)
+        if current_source_ids:
+            placeholders = ",".join("?" for _ in current_source_ids)
             sources = [
                 json.loads(payload)
                 for _, payload in self.connection.execute(
                     f"SELECT source_id, payload FROM sources WHERE source_id IN ({placeholders})",
-                    tuple(sorted(requested_source_ids)),
+                    tuple(sorted(current_source_ids)),
                 )
             ]
         return {
