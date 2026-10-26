@@ -39,12 +39,12 @@ def build_fact_batch(root: str | Path, codec: ContractCodec) -> dict[str, Any]:
         raise ValueError(f"source root is not a directory: {project_root}")
 
     files = sorted(
-        path for path in project_root.rglob("*.py")
+        path for path in project_root.rglob("*")
         if not any(part in EXCLUDED_DIRS for part in path.relative_to(project_root).parts)
-        and path.is_file()
+        and path.is_file() and path.suffix in {".py", ".rs"}
     )
     if not files:
-        raise ValueError(f"no Python source files found under {project_root}")
+        raise ValueError(f"no Python or Rust source files found under {project_root}")
 
     raw: list[tuple[str, str]] = []
     for path in files:
@@ -80,21 +80,23 @@ def build_fact_batch(root: str | Path, codec: ContractCodec) -> dict[str, Any]:
     parsed_files: list[tuple[str, dict[str, Any]]] = []
     parser_registry = ParserRegistry(codec.schema_root)
     for relative, source_text in raw:
+        language = "Rust" if Path(relative).suffix == ".rs" else "Python"
+        tool_id = "rust.syntax-source" if language == "Rust" else "python.ast-source"
         coverage = {
-            "domain": f"Python syntax in {relative}",
+            "domain": language + " syntax in " + relative,
             "checked": [relative],
             "excluded": [],
             "completeness": "complete",
-            "method": "Python ast.parse",
+            "method": "deterministic declaration parser",
         }
         request = {
             "kind": "parse_request",
             "tool_native_output": {"encoding": "utf-8", "text": source_text},
             "invocation_profile": {
-                "tool_id": "python.ast-source",
-                "tool_version": "3.12+",
-                "command": ["python", "-m", "ast", relative],
-                "environment": {"language": "Python"},
+                "tool_id": tool_id,
+                "tool_version": "rust-source-parser-1" if language == "Rust" else "3.12+",
+                "command": ["source-parser", relative],
+                "environment": {"language": language},
                 "sources": [source_record],
                 "coverage": coverage,
                 "evidence": [],
