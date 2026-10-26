@@ -100,3 +100,56 @@ def test_constructor_preserves_valid_file_when_another_producer_fails(tmp_path):
     assert any(gap["reason"] == "unparseable" and "broken.py" in gap["detail"] for gap in result["gaps"])
     scope_inventory = next(item for item in result["batch"]["direct_nodes"] if item["target"]["kind"] == "scope")
     assert scope_inventory["assertion"]["coverage"]["completeness"] == "partial"
+
+def test_constructor_runs_accepted_manifest_profile_and_preserves_manifest_observations(tmp_path):
+    import json
+    import shutil
+    import sys
+
+    project = tmp_path / "manifest-project"
+    (project / "src").mkdir(parents=True)
+    (project / "Cargo.toml").write_text(
+        '[package]\nname = "manifest-app"\nversion = "0.1.0"\nedition = "2021"\n'
+        '[dependencies]\nserde = "1"\n',
+        encoding="utf-8",
+    )
+    (project / "src" / "lib.rs").write_text("pub fn run() {}\n", encoding="utf-8")
+
+    assets = tmp_path / "assets"
+    shutil.copytree(ASSETS, assets)
+    matrix_path = assets / "capability-matrix.json"
+    matrix = json.loads(matrix_path.read_text(encoding="utf-8"))
+    candidate = next(entry for entry in matrix["entries"] if entry["tool_id"] == "rust.cargo-metadata")
+    candidate["enabled"] = True
+    candidate["acceptance"] = {
+        "actor": "parser_development",
+        "evidence": ["tests/test_info_parser.py::test_cargo_metadata_parser_emits_workspace_and_dependency_observations_separately"],
+    }
+    matrix_path.write_text(json.dumps(matrix), encoding="utf-8")
+
+    request_value = _request_for_project(project, fields=("identity", "names"))
+    request_value["query"]["selections"] = [
+        {"fact_type": "F2", "fields": ["identity", "names"]},
+        {"fact_type": "F4", "fields": ["kind"]},
+        {"fact_type": "F6", "fields": ["kind"]},
+    ]
+    executor = SubprocessToolExecutor({
+        "rust.cargo-metadata": ["cargo", "metadata", "--no-deps", "--format-version", "1"],
+    })
+
+    result = execute_constructor_request(request_value, assets, external_executor=executor)
+
+    assert any(fact["fact_type"] == "F2" for fact in result["batch"]["facts"])
+    assert any(fact["fact_type"] == "F4" for fact in result["batch"]["facts"])
+    assert any(fact["fact_type"] == "F6" for fact in result["batch"]["facts"])
+    assert any(
+        "workspace member" in assertion["value"].get("text", "")
+        for fact in result["batch"]["facts"]
+        for assertion in fact["fields"].values()
+    )
+    assert any(
+        "dependency" in assertion["value"].get("text", "")
+        for fact in result["batch"]["facts"]
+        for assertion in fact["fields"].values()
+    )
+    assert all(assertion["basis"]["evidence"] for fact in result["batch"]["facts"] for assertion in fact["fields"].values())
