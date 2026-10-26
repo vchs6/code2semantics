@@ -182,3 +182,11 @@ CI run: https://github.com/vchs6/code2semantics/actions/runs/40312675115
 - Product delivery gate: BLOCKED as intended; the acceptance record does not contain `FULL_END_TO_END_ACCEPTANCE: PASS`.
 
 The latest CI run verifies query responses for a closed repository, budget exhaustion after partial progress, current-source modification, and source-file deletion. Current query results exclude superseded/deleted source facts while the database retains prior fact rows. This evidence closes the focused query source-validity regressions only; it does not complete full S1–S12 runtime acceptance.
+
+## Query CLI source-deletion acceptance and quality-gate regression (2026-10-26)
+
+- Query CLI acceptance CI: https://github.com/vchs6/code2semantics/actions/runs/40314761586 — runtime acceptance tests passed, including a real CLI query after source-file deletion. The query rebuilt the current source snapshot, excluded deleted-file facts from current results, preserved prior fact rows, and appended a `modified` validity event for the superseded source.
+- Quality-gate RED: https://github.com/vchs6/code2semantics/actions/runs/40314914337 — new unit test failed because prose mentioning the success marker incorrectly made the gate return 0.
+- Gate fix: `scripts/quality_gates/check_product_delivery.py` now requires the marker as a standalone line, not as a substring. The unit test suite passes in https://github.com/vchs6/code2semantics/actions/runs/40315019218.
+- Latest full CI on `main`: repository 59 passed; transaction 6; transfer 8; repository acceptance 5; capability matrix 15; parser 9; scanner 7; runtime acceptance 10; packaging 2; bounded executor 3; producer dispatch 3; combined planning/constructor/binding/induction/query 55 passed; quality-gate unit tests 2 passed; strict OpenSpec passed.
+- Product delivery gate remains BLOCKED because full S1–S12 runtime acceptance has not been demonstrated. This is the expected result, not a component test failure.
