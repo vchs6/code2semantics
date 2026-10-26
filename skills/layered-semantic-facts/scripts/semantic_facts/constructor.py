@@ -53,7 +53,9 @@ def execute_constructor_request(
     gaps: list[dict[str, Any]] = []
     sources: list[dict[str, Any]] = []
     facts: list[dict[str, Any]] = []
+    direct_nodes: list[dict[str, Any]] = []
     current_sources = request["current_source_context"]["sources"]
+    needs_inventory = any(gap.get("reason") == "coverage_incomplete" for gap in request["unmet"])
     if not current_sources:
         raise ValueError("ConstructRequest requires at least one current source")
 
@@ -82,7 +84,7 @@ def execute_constructor_request(
             "coverage": coverage,
         })
 
-    if requested_fields:
+    if requested_fields or needs_inventory:
         for current_source in current_sources:
             root = Path(current_source["root"])
             try:
@@ -113,6 +115,12 @@ def execute_constructor_request(
                 continue
 
             sources.append(actual_source)
+            query_target = request["query"]["target"]
+            for inventory in produced["direct_nodes"]:
+                if query_target["kind"] == "scope":
+                    direct_nodes.append(inventory)
+                elif inventory["target"]["kind"] == "node" and inventory["target"]["node"] == query_target["node"]:
+                    direct_nodes.append(inventory)
             for fact in produced["facts"]:
                 fields = requested_fields.get(fact["fact_type"], set())
                 projected = dict(fact)
@@ -137,7 +145,7 @@ def execute_constructor_request(
         "sources": sources,
         "facts": facts,
         "navigation": [],
-        "direct_nodes": [],
+        "direct_nodes": direct_nodes,
         "conflicts": [],
     }
     codec.validate_batch(batch)
