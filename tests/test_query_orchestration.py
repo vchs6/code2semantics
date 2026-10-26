@@ -252,3 +252,21 @@ def test_same_named_nodes_in_different_projects_keep_distinct_identity(tmp_path)
         assert len({fact["node"]["subject_id"] for fact in same_named}) == 2
     finally:
         repository.close()
+def test_query_splits_out_of_catalog_fields_from_supported_fields(tmp_path):
+    project = tmp_path / "mixed-catalog-project"
+    project.mkdir()
+    (project / "engine.py").write_text("class Engine:\n    pass\n", encoding="utf-8")
+    query = make_query(project, ("names", "purpose"))
+    repository = Repository(tmp_path / "mixed-catalog.db", ASSETS)
+    try:
+        response = execute_query_with_construction(query, repository, ASSETS)
+        assert response["termination"] == "satisfied", response
+        assert any("class Engine" in fact["fields"]["names"]["value"]["text"] for fact in response["results"])
+        assert response["out_of_catalog"] == [{
+            "fact_type": "F2",
+            "fields": ["purpose"],
+            "reason": "No fixed first-phase information need covers these fields.",
+        }]
+        assert response["gaps"] == []
+    finally:
+        repository.close()
