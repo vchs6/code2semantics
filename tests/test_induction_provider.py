@@ -42,7 +42,30 @@ def _request():
             "direct_nodes": [],
             "conflicts": [],
         },
-        "unmet": [],
+        "unmet": [{
+            "fact_type": "F16",
+            "fields": ["strategy"],
+            "target": {"kind": "node", "node": {
+                "source_id": "src-fixture",
+                "subject_id": "subject-fixture",
+                "node_id": "node-fixture",
+            }},
+            "reason": "unknown",
+            "detail": "fixture need is not yet satisfied",
+            "context": {
+                "source_ids": ["src-fixture"],
+                "conditions": [],
+                "environment": {},
+                "language_semantics": ["fixture"],
+            },
+            "coverage": {
+                "domain": "fixture",
+                "checked": ["fixture"],
+                "excluded": [],
+                "completeness": "partial",
+                "method": "fixture",
+            },
+        }],
     }
 
 
