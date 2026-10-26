@@ -4,10 +4,10 @@ Implementation is TDD: write a failing behavior test (RED), implement the smalle
 
 ## 1. Information-needs catalogue (first-stage deliverable)
 
-- [ ] 1.1 Create `skills/layered-semantic-facts/assets/information-needs.json` from the current F2 fact-catalogue fields and the fixed Python/Rust first-phase scope; every entry must name required evidence kinds, current-source and coverage requirements, production mode, fixture, and research basis.
-- [ ] 1.2 Add positive and negative catalogue validation tests against `assets/information-needs.schema.json`, including duplicate need IDs, empty fields, missing evidence kinds and unsupported fact fields; run `python -m pytest tests/test_information_needs.py -q`.
-- [ ] 1.3 Add a deterministic catalogue loader that rejects invalid JSON/schema and duplicate need IDs without mutating the catalogue; run `python -m pytest tests/test_information_needs.py -q`.
-- [ ] 1.4 Record the initial catalogue's explicit unsupported scope and evidence provenance in `references/information-needs.md`; do not claim semantic fields not produced by current parsers.
+- [x] 1.1 Create `skills/layered-semantic-facts/assets/information-needs.json` from the current F2 fact-catalogue fields and the fixed Python/Rust first-phase scope; every entry must name required evidence kinds, current-source and coverage requirements, production mode, fixture, and research basis.
+- [x] 1.2 Add positive and negative catalogue validation tests against `assets/information-needs.schema.json`, including duplicate need IDs, empty fields, missing evidence kinds and unsupported fact fields; run `python -m pytest tests/test_information_needs.py -q`.
+- [x] 1.3 Add a deterministic catalogue loader that rejects invalid JSON/schema and duplicate need IDs without mutating the catalogue; run `python -m pytest tests/test_information_needs.py -q`.
+- [x] 1.4 Record the initial catalogue's explicit unsupported scope and evidence provenance in `references/information-needs.md`; do not claim semantic fields not produced by current parsers.
 
 ## 2. Deterministic request-to-plan matching
 
@@ -37,3 +37,10 @@ Implementation is TDD: write a failing behavior test (RED), implement the smalle
 - [ ] 5.3 Run the relevant repository, matrix, parser, scanner and acceptance regression suites; strict-validate this change.
 - [ ] 5.4 Update this task list only from observed test evidence and record limitations; no source facts may be deleted by implementation or test.
 
+
+
+## Evidence update (2026-10-26)
+
+- Catalogue and loader: `skills/layered-semantic-facts/assets/information-needs.json`, `skills/layered-semantic-facts/scripts/semantic_facts/information_needs.py`, `references/information-needs.md`.
+- Request planning: `semantic_facts/constructor_plan.py`; tests: `tests/test_information_needs.py`, `tests/test_constructor_plan.py`.
+- CI run `https://github.com/vchs6/code2semantics/actions/runs/40261330788`: information-needs and constructor-plan tests passed; strict OpenSpec passed. Product delivery gate remains blocked because full tool orchestration and semantic construction are not yet complete.
