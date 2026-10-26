@@ -180,3 +180,42 @@ def test_real_rust_source_scan_store_reopen_and_query(tmp_path, capsys):
     response = json.loads(capsys.readouterr().out)
     assert response["termination"] == "satisfied"
     assert any("struct Engine" in fact["fields"]["names"]["value"]["text"] for fact in response["results"])
+def test_partial_fact_updates_append_missing_attributes_and_reject_conflicts(tmp_path):
+    import copy
+    import pytest
+    from semantic_facts.repository.types import WriteConflict
+    from semantic_facts.repository.contract import ContractCodec
+    from semantic_facts.source_scanner import build_fact_batch
+
+    project = tmp_path / "partial-project"
+    project.mkdir()
+    (project / "service.py").write_text("class Example:\\n    def run(self):\\n        return 1\\n", encoding="utf-8")
+    batch = build_fact_batch(project, ContractCodec(ROOT / "skills" / "layered-semantic-facts" / "assets"))
+    identity_batch = copy.deepcopy(batch)
+    identity_batch["facts"][0]["fields"] = {"identity": batch["facts"][0]["fields"]["identity"]}
+    names_batch = copy.deepcopy(batch)
+    names_batch["facts"][0]["fields"] = {"names": batch["facts"][0]["fields"]["names"]}
+
+    repository = Repository(tmp_path / "partial.db")
+    repository.write(identity_batch, "identity-only")
+    repository.write(names_batch, "names-only")
+    fact_count = repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
+    attribute_names = {
+        row[0] for row in repository.connection.execute("SELECT field_name FROM attributes")
+    }
+    assert fact_count == 1
+    assert {"identity", "names"} <= attribute_names
+
+    conflicting = copy.deepcopy(names_batch)
+    conflicting["facts"][0]["fields"]["names"]["value"]["text"] += "; conflicting rewrite"
+    before = repository.connection.execute(
+        "SELECT attribute_key, payload FROM attributes ORDER BY attribute_key"
+    ).fetchall()
+    with pytest.raises(WriteConflict):
+        repository.write(conflicting, "conflicting-names")
+    after = repository.connection.execute(
+        "SELECT attribute_key, payload FROM attributes ORDER BY attribute_key"
+    ).fetchall()
+    assert after == before
+    assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == fact_count
+    repository.close()
