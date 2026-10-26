@@ -68,7 +68,7 @@ def build_fact_batch(root: str | Path, codec: ContractCodec) -> dict[str, Any]:
     # Version source identity by content so re-scans append a new fact set rather
     # than replacing or deleting facts from an earlier source state.
     source_id = "src-" + root_hash + "-" + snapshot_hash[:20]
-    subject_id = "project-" + root_hash
+    subject_id = __import__("re").sub(r"[^A-Za-z0-9._:-]+", "-", str(project_root)).strip("-") or "unnamed"
     dirty, has_untracked = _git_state(project_root)
     source_record = {
         "source_id": source_id,
