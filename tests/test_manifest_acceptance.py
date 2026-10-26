@@ -6,6 +6,8 @@ import shutil
 from semantic_facts.constructor import execute_constructor_request
 from semantic_facts.query_engine import execute_query
 from semantic_facts.repository.store import Repository
+from semantic_facts.repository.contract import ContractCodec
+from semantic_facts.source_scanner import build_fact_batch
 from test_information_needs import ASSETS, request
 
 
@@ -31,8 +33,11 @@ def test_python_manifest_to_factbatch_sqlite_reopen_and_minimal_query(tmp_path):
     }
     matrix_path.write_text(json.dumps(matrix), encoding="utf-8")
 
+    source_batch = build_fact_batch(project, ContractCodec(ASSETS))
     value = request(("identity", "names"))
     value["query"]["scope"]["directories"] = [str(project.resolve())]
+    value["existing_valid_facts"]["sources"] = source_batch["sources"]
+    value["current_source_context"]["sources"] = source_batch["sources"]
     value["query"]["selections"] = [
         {"fact_type": "F2", "fields": ["identity", "names"]},
         {"fact_type": "F3", "fields": ["runtime"]},
