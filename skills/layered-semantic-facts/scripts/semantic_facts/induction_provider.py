@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import json
+import os
 from pathlib import Path
 import subprocess
 from typing import Any, Mapping, Sequence
@@ -232,3 +233,40 @@ def run_induction_requests(
         })
         gaps.extend(execution["induction_result"]["gaps"])
     return {"requests": plan["requests"], "results": results, "gaps": gaps}
+
+def load_induction_provider_from_environment() -> tuple[InductionProviderRegistry | None, str | None]:
+    """Load optional provider registration from host environment configuration.
+
+    The command prefix is host configuration, not query/matrix data. With no
+    provider ID configured the CLI remains deterministic and fail-closed.
+    """
+    provider_id = os.environ.get("SEMANTIC_FACTS_INDUCTION_PROVIDER_ID")
+    argv_json = os.environ.get("SEMANTIC_FACTS_INDUCTION_PROVIDER_ARGV_JSON")
+    if not provider_id and not argv_json:
+        return None, None
+    if not provider_id or not argv_json:
+        raise ProviderConfigurationError(
+            "both SEMANTIC_FACTS_INDUCTION_PROVIDER_ID and "
+            "SEMANTIC_FACTS_INDUCTION_PROVIDER_ARGV_JSON must be configured"
+        )
+    try:
+        argv = json.loads(argv_json)
+    except json.JSONDecodeError as error:
+        raise ProviderConfigurationError("provider argv configuration must be a JSON string array") from error
+    if not isinstance(argv, list) or not argv or any(not isinstance(item, str) for item in argv):
+        raise ProviderConfigurationError("provider argv configuration must be a non-empty JSON string array")
+    try:
+        timeout = float(os.environ.get("SEMANTIC_FACTS_INDUCTION_PROVIDER_TIMEOUT_SECONDS", "30"))
+        max_stdout = int(os.environ.get("SEMANTIC_FACTS_INDUCTION_PROVIDER_MAX_STDOUT_BYTES", "1048576"))
+        max_stderr = int(os.environ.get("SEMANTIC_FACTS_INDUCTION_PROVIDER_MAX_STDERR_BYTES", "65536"))
+    except ValueError as error:
+        raise ProviderConfigurationError("provider timeout/output limits must be numeric") from error
+    registry = InductionProviderRegistry({
+        provider_id: {
+            "argv": argv,
+            "timeout_seconds": timeout,
+            "max_stdout_bytes": max_stdout,
+            "max_stderr_bytes": max_stderr,
+        }
+    })
+    return registry, provider_id
