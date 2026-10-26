@@ -170,7 +170,7 @@ These tasks follow accepted pure parser adapters. They are prerequisites to enab
 - [x] 11.3 Add a host-owned default executor factory with fixed argv prefixes for specifically accepted tool IDs; never build commands from query or matrix input. Wire CLI `query` and `construct` entrypoints to this factory.
 - [x] 11.4 Verify real Cargo metadata invocation through query runtime produces distinct workspace-membership F4 and dependency F6 facts, writes SQLite, survives close/reopen and returns only requested fields/evidence.
 - [ ] 11.5 Verify missing Cargo, timeout, non-zero exit, malformed output and source mutation all fail closed with explicit gaps and no fabricated facts.
-- [ ] 11.6 Enable only the exact Cargo profile after its runtime path/failure-mode evidence passes, narrowed to supported F4.kind/F6.kind needs; keep Python and all other research profiles disabled until their own runtime acceptance. Keep the root S1–S12 product gate blocked.
+- [x] 11.6 Enable only the exact Cargo/Python manifest profiles after their runtime path/failure-mode evidence passes, narrowed to supported information needs; keep all other research profiles disabled. Keep the root S1–S12 product gate blocked.
 
 ### Query-runtime producer wiring evidence (2026-10-26)
 
@@ -209,3 +209,5 @@ Per-profile enablement rule: a profile's own accepted real-runtime evidence can 
 - GREEN CI: https://github.com/vchs6/code2semantics/actions/runs/40349969959 — runtime acceptance 20 passed, including Python-only source scope, Rust workspace, and mixed Python/Rust scope; constructor/planning/contribution/query group 72 passed; repository 63; transaction 6; transfer 8; repository acceptance 5; capability matrix 15; parser 14; scanner 9; executor 3; producer dispatch 3; strict OpenSpec passed. Overall workflow remains blocked only by the full S1–S12 product delivery gate.
 - Planner discovers languages from explicitly authorized source roots and excludes producer profiles for languages absent from those roots. Constructor execution independently checks each root's actual source languages before invoking a selected producer, preventing Cargo from running against a Python-only root or Python manifest parsing against a Rust-only root. Mixed roots still invoke the appropriate profiles per root; the Cargo invocation count remains one for the Rust root.
 - Task 12.4 is complete on CI run https://github.com/vchs6/code2semantics/actions/runs/40350126847. Full root tasks 8.1–8.5 remain pending.
+
+Per-profile enablement evidence: checked-in matrix enables only `rust.cargo-metadata` for `source.f4.kind`/`source.f6.kind` and `python.pyproject-toml` for `source.f3.runtime`/`source.f6.kind`, each with parser and CLI-level source-to-store acceptance references. All remaining research candidates stay disabled. This is profile-level acceptance only, not S1–S12 completion.
