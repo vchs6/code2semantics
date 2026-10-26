@@ -217,3 +217,15 @@ def test_query_out_of_scope_node_reference_is_reported_without_reading_other_pro
         assert all(fact["node"]["source_id"] != "src-outside" for fact in response["results"])
     finally:
         repository.close()
+def test_query_unavailable_source_returns_gap_without_fallback(tmp_path):
+    missing = tmp_path / "missing-project"
+    query = make_query(missing)
+    repository = Repository(tmp_path / "unavailable-source.db", ASSETS)
+    try:
+        response = execute_query_with_construction(query, repository, ASSETS)
+        assert response["termination"] == "unavailable"
+        assert response["sources"][0]["status"] == "unavailable"
+        assert any(gap["reason"] == "source_unavailable" for gap in response["gaps"])
+        assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == 0
+    finally:
+        repository.close()
