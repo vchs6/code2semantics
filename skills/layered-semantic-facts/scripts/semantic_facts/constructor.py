@@ -22,6 +22,93 @@ from .source_scanner import build_fact_batch_with_gaps
 from .tool_executor import SubprocessToolExecutor
 
 
+
+def _merge_request_fact_contributions(
+    facts: list[dict[str, Any]],
+    *,
+    gaps: list[dict[str, Any]],
+    target: dict[str, Any],
+    context: dict[str, Any],
+    coverage: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Merge same request-local semantic fact contributions before FactBatch validation.
+
+    The repository still owns cross-request incremental persistence. This helper
+    only prevents duplicate contributions inside the current FactBatch and keeps
+    independent evidence when assertion bodies agree.
+    """
+    grouped: dict[tuple[str, str, str, str, tuple[str, ...]], dict[str, Any]] = {}
+    conflicted: set[tuple[tuple[str, str, str, str, tuple[str, ...]], str]] = set()
+    for fact in facts:
+        node = fact["node"]
+        key = (
+            node["source_id"], node["subject_id"], node["node_id"],
+            fact["fact_type"], tuple(sorted(fact.get("granularities", []))),
+        )
+        current = grouped.get(key)
+        if current is None:
+            grouped[key] = json.loads(json.dumps(fact))
+            continue
+        for field_name, assertion in fact.get("fields", {}).items():
+            previous = current["fields"].get(field_name)
+            if previous is None:
+                current["fields"][field_name] = json.loads(json.dumps(assertion))
+                continue
+            field_key = (key, field_name)
+            if field_key in conflicted:
+                continue
+            left = json.loads(json.dumps(previous))
+            right = json.loads(json.dumps(assertion))
+            left_evidence = left.get("basis", {}).pop("evidence", [])
+            right_evidence = right.get("basis", {}).pop("evidence", [])
+            if left != right:
+                conflicted.add(field_key)
+                current["fields"].pop(field_name, None)
+                gaps.append({
+                    "fact_type": fact["fact_type"],
+                    "fields": [field_name],
+                    "target": target,
+                    "reason": "conflict",
+                    "detail": "Multiple producers returned incompatible assertions for the same semantic entity field in one request.",
+                    "context": context,
+                    "coverage": {**coverage, "completeness": "partial"},
+                })
+                continue
+            by_id: dict[str, dict[str, Any]] = {}
+            for item in [*left_evidence, *right_evidence]:
+                evidence_id = item.get("evidence_id")
+                if not isinstance(evidence_id, str):
+                    continue
+                existing = by_id.get(evidence_id)
+                if existing is not None and existing != item:
+                    conflicted.add(field_key)
+                    current["fields"].pop(field_name, None)
+                    gaps.append({
+                        "fact_type": fact["fact_type"],
+                        "fields": [field_name],
+                        "target": target,
+                        "reason": "conflict",
+                        "detail": f"Producers reused evidence identity {evidence_id!r} with different content.",
+                        "context": context,
+                        "coverage": {**coverage, "completeness": "partial"},
+                    })
+                    break
+                by_id.setdefault(evidence_id, item)
+            if field_key not in conflicted:
+                merged = json.loads(json.dumps(previous))
+                merged.setdefault("basis", {})["evidence"] = list(by_id.values())
+                current["fields"][field_name] = merged
+    result: list[dict[str, Any]] = []
+    for key in sorted(grouped):
+        fact = grouped[key]
+        if not fact["fields"]:
+            continue
+        stable = json.dumps(key, ensure_ascii=False, separators=(",", ":"))
+        fact["fact_id"] = "fact-" + hashlib.sha256(stable.encode("utf-8")).hexdigest()[:24]
+        result.append(fact)
+    return result
+
+
 def _validate_result(result: dict[str, Any], asset_root: Path) -> None:
     schemas = [json.loads(path.read_text(encoding="utf-8")) for path in asset_root.glob("*.schema.json")]
     registry = Registry().with_resources(
@@ -335,6 +422,13 @@ def execute_constructor_request(
         # producer failed or the source changed during construction.
         sources.extend(current_sources)
 
+    facts = _merge_request_fact_contributions(
+        facts,
+        gaps=gaps,
+        target=request["query"]["target"],
+        context=context,
+        coverage=coverage,
+    )
     batch = {
         "contract_version": "1.0.0",
         "catalog_id": "semantic-facts-20261025",
