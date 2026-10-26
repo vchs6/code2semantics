@@ -58,9 +58,9 @@ def test_read_returns_only_selected_fact_and_fields(batch, db_path):
     assert [fact["fact_id"] for fact in result["facts"]] == ["fact-a", "fact-b"]
     assert all(list(fact["fields"]) == ["strategy"] for fact in result["facts"])
     assert result["sources"] == batch["sources"]
-    assert result["navigation"] == []
-    assert result["direct_nodes"] == []
-    assert result["conflicts"] == []
+    assert result["navigation"] == batch["navigation"]
+    assert result["direct_nodes"] == [item for item in batch["direct_nodes"] if item["target"].get("node", {}).get("node_id") == "unit-a"]
+    assert result["conflicts"] == batch["conflicts"]
     repository.close()
 
 
