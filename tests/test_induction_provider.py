@@ -223,12 +223,12 @@ def test_provider_orchestration_groups_requests_and_keeps_empty_proposal_unmet(t
     batch, observation, gap = fixture(tmp_path)
     script = tmp_path / "empty-provider.py"
     script.write_text(
-        "import json,sys\\n"
-        "request=json.load(sys.stdin)\\n"
+        "import json,sys\n"
+        "request=json.load(sys.stdin)\n"
         "json.dump({'provider_id':'fixture-provider','protocol_version':'1.0.0','proposed_batch':"
         "{'contract_version':'1.0.0','catalog_id':'semantic-facts-20261025',"
         "'sources':request['existing_valid_facts']['sources'],'facts':[],"
-        "'navigation':[],'direct_nodes':[],'conflicts':[]}},sys.stdout)\\n",
+        "'navigation':[],'direct_nodes':[],'conflicts':[]}},sys.stdout)\n",
         encoding="utf-8",
     )
     registry = InductionProviderRegistry({
