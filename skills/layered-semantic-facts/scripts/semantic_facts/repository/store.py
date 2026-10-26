@@ -11,10 +11,10 @@ import hashlib
 import json
 import sqlite3
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
 
 from .contract import ContractCodec
-from .types import CommitReceipt, StoredRecord, WriteConflict
+from .types import CommitReceipt, SourceRow, StoredRecord, WriteConflict
 
 
 def _canonical(value: object) -> str:
