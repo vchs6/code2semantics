@@ -770,7 +770,7 @@ class Repository:
                         raise WriteConflict(None, f"evidence identity conflict: {item['evidence_id']}")
                     by_id.setdefault(item["evidence_id"], item)
                 merged.setdefault("basis", {})["evidence"] = list(by_id.values())
-                merged_payload = _json(merged)
+                merged_payload = _canonical(merged)
                 version_key = hashlib.sha256(_canonical((row.key, merged_payload)).encode("utf-8")).hexdigest()
                 self.connection.execute(
                     "INSERT OR IGNORE INTO attribute_versions(version_key, attribute_key, fact_key, field_name, payload) VALUES (?, ?, ?, ?, ?)",
