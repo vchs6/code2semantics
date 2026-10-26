@@ -68,3 +68,32 @@
 - Added a test to `tests/test_acceptance.py` that executes the actual query/construction pipeline over two explicitly requested roots: one Python project and one Rust project, each defining a same-named `Engine`. It verifies distinct source/subject identities, schema-validated current-source facts, requested-field-only projection, and explicit out-of-catalog classification.
 - CI: https://github.com/vchs6/code2semantics/actions/runs/40297921776 — repository 53, matrix 15, parser 9, scanner 7, runtime acceptance 5, packaging 2, executor 3, producer dispatch 3, combined information-needs/constructor/induction/query 52 passed; strict OpenSpec passed.
 - This is additional root acceptance evidence, not completion of 8.1–8.5. The full S1–S12 matrix and runtime provider/induction path are still not fully covered, so the product delivery gate remains blocked.
+
+## Expanded source-information needs traceability (2026-10-26)
+
+The constructor information-needs catalogue now has one stable need per field in the authoritative F1–F18 fact catalogue: 127 fields across 18 fact types. Each record includes scenario IDs, expected output kind, candidate producer families, evidence kinds, language/platform/environment constraints, current-source and coverage requirements, limitations, fixture, research basis and acceptance status. This is a needs specification, not a claim that the producer exists.
+
+| Fact type | Fields represented | Need ID prefix / existing IDs | S1–S12 scenarios mapped | Status |
+|---|---|---|---|---|
+| F1 scope | selection, included, excluded, observation, external, limitations | source.f1.* | S1, S2, S4, S6, S12 | research_required |
+| F2 identity/boundary | identity, roles, names, boundary, locators | syntax.f2.* for four accepted syntax fields; source.f2.roles | S1, S2, S4, S7, S8, S12 | four initial fields accepted; roles research_required |
+| F3 purpose/runtime | purpose, capabilities, entries, runtime, deployment, environment, actors | source.f3.* | S1, S4, S5 | research_required |
+| F4 organization | source, target, kind, direction, member_scope, enumeration | source.f4.* | S2, S3, S4, S5, S7, S8 | research_required |
+| F5 responsibility | responsibility, bearers, collaboration, boundary, implementations, premises | source.f5.* | S3, S4, S8 | research_required |
+| F6 dependency | source, target, kind, direction, scope, necessity, resolution, cycle | source.f6.* | S2, S3, S5, S6, S7, S9, S10, S12 | research_required |
+| F7 interaction | participants, kind, payload, trigger, ordering, paths, mode | source.f7.* | S3, S5 | research_required |
+| F8 interface contract | owner, capability, inputs, outputs, constraints, visibility, effects, outcomes | source.f8.* | S3, S5, S6 | research_required |
+| F9 program elements/types | identity, name, declaration, scope, type, type_relations, visibility, language_semantics | source.f9.* | S1, S7, S11 | research_required |
+| F10 binding | site, targets, scope, resolution, target_conditions, completeness | source.f10.* | S7, S9, S10, S12 | research_required |
+| F11 call/dispatch | site, source, targets, arguments, dispatch, continuations, mode | source.f11.* | S6, S7, S9, S10 | research_required |
+| F12 data flow/effects | source, target, data, operation, path, transformation, aliasing, effects, precision | source.f12.* | S11 | research_required |
+| F13 state/lifecycle | owner, before, after, trigger, guard, action, lifetime, composition, cleanup | source.f13.* | S9, S10, S11 | research_required |
+| F14 constraints/errors | constraint, scope, error_kind, origin, propagation, handling, after | source.f14.* | S5, S9, S11 | research_required |
+| F15 control/computation | owner, operation, inputs, outputs, successors, guards, back_edges, effects | source.f15.* | S1, S9, S11 | research_required |
+| F16 algorithm explanation | steps, goal, strategy, invariants, termination, complexity, argument, open_items | source.f16.* | S1, S11 | research_required |
+| F17 evidence/knowledge | assertion, counterevidence, process, gaps | source.f17.* | S6, S10, S12 | research_required |
+| F18 refinement trace | source, target, kind, direction, participants, covered, uncovered, limitations | source.f18.* | S3, S7, S8, S11 | research_required |
+
+The full per-field mapping is authoritative in `skills/layered-semantic-facts/assets/information-needs.json`. The test `test_information_needs_cover_every_fact_catalogue_field_and_s1_s12` asserts exact F1–F18 field coverage and the presence of all S1–S12 IDs. Candidate producer families are research hypotheses, not enabled matrix entries. Only four F2 syntax needs are marked `accepted_initial_slice`; the remaining 123 needs remain `research_required`.
+
+After focused tests and strict OpenSpec pass, `survey-info-acquisition-tools` must use this catalogue as input and record actual candidate/version/output/environment evidence per need. Parser implementation and matrix enablement follow that research; no stage may be skipped.
