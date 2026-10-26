@@ -385,6 +385,53 @@
         "skills/layered-semantic-facts/assets/information-needs.json",
         "https://github.com/vchs6/code2semantics/actions/runs/40319334019"
       ]
+    },
+    {
+      "tool_id": "python.pyproject-toml",
+      "description": "Research candidate only: read-only TOML manifest metadata for Python project identity, build backend, scripts and declared dependencies.",
+      "information_need_ids": [
+        "source.f1.selection",
+        "source.f1.included",
+        "source.f1.excluded",
+        "source.f1.observation",
+        "source.f1.limitations",
+        "source.f3.entries",
+        "source.f3.runtime",
+        "source.f3.deployment",
+        "source.f3.environment",
+        "source.f6.kind",
+        "source.f6.scope",
+        "source.f6.necessity"
+      ],
+      "output_kinds": [
+        "toml_manifest_records"
+      ],
+      "languages": [
+        "python"
+      ],
+      "platforms": [
+        "linux",
+        "darwin",
+        "windows"
+      ],
+      "environment": "in-process",
+      "invocation": [
+        "tomllib.loads(pyproject.toml)",
+        "read-only manifest adapter; parser-development acceptance required"
+      ],
+      "combinations": [
+        "python.ast-source"
+      ],
+      "limitations": [
+        "DISABLED: no manifest parser or acceptance fixtures yet.",
+        "Only declared metadata is observed; it does not prove runtime entrypoint use or dependency resolution.",
+        "Workspace semantics vary by build backend and must be represented explicitly."
+      ],
+      "enabled": false,
+      "research_basis": [
+        "openspec/changes/survey-info-acquisition-tools/research/semantic-tooling-survey.md#7.1",
+        "skills/layered-semantic-facts/assets/information-needs.json"
+      ]
     }
   ]
 }
