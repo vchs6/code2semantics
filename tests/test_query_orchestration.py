@@ -422,3 +422,35 @@ def test_query_preserves_budget_exhaustion_after_partial_source_progress(tmp_pat
         assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] >= 1
     finally:
         repository.close()
+
+
+def test_query_rebuild_after_source_deletion_keeps_unaffected_current_facts_and_history(tmp_path):
+    project = tmp_path / "query-delete-rebuild-project"
+    project.mkdir()
+    stable_file = project / "stable.py"
+    removed_file = project / "removed.py"
+    stable_file.write_text("class Stable:\\n    pass\\n", encoding="utf-8")
+    removed_file.write_text("class Removed:\\n    pass\\n", encoding="utf-8")
+    repository = Repository(tmp_path / "query-delete-rebuild.db", ASSETS)
+    try:
+        first = execute_query_with_construction(make_query(project), repository, ASSETS)
+        assert first["termination"] == "satisfied", first
+        assert any("class Stable" in fact["fields"]["names"]["value"]["text"] for fact in first["results"])
+        assert any("class Removed" in fact["fields"]["names"]["value"]["text"] for fact in first["results"])
+        fact_rows_before = repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
+        prior_source_ids = {source["source_id"] for source in first["sources"]}
+
+        removed_file.unlink()
+        second = execute_query_with_construction(make_query(project), repository, ASSETS)
+
+        assert second["termination"] == "satisfied", second
+        assert any("class Stable" in fact["fields"]["names"]["value"]["text"] for fact in second["results"])
+        assert all("class Removed" not in fact["fields"]["names"]["value"]["text"] for fact in second["results"])
+        assert prior_source_ids.isdisjoint({source["source_id"] for source in second["sources"]})
+        assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] > fact_rows_before
+        assert all(
+            repository.connection.execute("SELECT 1 FROM facts WHERE fact_key = ?", (key,)).fetchone()
+            for key, in repository.connection.execute("SELECT fact_key FROM facts")
+        )
+    finally:
+        repository.close()
