@@ -157,3 +157,25 @@ def test_import_current_conflicting_identity_preserves_existing_fact_history(bat
         ("import-conflicting-fact",),
     ).fetchone() is None
     repository.close()
+
+def test_restore_rejects_wrong_repository_schema_without_changing_fact_history(batch, db_path, tmp_path):
+    import sqlite3
+    import pytest
+    from semantic_facts.repository.store import Repository
+
+    malformed = tmp_path / "malformed-repository-schema.db"
+    with sqlite3.connect(malformed) as connection:
+        for table in ("sources", "entities", "facts", "attributes", "relations", "submissions"):
+            connection.execute(f"CREATE TABLE {table} (id INTEGER PRIMARY KEY)")
+
+    repository = Repository(db_path)
+    repository.write(batch, "restore-malformed-schema-protection")
+    before_facts = repository.connection.execute("SELECT fact_key, payload FROM facts ORDER BY fact_key").fetchall()
+    before_sources = repository.connection.execute("SELECT source_id, payload FROM sources ORDER BY source_id").fetchall()
+
+    with pytest.raises(ValueError, match="repository schema"):
+        repository.restore(malformed)
+
+    assert repository.connection.execute("SELECT fact_key, payload FROM facts ORDER BY fact_key").fetchall() == before_facts
+    assert repository.connection.execute("SELECT source_id, payload FROM sources ORDER BY source_id").fetchall() == before_sources
+    repository.close()
