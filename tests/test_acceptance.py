@@ -758,3 +758,51 @@ def test_multi_project_source_change_does_not_invalidate_unrelated_project_facts
     }
     assert right_states <= {"current"}
     repository.close()
+
+def test_root_acceptance_enumerates_all_direct_children_but_projects_only_requested_fields(tmp_path, capsys):
+    project = tmp_path / "complete-child-inventory"
+    project.mkdir()
+    (project / "alpha.py").write_text(
+        """class Alpha:
+    def run(self):
+        return 1
+""",
+        encoding="utf-8",
+    )
+    (project / "beta.py").write_text(
+        """class Beta:
+    def execute(self):
+        return 2
+""",
+        encoding="utf-8",
+    )
+    database = tmp_path / "complete-child-inventory.sqlite"
+    query = {
+        "contract_version": "1.0.0",
+        "catalog_id": "semantic-facts-20261025",
+        "request_id": "complete-child-inventory-minimal-fields",
+        "scope": {
+            "scope_id": "complete-child-inventory-scope",
+            "directories": [str(project.resolve())],
+            "excludes": [],
+            "defaulted": False,
+        },
+        "target": {"kind": "scope"},
+        "granularity": "L3",
+        "selections": [{"fact_type": "F2", "fields": ["names"]}],
+        "budget": {"max_rounds": 2, "max_new_assertions": 20},
+    }
+    query_path = tmp_path / "complete-child-inventory-query.json"
+    query_path.write_text(json.dumps(query), encoding="utf-8")
+
+    assert main(["query", "--db", str(database), "--query-file", str(query_path)]) == 0
+    response = json.loads(capsys.readouterr().out)
+
+    assert response["termination"] == "satisfied", response["gaps"]
+    assert response["direct_nodes"]
+    scope_inventory = next(item for item in response["direct_nodes"] if item["target"]["kind"] == "scope")
+    assert scope_inventory["assertion"]["coverage"]["completeness"] == "complete"
+    child_paths = {child.get("path") for child in scope_inventory["children"]}
+    assert child_paths == {"alpha.py", "beta.py"}
+    assert response["results"]
+    assert all(set(fact["fields"]) == {"names"} for fact in response["results"])
