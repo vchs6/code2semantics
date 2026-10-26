@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -12,6 +13,24 @@ from .repository.contract import ContractCodec
 
 EXCLUDED_DIRS = {".git", ".venv", "venv", "__pycache__", "node_modules", "dist", "build"}
 
+
+
+def _git_state(root: Path) -> tuple[bool, bool]:
+    """Return (dirty, has_untracked); unknown VCS state is conservatively not clean."""
+    try:
+        subprocess.run(
+            ["git", "-C", str(root), "rev-parse", "--show-toplevel"],
+            check=True, capture_output=True, text=True,
+        )
+        status = subprocess.run(
+            ["git", "-C", str(root), "status", "--porcelain", "--untracked-files=all", "--", "."],
+            check=True, capture_output=True, text=True,
+        ).stdout.splitlines()
+    except (OSError, subprocess.CalledProcessError):
+        return True, True
+    dirty = any(not line.startswith("??") for line in status)
+    untracked = any(line.startswith("??") for line in status)
+    return dirty, untracked
 
 def build_fact_batch(root: str | Path, codec: ContractCodec) -> dict[str, Any]:
     """Read current Python source, parse it, and construct a validated FactBatch."""
@@ -44,13 +63,14 @@ def build_fact_batch(root: str | Path, codec: ContractCodec) -> dict[str, Any]:
     root_hash = hashlib.sha256(str(project_root).encode("utf-8")).hexdigest()[:20]
     source_id = "src-" + root_hash
     subject_id = "project-" + root_hash
+    dirty, has_untracked = _git_state(project_root)
     source_record = {
         "source_id": source_id,
         "root": str(project_root),
         "content_state": content_state,
         "status": "available",
-        "dirty": False,
-        "has_untracked": False,
+        "dirty": dirty,
+        "has_untracked": has_untracked,
         "excludes": sorted(EXCLUDED_DIRS),
     }
 
