@@ -119,3 +119,55 @@ def test_conflicting_induction_cannot_replace_existing_fact(tmp_path):
     assert result["batch"]["facts"] == []
     assert any(gap["reason"] == "conflict" for gap in result["gaps"])
     assert batch["facts"][0]["fields"]["names"]["value"]["text"] != "conflicting invented name"
+
+
+def test_induction_separates_different_content_states_and_contexts(tmp_path):
+    batch, observation, gap = fixture(tmp_path)
+    old_state_observation = copy.deepcopy(observation)
+    old_state_observation["observation_id"] = "observation-old-state"
+    old_state_observation["evidence"] = [
+        {**item, "evidence_id": "ev-old-" + item["evidence_id"], "content_state": "sha256:old"}
+        for item in observation["evidence"]
+    ]
+
+    different_context = copy.deepcopy(observation)
+    different_context["observation_id"] = "observation-different-context"
+    different_context["context"] = {
+        **observation["context"],
+        "environment": {"language": "Rust"},
+    }
+
+    result = build_induction_requests(
+        [observation, old_state_observation, different_context],
+        batch,
+        [gap],
+        ASSETS,
+    )
+    assert len(result["requests"]) == 3
+    assert len({
+        (request["group"]["subject"]["node_id"],
+         tuple((state["source_id"], state["content_state"]) for state in request["group"]["content_states"]),
+         str(request["group"]["context"]))
+        for request in result["requests"]
+    }) == 3
+
+
+def test_induction_rejects_wrong_subject_source_state_and_unobserved_evidence(tmp_path):
+    batch, observation, gap = fixture(tmp_path)
+    request = build_induction_requests([observation], batch, [gap], ASSETS)["requests"][0]
+
+    for mutation in ("subject", "source_state", "evidence"):
+        proposed = copy.deepcopy(batch)
+        fact = proposed["facts"][0]
+        assertion = copy.deepcopy(fact["fields"]["names"])
+        if mutation == "subject":
+            fact["node"]["node_id"] = "other-file"
+        elif mutation == "source_state":
+            assertion["validity"]["sources"][0]["content_state"] = "sha256:stale"
+            fact["fields"] = {"roles": assertion}
+        else:
+            assertion["basis"]["evidence"][0]["evidence_id"] = "ev-not-in-request"
+            fact["fields"] = {"roles": assertion}
+        result = validate_induction_result(request, proposed, ASSETS)
+        assert result["batch"]["facts"] == [], mutation
+        assert result["gaps"], mutation
