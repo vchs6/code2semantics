@@ -82,3 +82,13 @@
 - 新增 `tests/test_info_parser.py`、`tests/test_source_scanner.py`、`tests/test_acceptance.py` 和真实源码 fixture；端到端测试覆盖真实 Python 源码→解析→FactBatch→SQLite→关闭重开→查询，并验证重复扫描不减少事实行。
 - CI 运行：https://github.com/vchs6/code2semantics/actions/runs/40257745511 。结果：repository 35 passed，capability matrix 14 passed，parser 6 passed，source scanner 4 passed，runtime acceptance 1 passed；严格 OpenSpec 通过。
 - 产品交付门禁按预期仍 BLOCKED：当前链路只覆盖 Python F2/L3 语法清单，不包括工具矩阵调度与外部工具执行、受约束归纳、完整多层构造、源码变更后的受影响事实失效/重构，以及完整公共查询响应。未将该局部链路标记为完整系统验收。
+
+
+## 2026-10-26 查询投影与事实版本保留
+
+- 新增 `semantic_facts/query_engine.py`：校验公共 Query、从仓库读取当前范围事实、比较所选字段覆盖、生成符合 output-schema 的最小响应，并对缺失字段返回显式 gap。当前只覆盖已存事实的确定性投影，不会伪称能触发构造/归纳。
+- CLI `query` 已改为返回 Schema 校验后的响应，不再直接透传仓库原始结果。
+- 源码扫描以 root + Python 快照内容生成 source_id；新快照使用新的 source ID，旧事实行不删除。仓库按精确 scope root 选择最新来源快照用于当前查询，避免把旧快照事实与当前结果混合。
+- 新增运行测试：源码由 `version_one` 改为 `version_two` 后，事实总行数和来源版本数增加，旧版本仍保留在 SQLite 中，当前查询只返回最新版本；相同扫描保持幂等。
+- 最新已完成 CI：https://github.com/vchs6/code2semantics/actions/runs/40258363539 。repository 35 passed、matrix 14 passed、parser 6 passed、scanner 4 passed、runtime acceptance 2 passed；严格 OpenSpec 通过。
+- 质量门禁仍 BLOCKED 是正确结果：尚未完成能力矩阵驱动的工具执行、归纳批组、完整多层事实构造，以及对依赖影响/部分源码变化的精确失效传播。不能把当前 Python 语法清单路径等同于完整 Code2Semantics。
