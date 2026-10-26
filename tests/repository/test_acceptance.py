@@ -71,7 +71,7 @@ def test_repository_acceptance_conflict_rolls_back_without_deleting_facts(batch,
     ).fetchall()
 
     conflicting = json.loads(json.dumps(batch))
-    conflicting["facts"][0]["fields"]["strategy"]["value"]["text"] = "conflicting payload"
+    conflicting["facts"][0]["granularities"] = ["L2"]
     try:
         repository.write(conflicting, "conflicting-submission")
     except (WriteConflict, ValueError):
