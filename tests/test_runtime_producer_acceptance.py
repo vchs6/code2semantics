@@ -91,6 +91,6 @@ def test_cli_query_invokes_cargo_once_and_returns_distinct_membership_and_depend
         replay = execute_query_with_construction(query, reopened, assets, external_executor=cli.build_default_tool_executor())
         assert replay["termination"] == "satisfied", replay
         assert all(set(fact["fields"]) == {"kind"} for fact in replay["results"])
-        assert len(executor.calls) == 1, executor.calls
+        assert len(calls) == 1, calls
     finally:
         reopened.close()
