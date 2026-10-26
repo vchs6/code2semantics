@@ -92,3 +92,11 @@ CI run: https://github.com/vchs6/code2semantics/actions/runs/40277063506
 - `Repository.read()` and `Repository.export_current()` now validate transitive premise closure. Invalid targets, stale content states, explicitly invalidated premise links, and premise cycles do not qualify as current results; they are excluded from current projections without deleting rows.
 - Added explicit `invalidate_premise()` and `invalidate_inventory()` APIs. Tests verify premise-target invalidation, cycle rejection, inventory projection filtering, export/read consistency and unchanged row counts.
 - Full product delivery gate remains blocked for full system acceptance: higher-layer behavior semantics, graph-specific multi-parent/cycle interpretation, complete dependency-aware reconstruction, and all S1–S12 scenarios remain incomplete.
+## Graph storage/projection regression update (2026-10-26)
+
+CI run: https://github.com/vchs6/code2semantics/actions/runs/40277417171
+
+- Repository suite: 51 passed; matrix 15; parser 9; scanner 7; source acceptance 4; packaging 2; bounded executor 3; producer dispatch 3; combined planning/constructor/binding/induction/query 51 passed. Strict OpenSpec passed.
+- Navigation projection deduplicates semantically identical edges by source, target, relation and shared conditions while retaining distinct parent edges, reverse/cycle edges, external endpoints, and edges whose conditions contradict each other. It does not recursively walk the graph or claim a contradictory conditional cycle is executable.
+- Added regression coverage for multi-parent shape, duplicate edges, cycle edges, external references and mutually contradictory conditions. Historical relation rows remain stored.
+- Full product delivery gate remains blocked because higher-layer semantic graph inference, dependency-aware reconstruction and full S1–S12 acceptance are not complete.
