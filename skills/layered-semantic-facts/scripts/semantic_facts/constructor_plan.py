@@ -51,6 +51,36 @@ def _validate_construct_request(request: dict[str, Any], asset_root: Path) -> No
         raise ValueError(f"invalid ConstructRequest {pointer}: {error.message}")
 
 
+
+def _available_source_languages(request: dict[str, Any]) -> set[str] | None:
+    """Return languages found in existing authorized roots; None means roots unavailable."""
+    from fnmatch import fnmatch
+
+    roots = request.get("current_source_context", {}).get("sources", [])
+    excludes = request.get("query", {}).get("scope", {}).get("excludes", [])
+    excluded_dirs = {".git", ".venv", "venv", "__pycache__", "node_modules", "dist", "build"}
+    existing_root = False
+    languages: set[str] = set()
+    for source in roots:
+        root = Path(source.get("root", ""))
+        if not root.is_dir():
+            continue
+        existing_root = True
+        for path in root.rglob("*"):
+            if not path.is_file():
+                continue
+            relative = path.relative_to(root).as_posix()
+            if any(part in excluded_dirs for part in path.relative_to(root).parts):
+                continue
+            if any(fnmatch(relative, pattern) or relative == pattern for pattern in excludes):
+                continue
+            if path.suffix == ".py":
+                languages.add("python")
+            elif path.suffix == ".rs":
+                languages.add("rust")
+    return languages if existing_root else None
+
+
 def plan_constructor_request(
     request: dict[str, Any],
     asset_root: str | Path | None = None,
@@ -101,7 +131,10 @@ def plan_constructor_request(
                     need_ids_by_profile.setdefault((language, environment), set()).add(need["need_id"])
 
     selected_by_profile: dict[tuple[str, str], dict[str, list[dict[str, Any]]]] = {}
+    available_languages = _available_source_languages(request)
     for (language, environment), ids in sorted(need_ids_by_profile.items()):
+        if available_languages is not None and language.lower() not in available_languages:
+            continue
         selected_by_profile[(language, environment)] = select_enabled_producers(
             matrix, sorted(ids), language, platform, environment
         )
