@@ -161,3 +161,24 @@ CI run: https://github.com/vchs6/code2semantics/actions/runs/40311963317
 - Product delivery gate: BLOCKED as intended; full S1–S12 acceptance has not passed.
 
 New query checks cover a closed repository returning explicit `repository_unavailable` gaps without fallback or fabricated results, and preservation of `budget_exhausted` when the final allowed construction round makes partial progress but still has gaps. Source-deletion acceptance also verifies that old fact rows remain stored while current queries exclude deleted-file facts and retain unaffected current facts.
+
+## Query current-source regression verification (2026-10-26)
+
+CI run: https://github.com/vchs6/code2semantics/actions/runs/40312675115
+
+- Repository suite: 59 passed.
+- Transaction suite: 6 passed.
+- Transfer suite: 8 passed.
+- Repository acceptance suite: 5 passed.
+- Capability matrix: 15 passed.
+- Parser: 9 passed.
+- Source scanner: 7 passed.
+- Runtime acceptance: 9 passed.
+- Copied Skill packaging: 2 passed.
+- Bounded tool executor: 3 passed.
+- Producer dispatch: 3 passed.
+- Combined information-needs/constructor/binding/induction/query orchestration: 55 passed.
+- Public contract validation and strict OpenSpec: passed.
+- Product delivery gate: BLOCKED as intended; the acceptance record does not contain `FULL_END_TO_END_ACCEPTANCE: PASS`.
+
+The latest CI run verifies query responses for a closed repository, budget exhaustion after partial progress, current-source modification, and source-file deletion. Current query results exclude superseded/deleted source facts while the database retains prior fact rows. This evidence closes the focused query source-validity regressions only; it does not complete full S1–S12 runtime acceptance.
