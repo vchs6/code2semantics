@@ -514,3 +514,97 @@ def test_query_cli_rebuilds_current_snapshot_after_source_file_deletion(tmp_path
         ).fetchone() is not None
     finally:
         repository.close()
+
+def test_integrated_parser_constructor_induction_gap_repository_reopen_and_minimal_query(tmp_path):
+    from semantic_facts.induction import build_induction_requests, validate_induction_result
+    from semantic_facts.repository.contract import ContractCodec
+    from semantic_facts.source_scanner import build_fact_batch, inspect_source
+
+    project = tmp_path / "pipeline-python-project"
+    project.mkdir()
+    source = project / "service.py"
+    source.write_text("""class Service:
+    def run(self):
+        return True
+""", encoding="utf-8")
+    assets = ROOT / "skills" / "layered-semantic-facts" / "assets"
+    codec = ContractCodec(assets)
+
+    # This is the actual enabled producer -> registered parser -> deterministic
+    # constructor path, not a mocked observation or a hand-authored FactBatch.
+    batch = build_fact_batch(project, codec)
+    assert batch["facts"]
+    fact = batch["facts"][0]
+    names = fact["fields"]["names"]
+    assert names["basis"]["evidence"]
+    assert names["context"]["environment"]["language"] == "Python"
+
+    # Exercise the real induction boundary on a higher-level field. Since no
+    # cognitive provider is configured, it must return an explicit gap and
+    # must not invent or persist an inferred field.
+    evidence = names["basis"]["evidence"]
+    observation = {
+        "observation_id": "pipeline-observation-" + fact["fact_id"],
+        "subject": fact["node"],
+        "information_need_id": "python.syntax_inventory",
+        "payload": names["value"],
+        "evidence": evidence,
+        "context": names["context"],
+        "coverage": names["coverage"],
+    }
+    induction_gap = {
+        "fact_type": "F2",
+        "fields": ["roles"],
+        "target": {"kind": "node", "node": fact["node"]},
+        "reason": "insufficient_evidence",
+        "detail": "Higher-level role semantics require a configured induction provider.",
+        "context": names["context"],
+        "coverage": names["coverage"],
+    }
+    requests = build_induction_requests([observation], batch, [induction_gap], assets)
+    assert len(requests["requests"]) == 1
+    induction_result = validate_induction_result(requests["requests"][0], None, assets)
+    assert induction_result["batch"]["facts"] == []
+    assert any(gap["reason"] == "constructor_unavailable" for gap in induction_result["gaps"])
+
+    database = tmp_path / "pipeline-facts.db"
+    repository = Repository(database, assets)
+    try:
+        repository.write(batch, "pipeline-" + batch["sources"][0]["source_id"])
+        before_close = repository.read({
+            "scope": {"directories": [str(project.resolve())], "excludes": []},
+            "target": {"kind": "scope"},
+            "selections": [{"fact_type": "F2", "fields": ["identity", "names"]}],
+        })
+        assert before_close["facts"]
+        assert all("roles" not in item["fields"] for item in before_close["facts"])
+    finally:
+        repository.close()
+
+    reopened = Repository(database, assets)
+    try:
+        query = {
+            "contract_version": "1.0.0",
+            "catalog_id": "semantic-facts-20261025",
+            "request_id": "pipeline-after-reopen",
+            "scope": {
+                "scope_id": "pipeline-scope",
+                "directories": [str(project.resolve())],
+                "excludes": [],
+                "defaulted": False,
+            },
+            "target": {"kind": "scope"},
+            "granularity": "L3",
+            "selections": [{"fact_type": "F2", "fields": ["identity", "names"]}],
+            "budget": {"max_rounds": 1, "max_new_assertions": 10},
+        }
+        response = execute_query(query, reopened, assets)
+        assert response["termination"] == "satisfied", response
+        assert response["gaps"] == []
+        assert response["results"]
+        assert all(set(item["fields"]) <= {"identity", "names"} for item in response["results"])
+        assert all(item["node"]["source_id"] == batch["sources"][0]["source_id"] for item in response["results"])
+        assert all("roles" not in item["fields"] for item in response["results"])
+        assert reopened.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == len(batch["facts"])
+    finally:
+        reopened.close()
