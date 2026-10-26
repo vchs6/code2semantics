@@ -128,3 +128,32 @@ def test_restore_rejects_empty_sqlite_file_without_changing_fact_history(batch, 
     assert repository.connection.execute("SELECT fact_key, payload FROM facts ORDER BY fact_key").fetchall() == before_facts
     assert repository.connection.execute("SELECT source_id, payload FROM sources ORDER BY source_id").fetchall() == before_sources
     repository.close()
+
+def test_import_current_conflicting_identity_preserves_existing_fact_history(batch, db_path):
+    import copy
+    import pytest
+    from semantic_facts.repository.store import Repository
+    from semantic_facts.repository.types import WriteConflict
+
+    repository = Repository(db_path)
+    repository.write(batch, "import-conflict-base")
+    before = {
+        table: repository.connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+        for table in ("sources", "facts", "attributes", "relations", "evidence", "submissions")
+    }
+    conflicting = copy.deepcopy(batch)
+    conflicting["facts"][0]["granularities"] = ["L2"]
+
+    with pytest.raises(WriteConflict):
+        repository.import_current(conflicting, "import-conflicting-fact")
+
+    after = {
+        table: repository.connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+        for table in before
+    }
+    assert after == before
+    assert repository.connection.execute(
+        "SELECT submission_key FROM submissions WHERE submission_key = ?",
+        ("import-conflicting-fact",),
+    ).fetchone() is None
+    repository.close()
