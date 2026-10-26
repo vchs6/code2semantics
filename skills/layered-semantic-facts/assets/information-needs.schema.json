@@ -95,6 +95,17 @@
             },
             "minItems": 1,
             "uniqueItems": true
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "Python",
+                "Rust"
+              ]
+            },
+            "minItems": 1,
+            "uniqueItems": true
           }
         },
         "required": [
@@ -108,7 +119,8 @@
           "coverage_requirement",
           "production_mode",
           "acceptance_fixture",
-          "research_basis"
+          "research_basis",
+          "languages"
         ],
         "additionalProperties": false
       },
