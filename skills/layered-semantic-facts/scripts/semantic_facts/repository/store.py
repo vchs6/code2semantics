@@ -93,7 +93,7 @@ class Repository:
             );
             CREATE TABLE IF NOT EXISTS relations (
                 relation_key TEXT PRIMARY KEY, owner_key TEXT NOT NULL,
-                payload TEXT NOT NULL
+                payload TEXT NOT NULL, navigation INTEGER NOT NULL DEFAULT 0
             );
             CREATE TABLE IF NOT EXISTS submissions (
                 submission_key TEXT PRIMARY KEY, digest TEXT NOT NULL,
@@ -128,6 +128,13 @@ class Repository:
             );
             """
         )
+        relation_columns = {
+            row[1] for row in self.connection.execute("PRAGMA table_info(relations)")
+        }
+        if "navigation" not in relation_columns:
+            self.connection.execute(
+                "ALTER TABLE relations ADD COLUMN navigation INTEGER NOT NULL DEFAULT 0"
+            )
         # Bootstrap current pointers for older databases; never remove historical facts.
         for _, payload in self.connection.execute(
             "SELECT source_id, payload FROM sources ORDER BY rowid DESC"
@@ -249,13 +256,13 @@ class Repository:
                 raise WriteConflict(None, f"attribute conflict: {row.key}")
 
         for row in record.relations:
-            values = (row.key, row.owner_key, row.payload)
+            values = (row.key, row.owner_key, row.payload, int(row.navigation))
             self.connection.execute(
-                "INSERT OR IGNORE INTO relations(relation_key, owner_key, payload) VALUES (?, ?, ?)",
+                "INSERT OR IGNORE INTO relations(relation_key, owner_key, payload, navigation) VALUES (?, ?, ?, ?)",
                 values,
             )
             existing = self.connection.execute(
-                "SELECT relation_key, owner_key, payload FROM relations WHERE relation_key = ?",
+                "SELECT relation_key, owner_key, payload, navigation FROM relations WHERE relation_key = ?",
                 (row.key,),
             ).fetchone()
             if not existing or tuple(existing) != values:
