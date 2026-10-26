@@ -81,10 +81,10 @@ def _request(root: Path):
     }
 
 
-def test_provider_requires_host_registered_fixed_command():
+def test_provider_requires_host_registered_fixed_command(tmp_path):
     registry = InductionProviderRegistry({})
     with pytest.raises(ProviderConfigurationError, match="not registered"):
-        invoke_induction_provider("unregistered", _request(), registry)
+        invoke_induction_provider("unregistered", _request(tmp_path / "source"), registry)
 
 
 def test_provider_validates_registration_limits():
@@ -117,7 +117,7 @@ def test_provider_accepts_versioned_json_protocol_and_routes_result_through_indu
         }
     })
 
-    result = invoke_induction_provider("fixture-provider", _request(), registry)
+    result = invoke_induction_provider("fixture-provider", _request(tmp_path / "source"), registry)
 
     assert result["execution_status"] == "completed"
     assert result["provider_id"] == "fixture-provider"
