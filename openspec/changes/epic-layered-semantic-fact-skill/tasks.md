@@ -147,3 +147,9 @@
 - RED/GREEN for bounded budget semantics: a real mixed Python source scope with one valid and one malformed file initially lost `budget_exhausted` during final projection; the loop now preserves the reason after final re-read.
 - CI GREEN: https://github.com/vchs6/code2semantics/actions/runs/40311963317 — repository 59 passed; transaction 6; transfer 8; repository acceptance 5; matrix 15; parser 9; scanner 7; runtime acceptance 9; packaging 2; executor 3; producer dispatch 3; combined planning/constructor/binding/induction/query 55 passed; strict OpenSpec passed.
 - Root task 7.1 and 8.1–8.5 remain pending. F2/L3 runtime tests do not satisfy full S1–S12 semantic scenarios, especially workspace membership vs dependency, conditional-cycle satisfiability, higher-layer algorithm semantics, and bounded negative-evidence reasoning.
+
+### Root mixed-language integration progress (2026-10-26)
+
+- Added a root-harness test in `tests/test_acceptance.py` covering actual CLI query → Python/Rust manifest producers → parser observations → FactBatch → SQLite → reopen → minimal F6.kind response. The test distinguishes Cargo workspace membership (F4) from package dependency (F6), checks Python runtime metadata (F3), and verifies source evidence on all returned fields.
+- GREEN CI: https://github.com/vchs6/code2semantics/actions/runs/40353437920. Root/runtime acceptance 21 passed; constructor/induction/provider/query group 84 passed; repository 63; transactions 6; transfer 8; repository acceptance 5; matrix 15; parser 14; scanner 9; strict OpenSpec passed.
+- Root tasks 8.1–8.5 remain unchecked because this is one integrated slice, not the complete S1–S12 scenario set. Provider-backed induction is not yet available; no full acceptance marker was added.
