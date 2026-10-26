@@ -1,5 +1,93 @@
 {
   "contract_version": "1.0.0",
-  "entries": []
+  "entries": [
+    {
+      "information_need_ids": [
+        "syntax.f2.identity",
+        "syntax.f2.names",
+        "syntax.f2.boundary",
+        "syntax.f2.locators"
+      ],
+      "output_kinds": [
+        "parse_result"
+      ],
+      "platforms": [
+        "linux",
+        "darwin",
+        "windows"
+      ],
+      "invocation": [
+        "in-process",
+        "ParserRegistry.parse(ParseRequest)"
+      ],
+      "combinations": [],
+      "enabled": true,
+      "acceptance": {
+        "actor": "parser_development",
+        "evidence": [
+          "tests/test_info_parser.py",
+          "tests/test_source_scanner.py",
+          "tests/test_acceptance.py"
+        ]
+      },
+      "research_basis": [
+        "openspec/changes/survey-info-acquisition-tools/research/semantic-tooling-survey.md#5",
+        "skills/layered-semantic-facts/references/information-needs.md"
+      ],
+      "tool_id": "python.ast-source",
+      "description": "Python standard-library AST parser for supplied source text; returns declaration observations with source evidence.",
+      "languages": [
+        "python"
+      ],
+      "environment": "in-process",
+      "limitations": [
+        "Syntax inventory only; no runtime behavior inference.",
+        "Does not execute project code."
+      ]
+    },
+    {
+      "information_need_ids": [
+        "syntax.f2.identity",
+        "syntax.f2.names",
+        "syntax.f2.boundary",
+        "syntax.f2.locators"
+      ],
+      "output_kinds": [
+        "parse_result"
+      ],
+      "platforms": [
+        "linux",
+        "darwin",
+        "windows"
+      ],
+      "invocation": [
+        "in-process",
+        "ParserRegistry.parse(ParseRequest)"
+      ],
+      "combinations": [],
+      "enabled": true,
+      "acceptance": {
+        "actor": "parser_development",
+        "evidence": [
+          "tests/test_info_parser.py",
+          "tests/test_source_scanner.py",
+          "tests/test_acceptance.py"
+        ]
+      },
+      "research_basis": [
+        "openspec/changes/survey-info-acquisition-tools/research/semantic-tooling-survey.md#5",
+        "skills/layered-semantic-facts/references/information-needs.md"
+      ],
+      "tool_id": "rust.syntax-source",
+      "description": "Deterministic Rust declaration inventory parser for supplied source text; returns declaration observations and delimiter diagnostics.",
+      "languages": [
+        "rust"
+      ],
+      "environment": "in-process",
+      "limitations": [
+        "Not rustc or rust-analyzer.",
+        "No type checking, macro expansion, borrow checking or runtime behavior inference."
+      ]
+    }
+  ]
 }
-
