@@ -408,3 +408,56 @@ def test_request_plan_does_not_select_producers_for_languages_absent_from_source
     }
 
     assert selected == {"python.pyproject-toml"}
+
+def test_request_plan_keeps_both_producers_for_a_mixed_python_rust_scope(tmp_path):
+    import json
+    import shutil
+
+    from semantic_facts.repository.contract import ContractCodec
+    from semantic_facts.source_scanner import build_fact_batch
+
+    project = tmp_path / "mixed-language"
+    (project / "src").mkdir(parents=True)
+    (project / "app.py").write_text("""def main():
+    return 0
+""", encoding="utf-8")
+    (project / "src" / "lib.rs").write_text("pub fn run() {}\\n", encoding="utf-8")
+    (project / "pyproject.toml").write_text(
+        """[project]
+name = "mixed-language"
+version = "1.0.0"
+""",
+        encoding="utf-8",
+    )
+    (project / "Cargo.toml").write_text(
+        """[package]
+name = "mixed-language-rust"
+version = "0.1.0"
+edition = "2021"
+""",
+        encoding="utf-8",
+    )
+    assets = tmp_path / "assets"
+    shutil.copytree(ASSETS, assets)
+    matrix_path = assets / "capability-matrix.json"
+    matrix = json.loads(matrix_path.read_text(encoding="utf-8"))
+    for tool_id in ("python.pyproject-toml", "rust.cargo-metadata"):
+        profile = next(item for item in matrix["entries"] if item["tool_id"] == tool_id)
+        profile["enabled"] = True
+        profile["acceptance"] = {"actor": "parser_development", "evidence": ["tests/test_info_parser.py"]}
+    matrix_path.write_text(json.dumps(matrix), encoding="utf-8")
+
+    source = build_fact_batch(project, ContractCodec(ASSETS))["sources"][0]
+    value = request(("identity",))
+    value["query"]["scope"]["directories"] = [str(project.resolve())]
+    value["query"]["selections"] = [{"fact_type": "F6", "fields": ["kind"]}]
+    value["existing_valid_facts"]["sources"] = [source]
+    value["current_source_context"]["sources"] = [source]
+
+    result = plan_constructor_request(value, assets)
+    selected = {
+        profile["tool_id"]
+        for item in result["plan"]
+        for profile in item["producer_profiles"]
+    }
+    assert selected == {"python.pyproject-toml", "rust.cargo-metadata"}
