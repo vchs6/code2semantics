@@ -752,11 +752,34 @@ class Repository:
             elif tuple(existing[:3]) != values[:3]:
                 raise WriteConflict(None, f"attribute identity conflict: {row.key}")
             elif existing[3] != row.payload:
-                # A logical field identity is immutable within one source snapshot.
-                # A changed source must produce a new source/fact identity; a caller
-                # cannot rewrite an existing field payload under the same identity.
-                # Prior assertion versions remain in attribute_versions for audit.
-                raise WriteConflict(None, f"field assertion conflict: {row.key}")
+                previous = json.loads(existing[3])
+                incoming = json.loads(row.payload)
+                previous_basis = previous.get("basis", {})
+                incoming_basis = incoming.get("basis", {})
+                previous_evidence = previous_basis.get("evidence", [])
+                incoming_evidence = incoming_basis.get("evidence", [])
+                previous_basis.pop("evidence", None)
+                incoming_basis.pop("evidence", None)
+                if _canonical(previous) != _canonical(incoming):
+                    raise WriteConflict(None, f"field assertion conflict: {row.key}")
+                merged = json.loads(existing[3])
+                by_id = {item["evidence_id"]: item for item in merged.get("basis", {}).get("evidence", [])}
+                for item in row.value.get("basis", {}).get("evidence", []):
+                    old_item = by_id.get(item["evidence_id"])
+                    if old_item is not None and _canonical(old_item) != _canonical(item):
+                        raise WriteConflict(None, f"evidence identity conflict: {item['evidence_id']}")
+                    by_id.setdefault(item["evidence_id"], item)
+                merged.setdefault("basis", {})["evidence"] = [by_id[key] for key in sorted(by_id)]
+                merged_payload = _json(merged)
+                version_key = hashlib.sha256(_canonical((row.key, merged_payload)).encode("utf-8")).hexdigest()
+                self.connection.execute(
+                    "INSERT OR IGNORE INTO attribute_versions(version_key, attribute_key, fact_key, field_name, payload) VALUES (?, ?, ?, ?, ?)",
+                    (version_key, *values[:3], merged_payload),
+                )
+                self.connection.execute(
+                    "UPDATE attributes SET payload = ? WHERE attribute_key = ?",
+                    (merged_payload, row.key),
+                )
 
         for row in record.relations:
             values = (row.key, row.owner_key, row.payload, int(row.navigation))
