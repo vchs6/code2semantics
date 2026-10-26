@@ -13,7 +13,12 @@ def test_backup_and_restore_preserve_current_fact_set(batch, db_path, tmp_path):
     original_count = repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
 
     repository.backup(backup_path)
+    repository.connection.execute("DELETE FROM attributes")
     repository.connection.execute("DELETE FROM facts")
+    repository.connection.execute("DELETE FROM entities")
+    repository.connection.execute("DELETE FROM sources")
+    repository.connection.execute("DELETE FROM relations")
+    repository.connection.execute("DELETE FROM submissions")
     repository.connection.commit()
     assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == 0
 
