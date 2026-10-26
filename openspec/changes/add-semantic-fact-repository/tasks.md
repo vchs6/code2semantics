@@ -99,3 +99,11 @@
 - Fix: `Repository.restore` now requires the full repository table set unconditionally before copying a backup. Empty/foreign SQLite databases are rejected before target mutation.
 - GREEN and focused CI: https://github.com/vchs6/code2semantics/actions/runs/40298437864 — repository 55 passed; focused transaction 6 passed; focused transfer 6 passed; repository acceptance 3 passed; matrix 15; parser 9; scanner 7; runtime acceptance 5; packaging 2; executor 3; producer dispatch 3; combined information-needs/constructor/induction/query 52 passed; strict OpenSpec passed.
 - The product delivery gate remains intentionally BLOCKED for full S1–S12 acceptance. Repository task 6.2/6.4 remain pending until their complete RED-first acceptance obligations and broader import/local-mutation policy are fully demonstrated.
+
+
+## Focused transfer RED/GREEN closure (2026-10-26)
+
+- The dedicated CI step now runs `python -m pytest tests/repository/test_transfer.py -q -ra -p no:cacheprovider`, alongside dedicated transaction and repository acceptance steps.
+- RED case: https://github.com/vchs6/code2semantics/actions/runs/40298339861 failed because an empty SQLite database was accepted as a backup. The target database could have been replaced by a schema-less database.
+- GREEN: unconditional required-table validation in `Repository.restore` now rejects empty or foreign SQLite files before restore. The focused transfer suite passed 6 tests, transaction suite passed 6, repository acceptance passed 3, and the full repository suite passed 55 in https://github.com/vchs6/code2semantics/actions/runs/40298437864.
+- Full product acceptance remains blocked and repository task 6.2/6.4 remain pending; this transfer fix does not close the broader repository lifecycle acceptance.
