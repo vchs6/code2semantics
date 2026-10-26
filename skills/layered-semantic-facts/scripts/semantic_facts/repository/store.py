@@ -58,7 +58,7 @@ class Repository:
                 if not integrity or integrity[0] != "ok":
                     raise ValueError("backup failed SQLite integrity check")
                 tables = {row[0] for row in backup.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
-                expected = {"sources", "entities", "facts", "attributes", "relations", "submissions"}
+                expected = {"sources", "entities", "facts", "attributes", "relations", "submissions", "source_heads"}
                 if tables and not expected.issubset(tables):
                     raise ValueError("backup does not contain the repository schema")
                 backup.backup(self.connection)
@@ -99,8 +99,20 @@ class Repository:
                 submission_key TEXT PRIMARY KEY, digest TEXT NOT NULL,
                 receipt TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS source_heads (
+                root TEXT PRIMARY KEY, source_id TEXT NOT NULL
+            );
             """
         )
+        # Bootstrap current pointers for older databases; never remove historical facts.
+        for _, payload in self.connection.execute(
+            "SELECT source_id, payload FROM sources ORDER BY rowid DESC"
+        ).fetchall():
+            source = json.loads(payload)
+            self.connection.execute(
+                "INSERT OR IGNORE INTO source_heads(root, source_id) VALUES (?, ?)",
+                (str(Path(source["root"]).resolve()), source["source_id"]),
+            )
         self.connection.commit()
         self._initialized = True
 
@@ -121,6 +133,8 @@ class Repository:
             if existing[0] != digest:
                 raise WriteConflict(None, "submission key already has different content")
             payload = json.loads(existing[1])
+            # Re-observing an old snapshot can make it current again; fact history stays.
+            self._mark_current_sources(records[0].sources)
             return CommitReceipt(submission_key, payload["digest"], tuple())
 
         record = records[0]
@@ -137,6 +151,15 @@ class Repository:
             raise WriteConflict(None, str(error)) from error
         return CommitReceipt(submission_key, digest, affected)
 
+    def _mark_current_sources(self, sources: Sequence[SourceRow]) -> None:
+        for row in sources:
+            value = row.value
+            self.connection.execute(
+                "INSERT INTO source_heads(root, source_id) VALUES (?, ?) "
+                "ON CONFLICT(root) DO UPDATE SET source_id = excluded.source_id",
+                (str(Path(value["root"]).resolve()), value["source_id"]),
+            )
+
     def _insert_record(self, record: StoredRecord) -> None:
         for row in record.sources:
             value = row.value
@@ -144,6 +167,7 @@ class Repository:
                 "INSERT OR IGNORE INTO sources(source_id, payload) VALUES (?, ?)",
                 (value["source_id"], row.payload),
             )
+        self._mark_current_sources(record.sources)
         for row in record.entities:
             value = row.value
             self.connection.execute(
@@ -174,31 +198,37 @@ class Repository:
         target = query["target"].get("node")
         selections = query["selections"]
 
-        # Resolve the current source version for each exact requested project root.
-        # Older source versions remain stored, but current-scope reads do not mix them.
         if target:
-            current_source_ids = {target["source_id"]}
+            source_row = self.connection.execute(
+                "SELECT payload FROM sources WHERE source_id = ?", (target["source_id"],)
+            ).fetchone()
+            if source_row:
+                source = json.loads(source_row[0])
+                head = self.connection.execute(
+                    "SELECT source_id FROM source_heads WHERE root = ?",
+                    (str(Path(source["root"]).resolve()),),
+                ).fetchone()
+                current_source_ids = {head[0]} if head else set()
+            else:
+                current_source_ids = set()
         else:
             directories = {
                 str(Path(directory).resolve())
                 for directory in query["scope"].get("directories", [])
             }
-            current_source_ids: set[str] = set()
-            seen_roots: set[str] = set()
-            for _, source_id, payload in self.connection.execute(
-                "SELECT rowid, source_id, payload FROM sources ORDER BY rowid DESC"
-            ):
-                source = json.loads(payload)
-                root = str(Path(source["root"]).resolve())
-                if root in directories and root not in seen_roots:
-                    current_source_ids.add(source_id)
-                    seen_roots.add(root)
+            current_source_ids = {
+                source_id for root, source_id in self.connection.execute("SELECT root, source_id FROM source_heads")
+                if root in directories
+            }
 
         params: list[Any] = []
         sql = "SELECT fact_key, source_id, subject_id, node_id, fact_id, fact_type, payload FROM facts WHERE 1=1"
         if target:
-            sql += " AND source_id = ? AND subject_id = ? AND node_id = ?"
-            params.extend((target["source_id"], target["subject_id"], target["node_id"]))
+            if current_source_ids:
+                sql += " AND source_id = ? AND subject_id = ? AND node_id = ?"
+                params.extend((next(iter(current_source_ids)), target["subject_id"], target["node_id"]))
+            else:
+                sql += " AND 1=0"
         elif current_source_ids:
             placeholders = ",".join("?" for _ in current_source_ids)
             sql += f" AND source_id IN ({placeholders})"
