@@ -33,4 +33,4 @@
 
 - Independent copied-install test: `tests/test_packaging.py` copies only the Skill directory, runs Python/Rust scan-source and query from that copy, and validates the public response.
 - Metadata/layout fallback checklist: `skills/layered-semantic-facts/references/skill-packaging-validation.md`. The official `skills-ref validate` was not invoked; no official-validator pass is claimed.
-- CI run https://github.com/vchs6/code2semantics/actions/runs/40268487627: repository, matrix, parser, scanner, source acceptance, copied packaging, bounded executor, information-needs/constructor/induction/query tests and strict OpenSpec all passed. The fail-closed product gate remains blocked because full S1–S12 acceptance is not yet complete.
+- CI run https://github.com/vchs6/code2semantics/actions/runs/40269286038: repository, matrix, parser, scanner, source acceptance, copied packaging, bounded executor, information-needs/constructor/induction/query tests and strict OpenSpec all passed. The fail-closed product gate remains blocked because full S1–S12 acceptance is not yet complete.
