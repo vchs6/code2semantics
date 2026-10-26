@@ -270,3 +270,51 @@ def test_query_splits_out_of_catalog_fields_from_supported_fields(tmp_path):
         assert response["gaps"] == []
     finally:
         repository.close()
+def test_query_projection_preserves_external_reference_and_conflict_evidence(tmp_path):
+    from semantic_facts.query_engine import execute_query
+
+    project = tmp_path / "external-conflict-project"
+    project.mkdir()
+    (project / "engine.py").write_text("class Engine:\n    pass\n", encoding="utf-8")
+    query = make_query(project)
+    repository = Repository(tmp_path / "external-conflict.db", ASSETS)
+    try:
+        seeded = execute_query_with_construction(query, repository, ASSETS)
+        assert seeded["termination"] == "satisfied"
+        stored = repository.read(query)
+        fact = stored["facts"][0]
+        source = stored["sources"][0]
+        subject = fact["node"]
+        fact["fields"]["identity"]["value"] = {
+            "kind": "reference",
+            "ref": {
+                "kind": "external",
+                "reference_id": "external-rust-crate",
+                "label": "unscanned external crate",
+                "reason": "outside_authorized_scope",
+                "boundary": "Only the explicitly requested project roots were scanned.",
+                "observed_in": {
+                    "kind": "subject",
+                    "source_id": subject["source_id"],
+                    "subject_id": subject["subject_id"],
+                },
+            },
+        }
+        evidence = fact["fields"]["names"]["basis"]["evidence"][0]
+        context = fact["fields"]["names"]["context"]
+        stored["conflicts"] = [{
+            "conflict_id": "conflict-engine-names",
+            "members": [
+                {"node": subject, "fact_id": fact["fact_id"], "field": "names", "content_state": source["content_state"]},
+                {"node": subject, "fact_id": fact["fact_id"], "field": "identity", "content_state": source["content_state"]},
+            ],
+            "reason": "fixture conflict used to verify projection preserves conflict evidence",
+            "context": context,
+            "evidence": [evidence],
+        }]
+        response = execute_query(query, repository, ASSETS, stored_result=stored)
+        assert response["results"][0]["fields"]["identity"]["value"]["ref"]["reason"] == "outside_authorized_scope"
+        assert response["conflicts"][0]["conflict_id"] == "conflict-engine-names"
+        assert response["conflicts"][0]["evidence"][0]["evidence_id"] == evidence["evidence_id"]
+    finally:
+        repository.close()
