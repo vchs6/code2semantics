@@ -128,6 +128,20 @@ def test_changed_source_appends_new_facts_without_deleting_old_versions(tmp_path
     assert any("function version_two" in fact["fields"]["names"]["value"]["text"] for fact in current["results"])
     assert all("function version_one" not in fact["fields"]["names"]["value"]["text"] for fact in current["results"])
     assert len(current["sources"]) == 1
+    count_after_second_version = total_count
+    repository.close()
+
+    # Reverting to an already-seen snapshot makes it current again without
+    # deleting the newer version or creating duplicate fact rows.
+    source_file.write_text("def version_one():\n    return 1\n", encoding="utf-8")
+    assert main(["scan-python", "--root", str(project), "--db", str(database)]) == 0
+    capsys.readouterr()
+    repository = Repository(database)
+    reverted = execute_query(query(), repository, ROOT / "skills" / "layered-semantic-facts" / "assets")
+    assert any("function version_one" in fact["fields"]["names"]["value"]["text"] for fact in reverted["results"])
+    assert all("function version_two" not in fact["fields"]["names"]["value"]["text"] for fact in reverted["results"])
+    assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == count_after_second_version
+    assert repository.connection.execute("SELECT COUNT(*) FROM sources").fetchone()[0] == 2
     repository.close()
 
 def test_real_rust_source_scan_store_reopen_and_query(tmp_path, capsys):
