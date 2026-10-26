@@ -66,6 +66,62 @@ def execute_query(query: dict[str, Any], repository: Repository, asset_root: str
         "method": "stored fact field coverage comparison",
     }
 
+    current_states = {source["source_id"]: source["content_state"] for source in sources}
+
+    def inventory_is_current(inventory: dict[str, Any]) -> bool:
+        assertion = inventory.get("assertion", {})
+        if assertion.get("knowledge") != "supported" or assertion.get("coverage", {}).get("completeness") != "complete":
+            return False
+        validity = assertion.get("validity", {})
+        if validity.get("state") != "current":
+            return False
+        validity_sources = validity.get("sources", [])
+        if not validity_sources or any(
+            item.get("source_id") not in current_states
+            or item.get("content_state") != current_states[item.get("source_id")]
+            for item in validity_sources
+        ):
+            return False
+        return all(
+            item.get("source_id") in current_states
+            and item.get("content_state") == current_states[item.get("source_id")]
+            for item in assertion.get("basis", {}).get("evidence", [])
+        )
+
+    target = query["target"]
+    if target["kind"] == "scope":
+        matching_direct_nodes = [
+            inventory for inventory in stored["direct_nodes"]
+            if inventory.get("target", {}).get("kind") == "scope"
+            and set(inventory.get("assertion", {}).get("context", {}).get("source_ids", [])).intersection(current_states)
+        ]
+        covered_sources = {
+            source_id
+            for inventory in matching_direct_nodes
+            if inventory_is_current(inventory)
+            for source_id in inventory["assertion"]["context"]["source_ids"]
+            if source_id in current_states
+        }
+        inventory_complete = set(current_states).issubset(covered_sources)
+    else:
+        matching_direct_nodes = [
+            inventory for inventory in stored["direct_nodes"]
+            if inventory.get("target", {}).get("kind") == "node"
+            and inventory["target"].get("node") == target.get("node")
+        ]
+        inventory_complete = any(inventory_is_current(inventory) for inventory in matching_direct_nodes)
+
+    if not inventory_complete:
+        gaps.append({
+            "fact_type": "F2",
+            "fields": ["direct_nodes"],
+            "target": target,
+            "reason": "coverage_incomplete",
+            "detail": "Direct-node completeness for the requested observation boundary is not established by current evidence.",
+            "context": context,
+            "coverage": coverage,
+        })
+
     for selection in query["selections"]:
         matching = [fact for fact in results if fact["fact_type"] == selection["fact_type"]]
         if not matching:
@@ -98,7 +154,7 @@ def execute_query(query: dict[str, Any], repository: Repository, asset_root: str
         "query": query,
         "sources": sources,
         "results": results,
-        "direct_nodes": stored["direct_nodes"],
+        "direct_nodes": matching_direct_nodes,
         "premise_checks": [],
         "conflicts": stored["conflicts"],
         "gaps": gaps,
