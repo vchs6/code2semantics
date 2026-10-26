@@ -8,6 +8,7 @@ prebuilt repository fixtures.
 from __future__ import annotations
 
 from pathlib import Path
+import re
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -36,9 +37,9 @@ def main() -> int:
 
     acceptance_record = REQUIRED_DELIVERABLES["Recorded real runtime acceptance"]
     record_text = acceptance_record.read_text(encoding="utf-8")
-    if "FULL_END_TO_END_ACCEPTANCE: PASS" not in record_text:
+    if not re.search(r"(?m)^FULL_END_TO_END_ACCEPTANCE: PASS\\s*$", record_text):
         print("PRODUCT DELIVERY GATE: BLOCKED")
-        print("The acceptance record does not contain FULL_END_TO_END_ACCEPTANCE: PASS.")
+        print("The acceptance record does not contain the full acceptance success marker on a standalone line.")
         print("A partial source-to-store smoke test cannot certify full component integration.")
         return 1
 
