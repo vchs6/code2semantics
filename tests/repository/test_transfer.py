@@ -59,3 +59,51 @@ def test_backup_requires_initialized_repository(db_path, tmp_path):
     repository.backup(backup_path)
     assert backup_path.exists()
     repository.close()
+
+def test_export_current_and_import_current_roundtrip_only_current_facts(batch, db_path, tmp_path):
+    from semantic_facts.repository.store import Repository
+
+    repository = Repository(db_path)
+    repository.write(batch, "export-source")
+    total_rows_before = repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
+
+    exported = repository.export_current()
+    assert exported["sources"]
+    assert exported["facts"]
+    assert "fact-old" not in {fact["fact_id"] for fact in exported["facts"]}
+    assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == total_rows_before
+    repository.close()
+
+    imported = Repository(tmp_path / "imported-current.db")
+    receipt = imported.import_current(exported, "import-current-1")
+    roundtrip = imported.export_current()
+    assert receipt.submission_key == "import-current-1"
+    assert {fact["fact_id"] for fact in roundtrip["facts"]} == {fact["fact_id"] for fact in exported["facts"]}
+    assert roundtrip["sources"] == exported["sources"]
+    assert len(roundtrip["direct_nodes"]) == len(exported["direct_nodes"])
+    imported.close()
+
+
+def test_import_current_rejects_invalid_batch_without_mutating_repository(batch, db_path):
+    from semantic_facts.repository.store import Repository
+
+    repository = Repository(db_path)
+    repository.write(batch, "existing")
+    before = {
+        table: repository.connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+        for table in ("sources", "facts", "attributes", "submissions", "inventories")
+    }
+    invalid = json.loads(json.dumps(batch))
+    invalid["facts"][0]["node"]["node_id"] = ""
+    try:
+        repository.import_current(invalid, "invalid-import")
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("invalid import must be rejected")
+    after = {
+        table: repository.connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+        for table in before
+    }
+    assert after == before
+    repository.close()
