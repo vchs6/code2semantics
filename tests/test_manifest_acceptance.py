@@ -40,8 +40,8 @@ def test_python_manifest_to_factbatch_sqlite_reopen_and_minimal_query(tmp_path):
     ]
     result = execute_constructor_request(value, assets)
     assert not any(gap["reason"] == "source_modified" for gap in result["gaps"])
-    assert any(fact["fact_type"] == "F3" for fact in result["batch"]["facts"])
-    assert any(fact["fact_type"] == "F6" for fact in result["batch"]["facts"])
+    assert any(fact["fact_type"] == "F3" for fact in result["batch"]["facts"]), result["gaps"]
+    assert any(fact["fact_type"] == "F6" for fact in result["batch"]["facts"]), result["gaps"]
 
     database = tmp_path / "manifest-acceptance.sqlite"
     repository = Repository(database, assets)
