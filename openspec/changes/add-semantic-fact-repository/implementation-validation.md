@@ -52,3 +52,33 @@ Source ingress ��飺D3 apply(ChangeSet) û�� Source/FactBatch ����
 
 �ڶ���ǰֹͣ��D3 �� Mutation ֻ������Ŀ����û�� Source ��ڣ��޷��� FactBatch �����������Դ�����״�д�����£�D5 Ҫ�����Ȩ���Ϸ��ؿս������δ�涨����Դ����ʱ������� FactBatch.sources �� minItems=1������������밴 AGENTS �� 8/10 ��ȡ���û�ȷ�ϲ��� OpenSpec �޶� design/tasks �������������ʵ���мд������ֶλ�α����Դ����ǰ������ 1.1�C1.5 ��ɣ��������񱣳�δ��ɣ�δ������δ�鵵��
 
+
+
+## 2026-10-26 当前来源有效性、规范化存储与传输 API
+
+最新相关 CI: https://github.com/vchs6/code2semantics/actions/runs/40269799051
+
+### 本轮实际验证
+
+- `tests/repository`: 41 passed, 0 failed, 0 skipped.
+- Capability matrix: 15 passed.
+- Parser: 9 passed.
+- Source scanner/direct inventory: 6 passed.
+- Runtime source-to-query acceptance: 4 passed.
+- Copied Skill packaging: 2 passed.
+- Bounded tool executor: 3 passed.
+- Combined information-needs/constructor/induction/query suite: 37 passed.
+- Public contract validation and strict OpenSpec: passed.
+- Product delivery gate: BLOCKED as expected because full S1–S12 product acceptance is not complete.
+
+### New repository behavior
+
+- SQLite now persists normalized `evidence`, `evidence_links`, `premises`, `inventories`, `conflicts`, and `conflict_links` in addition to sources/entities/facts/attributes/relations/submissions/source_heads. Relation rows retain the navigation classification.
+- Current reads use source heads and filter assertions whose validity or evidence content state does not match the current source state. Filtering does not delete the underlying rows.
+- `export_current()` exports current-head sources/facts plus current navigation/inventory/conflict records; stale historical fact rows remain in the local database but are not included in the current export.
+- `import_current(batch, submission_key)` validates and appends through the same atomic write path. Invalid imports fail before mutation. Existing facts are never cleared to import a batch.
+- Backup/restore continues to use SQLite backup and restores into a separate test database; invalid backups leave target state unchanged.
+
+### Remaining repository gaps
+
+The repository component is not fully complete. A public local-mutation API for field/relation/evidence/conflict invalidation, complete premise dependency propagation, graph-cycle/ancestor traversal, and full source-level import conflict policy remain pending. The RED-first sequence for the newest transfer tests was not captured as a separate CI run, so the associated task is not claimed complete solely from the GREEN regression.
