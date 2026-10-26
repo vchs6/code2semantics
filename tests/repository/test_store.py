@@ -297,7 +297,7 @@ def test_existing_field_can_be_enriched_with_new_evidence_without_replacing_old_
 def test_evidence_enrichment_rejects_conflicting_reuse_of_evidence_identity(batch, db_path):
     import copy
     from semantic_facts.repository.store import Repository
-    from semantic_facts.repository.types import WriteConflict
+    from semantic_facts.repository.types import ContractError
 
     first = copy.deepcopy(batch)
     first["facts"] = [fact for fact in first["facts"] if fact["fact_id"] == "fact-a"]
@@ -314,7 +314,7 @@ def test_evidence_enrichment_rejects_conflicting_reuse_of_evidence_identity(batc
 
     repository = Repository(db_path)
     repository.write(first, "evidence-conflict-first")
-    with pytest.raises(WriteConflict, match="evidence identity conflict"):
+    with pytest.raises(ContractError, match="Same evidence identity has different content"):
         repository.write(second, "evidence-conflict-second")
 
     result = repository.read(make_query(fields=("strategy",)))
