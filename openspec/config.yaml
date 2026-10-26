@@ -9,6 +9,7 @@ context: |
 # Add custom rules for specific artifacts.
 rules:
   tasks:
+    - 产品完成状态 MUST 有真实运行入口、真实输入场景、可观察输出与集成验收证据；组件测试/Schema 校验/OpenSpec strict 不得替代端到端验收
     - epic-layered-semantic-fact-skill 开始前，需要先完成语义事实集需求调研（survey-semantic-fact-requirements）
     - 语义事实集需求调研的重入取决于调研报告（research/semantic-fact-requirements.md）不存在或有强制要求
     - epic 的设计阶段顺序仅有：fact-catalog → 查询契约（contract-format）→ 响应契约（output-schema）
