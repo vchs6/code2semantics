@@ -88,7 +88,7 @@ def test_registry_rejects_duplicate_registration():
 
 def test_rust_parser_emits_struct_trait_function_and_use_observations():
     result = parse_rust_request(request(
-        "use std::path::Path;\n\npub struct Config { value: String }\n\npub trait Readable { fn read(&self); }\n\nimpl Config {\n    pub fn load() {}\n}\n",
+        "use std::path::Path;\n\npub struct Config { value: String }\n\npub trait Readable {\n    fn read(&self);\n}\n\nimpl Config {\n    pub fn load() {}\n}\n",
         tool_id="rust.syntax-source",
     ))
 
