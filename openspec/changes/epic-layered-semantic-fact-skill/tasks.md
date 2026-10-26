@@ -115,3 +115,11 @@
 - Added transfer coverage for importing a conflicting immutable fact identity; the import is rejected and normalized rows/submission receipts remain unchanged.
 - CI: https://github.com/vchs6/code2semantics/actions/runs/40298718500 — repository 56 passed; transaction 6; transfer 7; repository acceptance 3; matrix 15; parser 9; scanner 7; runtime acceptance 6; packaging 2; executor 3; producer dispatch 3; combined planning/constructor/induction/query 52 passed; strict OpenSpec passed.
 - These checks strengthen the append-only/current-head boundary, but root 6.3, 7.1 and 8.1–8.5 remain pending until child acceptance gaps and full S1–S12 are closed. The product delivery gate remains blocked by design.
+
+
+## Restore schema validation hardening (2026-10-26)
+
+- Added a RED regression for a malformed SQLite backup that contains every expected table name but lacks the required columns. The previous name-only check accepted it and could overwrite the live database.
+- `Repository.restore` now verifies required columns across all normalized tables before calling SQLite backup/restore. Both empty and malformed backup tests assert fact/source history remains unchanged after rejection.
+- CI GREEN: https://github.com/vchs6/code2semantics/actions/runs/40299139228 — repository 57 passed; transaction 6; transfer 8; repository acceptance 3; matrix 15; parser 9; scanner 7; runtime acceptance 6; packaging 2; executor 3; producer dispatch 3; combined planning/constructor/induction/query 52; strict OpenSpec passed.
+- Full S1–S12 acceptance and the final product delivery gate remain pending. This repository safety improvement does not imply complete system acceptance.
