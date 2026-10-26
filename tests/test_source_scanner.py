@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from semantic_facts.source_scanner import build_fact_batch
+from semantic_facts.source_scanner import build_fact_batch, inspect_source
 from semantic_facts.repository.contract import ContractCodec
 
 
