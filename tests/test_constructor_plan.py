@@ -10,7 +10,7 @@ def test_partially_satisfied_request_only_plans_missing_fields(tmp_path):
 
     project = tmp_path / "project"
     project.mkdir()
-    (project / "service.py").write_text("class Example:\\n    pass\\n", encoding="utf-8")
+    (project / "service.py").write_text("class Example:\n    pass\n", encoding="utf-8")
     batch = build_fact_batch(project, ContractCodec(ASSETS))
     source = batch["sources"][0]
     fact = dict(batch["facts"][0])
