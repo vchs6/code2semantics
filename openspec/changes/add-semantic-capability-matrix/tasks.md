@@ -39,3 +39,10 @@
 - `/opsx-apply` ���� tasks.md ˳��ִ�У�ÿ��ʵ��������д RED����д��Сʵ�֣������� GREEN��
 - ���ʵ�ֺͶ����������� `/opsx-archive`��
 
+## 6. Expanded information-needs candidate matrix (2026-10-26)
+
+- [x] 6.1 Add a small set of disabled research-candidate profiles mapped to the expanded F1–F18 need IDs: `python.compileall`, `rust.cargo-metadata`, `rust.cargo-check`, `rust.rust-analyzer`, `multi.ctags`, and `multi.ast-grep`. These are candidates for grouped coverage, not one tool per field.
+- [x] 6.2 Keep every new candidate disabled and without `acceptance`; add a matrix test asserting that only the two initial Python/Rust syntax parser profiles are enabled and each research candidate remains disabled until parser-development acceptance.
+- [ ] 6.3 After CI probe evidence is recorded by `survey-info-acquisition-tools`, update candidate descriptions, versions, platform/environment constraints and native output formats. Do not enable any candidate in this task.
+- [ ] 6.4 Enable a candidate only after the exact native-output parser and invocation profile pass parser-development acceptance; update the matrix entry with test/fixture evidence and verify constructor selection and failure gaps.
+
