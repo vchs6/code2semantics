@@ -176,6 +176,7 @@ This section supersedes the earlier statement that the survey input is only the 
 | Candidate profile | Intended coverage | Native output to parse | Current decision |
 |---|---|---|---|
 | Python `compileall` | Additional Python syntax/compile diagnostics | Compiler/compileall diagnostics | Candidate; safe fixture probe in CI, disabled pending parser acceptance |
+| Python `pyproject.toml` via stdlib `tomllib` | Declared project metadata, build backend, scripts and dependency declarations | TOML manifest records | Candidate; no dedicated parser/acceptance yet, disabled |
 | `cargo metadata --no-deps --format-version 1` | Rust workspace members, targets and declared dependencies | Cargo metadata JSON | Candidate; availability and output probe in CI, disabled pending parser acceptance |
 | `cargo check` | Rust type/compiler diagnostics for explicitly opted-in projects | Compiler diagnostics | Candidate; disabled pending environment, sandbox and parser acceptance |
 | `rust-analyzer` | Rust semantic symbols, references, implementations and call hierarchy | LSP responses/diagnostics | Candidate; server lifecycle/project readiness and adapter acceptance pending |
