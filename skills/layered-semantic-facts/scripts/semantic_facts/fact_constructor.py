@@ -30,6 +30,32 @@ def construct_fact_batch(
         if not observations:
             raise ValueError(f"parser produced no file-level observation for {relative}")
 
+        # Bind every observation to this exact source snapshot, project subject,
+        # and file scope before any assertion is constructed.
+        seen_observation_ids: set[str] = set()
+        for observation in observations:
+            observation_id = observation.get("observation_id")
+            if not observation_id or observation_id in seen_observation_ids:
+                raise ValueError(f"duplicate or missing observation_id in {relative}")
+            seen_observation_ids.add(observation_id)
+            subject = observation.get("subject", {})
+            if subject.get("source_id") != source_id:
+                raise ValueError(f"observation source mismatch in {relative}: {observation_id}")
+            if subject.get("subject_id") != subject_id:
+                raise ValueError(f"observation subject mismatch in {relative}: {observation_id}")
+            evidence = observation.get("evidence", [])
+            if not evidence:
+                raise ValueError(f"observation has no evidence in {relative}: {observation_id}")
+            for item in evidence:
+                if item.get("source_id") != source_id:
+                    raise ValueError(f"evidence source mismatch in {relative}: {item.get('evidence_id')}")
+                if item.get("content_state") != content_state:
+                    raise ValueError(f"evidence content state mismatch in {relative}: {item.get('evidence_id')}")
+                locator = item.get("locator", "")
+                locator_path = locator.split(":L", 1)[0]
+                if locator_path != relative:
+                    raise ValueError(f"evidence locator outside requested file {relative}: {locator}")
+
         names = [item["payload"]["text"] for item in observations]
         evidence_by_id = {
             item["evidence_id"]: item
