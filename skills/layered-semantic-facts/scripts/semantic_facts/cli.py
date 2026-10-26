@@ -10,6 +10,7 @@ import sys
 from .repository.contract import ContractCodec
 from .repository.store import Repository
 from .source_scanner import build_fact_batch
+from .query_engine import execute_query
 
 
 def _assets() -> Path:
@@ -57,7 +58,7 @@ def main(argv: list[str] | None = None) -> int:
     query_document = json.loads(args.query_file.read_text(encoding="utf-8"))
     repository = Repository(args.db, _assets())
     try:
-        result = repository.read(query_document)
+        result = execute_query(query_document, repository, _assets())
     finally:
         repository.close()
     print(json.dumps(result, ensure_ascii=False, indent=2))
