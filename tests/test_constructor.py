@@ -223,3 +223,50 @@ def test_constructor_manifest_facts_survive_repository_reopen_and_minimal_query(
         assert all(fact["fields"]["kind"]["basis"]["evidence"] for fact in response["results"])
     finally:
         reopened.close()
+
+def test_constructor_discards_manifest_observations_if_source_changes_during_tool_execution(tmp_path):
+    import json
+    import shutil
+
+    from semantic_facts.tool_executor import SubprocessToolExecutor
+
+    project = tmp_path / "manifest-mutates-during-tool"
+    (project / "src").mkdir(parents=True)
+    manifest = project / "Cargo.toml"
+    manifest.write_text('[package]\nname = "before"\nversion = "0.1.0"\nedition = "2021"\n', encoding="utf-8")
+    (project / "src" / "lib.rs").write_text("pub fn run() {}\n", encoding="utf-8")
+    assets = tmp_path / "assets"
+    shutil.copytree(ASSETS, assets)
+    matrix_path = assets / "capability-matrix.json"
+    matrix = json.loads(matrix_path.read_text(encoding="utf-8"))
+    candidate = next(entry for entry in matrix["entries"] if entry["tool_id"] == "rust.cargo-metadata")
+    candidate["enabled"] = True
+    candidate["acceptance"] = {
+        "actor": "parser_development",
+        "evidence": ["tests/test_info_parser.py::test_cargo_metadata_parser_emits_workspace_and_dependency_observations_separately"],
+    }
+    matrix_path.write_text(json.dumps(matrix), encoding="utf-8")
+    request_value = _request_for_project(project)
+    request_value["query"]["selections"] = [
+        {"fact_type": "F2", "fields": ["identity", "names"]},
+        {"fact_type": "F4", "fields": ["kind"]},
+    ]
+
+    class MutatingExecutor:
+        def __init__(self):
+            self.delegate = SubprocessToolExecutor({
+                "rust.cargo-metadata": ["cargo", "metadata", "--no-deps", "--format-version", "1"],
+            })
+
+        def execute(self, tool_id, args, *, cwd, timeout_seconds):
+            result = self.delegate.execute(tool_id, args, cwd=cwd, timeout_seconds=timeout_seconds)
+            manifest.write_text(
+                '[package]\nname = "after"\nversion = "0.1.0"\nedition = "2021"\n',
+                encoding="utf-8",
+            )
+            return result
+
+    result = execute_constructor_request(request_value, assets, external_executor=MutatingExecutor())
+
+    assert not any(fact["fact_type"] == "F4" for fact in result["batch"]["facts"])
+    assert any(gap["reason"] == "source_modified" for gap in result["gaps"])
