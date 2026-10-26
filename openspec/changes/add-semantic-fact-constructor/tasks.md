@@ -114,3 +114,13 @@ These tasks follow accepted pure parser adapters. They are prerequisites to enab
 - 7.3–7.5: first accepted Cargo metadata subprocess is now executed and parsed, with F4.kind/F6.kind observations mapped into a schema-valid FactBatch. Source/manifest state is included in source identity, and a post-execution rescan rejects stale output. RED/GREEN evidence: https://github.com/vchs6/code2semantics/actions/runs/40324281385 and https://github.com/vchs6/code2semantics/actions/runs/40324323776.
 - 7.6: narrow Cargo F4 persistence/reopen/minimal-query test passes in the same GREEN run. The task remains unchecked because the full requested contract includes broader F1/F3/F4/F6 mapping, missing-tool/timeout coverage and Python/Rust project manifest acceptance.
 - Matrix decision: keep all research candidates disabled in the checked-in production matrix. Parser and constructor acceptance has been exercised against a temporary test matrix, not yet sufficient for enabling the profile globally.
+
+## 8. Request-level producer deduplication
+
+- [ ] 8.1 Add a RED test proving one selected producer covering multiple requested needs is invoked once and its observations satisfy all matching fields.
+- [ ] 8.2 Add a RED test proving matching values from multiple producers become one fact with merged evidence.
+- [ ] 8.3 Add a RED test proving disagreeing values become an explicit conflict and do not silently overwrite one another.
+- [ ] 8.4 Build a canonical execution-task list keyed by source snapshot, tool ID, invocation profile and arguments; execute each unique task once and fan its observations out to matching needs.
+- [ ] 8.5 Aggregate by repository fact identity before FactBatch validation. Keep repository duplicate-identity validation strict.
+- [ ] 8.6 Test source changes during execution and verify outputs from the stale snapshot are discarded.
+- [ ] 8.7 Run focused tests, repository/query regressions, strict OpenSpec and full CI. Keep new profiles disabled until accepted.
