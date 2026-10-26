@@ -123,3 +123,11 @@
 - `Repository.restore` now verifies required columns across all normalized tables before calling SQLite backup/restore. Both empty and malformed backup tests assert fact/source history remains unchanged after rejection.
 - CI GREEN: https://github.com/vchs6/code2semantics/actions/runs/40299139228 — repository 57 passed; transaction 6; transfer 8; repository acceptance 3; matrix 15; parser 9; scanner 7; runtime acceptance 6; packaging 2; executor 3; producer dispatch 3; combined planning/constructor/induction/query 52; strict OpenSpec passed.
 - Full S1–S12 acceptance and the final product delivery gate remain pending. This repository safety improvement does not imply complete system acceptance.
+
+
+## Root acceptance: unavailable and out-of-scope boundaries (2026-10-26)
+
+- `tests/test_acceptance.py` now exercises the real query/construction path for unavailable roots and out-of-scope node targets. It verifies explicit failure gaps, no fallback to another project, no foreign-source result leakage, and no mutation of the foreign repository's fact rows.
+- Backup restore rejects empty SQLite files and malformed databases with expected table names but incorrect columns. The target's fact/source history remains unchanged on rejection.
+- CI: https://github.com/vchs6/code2semantics/actions/runs/40299401934 — repository 57 passed; transaction 6; transfer 8; repository acceptance 3; matrix 15; parser 9; scanner 7; runtime acceptance 8; packaging 2; executor 3; producer dispatch 3; combined planning/constructor/induction/query 52 passed; strict OpenSpec passed.
+- Root tasks 8.1–8.5 remain pending: this is expanded but not complete S1–S12 coverage; the full external tool/provider → parse → constructor/induction → FactBatch → repository → minimal response path is not yet fully demonstrated. Product gate remains BLOCKED.
