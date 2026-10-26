@@ -229,3 +229,22 @@ def test_query_unavailable_source_returns_gap_without_fallback(tmp_path):
         assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == 0
     finally:
         repository.close()
+def test_same_named_nodes_in_different_projects_keep_distinct_identity(tmp_path):
+    first = tmp_path / "project-a"
+    second = tmp_path / "project-b"
+    first.mkdir()
+    second.mkdir()
+    (first / "engine.py").write_text("class Engine:\n    pass\n", encoding="utf-8")
+    (second / "engine.py").write_text("class Engine:\n    pass\n", encoding="utf-8")
+    query = make_query(first)
+    query["scope"]["directories"] = [str(first.resolve()), str(second.resolve())]
+    repository = Repository(tmp_path / "same-name.db", ASSETS)
+    try:
+        response = execute_query_with_construction(query, repository, ASSETS)
+        assert response["termination"] == "satisfied", response
+        same_named = [fact for fact in response["results"] if "class Engine" in fact["fields"]["names"]["value"]["text"]]
+        assert len(same_named) == 2
+        assert len({fact["node"]["source_id"] for fact in same_named}) == 2
+        assert len({fact["node"]["subject_id"] for fact in same_named}) == 2
+    finally:
+        repository.close()
