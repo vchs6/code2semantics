@@ -95,3 +95,20 @@ def test_scans_mixed_python_and_rust_project(tmp_path, codec):
     assert any("class Runner" in value and "function start" in value for value in names)
     assert all(fact["fields"]["names"]["basis"]["evidence"] for fact in batch["facts"])
     assert all(fact["fields"]["names"]["context"]["environment"]["language"] in {"Python", "Rust"} for fact in batch["facts"])
+
+def test_scanner_records_scope_and_file_direct_node_completeness(tmp_path, codec):
+    project = tmp_path / "inventory-project"
+    project.mkdir()
+    (project / "app.py").write_text(
+        "class Engine:\\n    def run(self):\\n        return True\\n",
+        encoding="utf-8",
+    )
+
+    batch = build_fact_batch(project, codec)
+    assert len(batch["direct_nodes"]) == 2
+    scope_inventory = next(item for item in batch["direct_nodes"] if item["target"]["kind"] == "scope")
+    file_inventory = next(item for item in batch["direct_nodes"] if item["target"]["kind"] == "node")
+    assert scope_inventory["assertion"]["coverage"]["completeness"] == "complete"
+    assert scope_inventory["children"] == [batch["facts"][0]["node"]]
+    assert file_inventory["target"]["node"] == batch["facts"][0]["node"]
+    assert any(child["node_id"].endswith("class-Engine-1") for child in file_inventory["children"])
