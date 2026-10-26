@@ -436,6 +436,7 @@ def execute_query_with_construction(
         return keys
 
     last_constructor_gaps: list[dict[str, Any]] = []
+    budget_exhausted = False
     max_rounds = max(1, query["budget"]["max_rounds"])
     for round_index in range(max_rounds):
         stored = repository.read(query)
@@ -506,6 +507,7 @@ def execute_query_with_construction(
         if not (after_coverage - before_coverage) and not (after_inventory - before_inventory):
             break
         if round_index == max_rounds - 1:
+            budget_exhausted = True
             response["termination"] = "budget_exhausted"
 
     try:
@@ -540,7 +542,9 @@ def execute_query_with_construction(
         response["gaps"] = merged_gaps
     if not response["gaps"]:
         response["termination"] = "satisfied"
-    elif response["termination"] != "budget_exhausted":
+    elif budget_exhausted:
+        response["termination"] = "budget_exhausted"
+    else:
         response["termination"] = "no_progress"
     error = next(response_validator.iter_errors(response), None)
     if error:
