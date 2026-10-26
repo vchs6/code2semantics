@@ -78,7 +78,7 @@ def test_query_runtime_invokes_cargo_once_and_returns_distinct_membership_and_de
         response = execute_query_with_construction(
             query, repository, assets, external_executor=executor
         )
-        assert response["termination"] == "satisfied", {"gaps": response["gaps"], "calls": executor.calls}
+        assert response["termination"] == "satisfied", {"gaps": [(gap["reason"], gap["detail"]) for gap in response["gaps"]], "calls": executor.calls}
         assert {fact["fact_type"] for fact in response["results"]} == {"F4", "F6"}
         assert all(set(fact["fields"]) == {"kind"} for fact in response["results"])
         values = [fact["fields"]["kind"]["value"].get("text", "") for fact in response["results"]]
