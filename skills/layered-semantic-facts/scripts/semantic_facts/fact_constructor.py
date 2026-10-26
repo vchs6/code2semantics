@@ -39,18 +39,19 @@ def construct_fact_batch(
 
         node_id = "file-" + hashlib.sha256(relative.encode("utf-8")).hexdigest()[:20]
         fact_id = "fact-" + hashlib.sha256((relative + "\\0F2").encode("utf-8")).hexdigest()[:20]
+        language = "Rust" if relative.endswith(".rs") else "Python"
         context = {
             "source_ids": [source_id],
             "conditions": [],
-            "environment": {"language": "Python"},
-            "language_semantics": ["Python syntax inventory; runtime behavior not inferred"],
+            "environment": {"language": language},
+            "language_semantics": [language + " syntax inventory; runtime behavior not inferred"],
         }
         coverage = {
-            "domain": f"Python syntax in {relative}",
+            "domain": language + " syntax in " + relative,
             "checked": [relative],
             "excluded": [],
             "completeness": "complete",
-            "method": "Python ast.parse via info_parser",
+            "method": "deterministic declaration parser via info_parser",
         }
 
         def assertion(value: dict[str, Any]) -> dict[str, Any]:
@@ -63,7 +64,7 @@ def construct_fact_batch(
                     "evidence": evidence_items,
                     "premises": [],
                     "method": "deterministic Python AST parser",
-                    "limitations": ["Does not infer runtime behavior or intent"],
+                    "limitations": ["Does not infer runtime behavior or intent", "Rust syntax inventory does not include type checking or macro expansion"] if language == "Rust" else ["Does not infer runtime behavior or intent"],
                 },
                 "value": value,
                 "validity": {"state": "current", "sources": [{"source_id": source_id, "content_state": content_state}]},
