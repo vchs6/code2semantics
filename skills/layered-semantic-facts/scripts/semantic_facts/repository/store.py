@@ -141,30 +141,30 @@ class Repository:
         for row in record.sources:
             value = row.value
             self.connection.execute(
-                "INSERT OR REPLACE INTO sources(source_id, payload) VALUES (?, ?)",
+                "INSERT INTO sources(source_id, payload) VALUES (?, ?)",
                 (value["source_id"], row.payload),
             )
         for row in record.entities:
             value = row.value
             self.connection.execute(
-                "INSERT OR REPLACE INTO entities(entity_key, source_id, subject_id, node_id, payload) VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO entities(entity_key, source_id, subject_id, node_id, payload) VALUES (?, ?, ?, ?, ?)",
                 (row.key, value["source_id"], value["subject_id"], value.get("node_id"), row.payload),
             )
         for row in record.facts:
             value = row.value
             node = value["node"]
             self.connection.execute(
-                "INSERT OR REPLACE INTO facts(fact_key, source_id, subject_id, node_id, fact_id, fact_type, payload) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO facts(fact_key, source_id, subject_id, node_id, fact_id, fact_type, payload) VALUES (?, ?, ?, ?, ?, ?, ?)",
                 (row.key, node["source_id"], node["subject_id"], node["node_id"], value["fact_id"], value["fact_type"], row.payload),
             )
         for row in record.attributes:
             self.connection.execute(
-                "INSERT OR REPLACE INTO attributes(attribute_key, fact_key, field_name, payload) VALUES (?, ?, ?, ?)",
+                "INSERT INTO attributes(attribute_key, fact_key, field_name, payload) VALUES (?, ?, ?, ?)",
                 (row.key, row.fact_key, row.field_path.removeprefix("/fields/"), row.payload),
             )
         for row in record.relations:
             self.connection.execute(
-                "INSERT OR REPLACE INTO relations(relation_key, owner_key, payload) VALUES (?, ?, ?)",
+                "INSERT INTO relations(relation_key, owner_key, payload) VALUES (?, ?, ?)",
                 (row.key, row.owner_key, row.payload),
             )
 
