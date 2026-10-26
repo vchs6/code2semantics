@@ -107,3 +107,24 @@ def test_import_current_rejects_invalid_batch_without_mutating_repository(batch,
     }
     assert after == before
     repository.close()
+
+def test_restore_rejects_empty_sqlite_file_without_changing_fact_history(batch, db_path, tmp_path):
+    import sqlite3
+    import pytest
+    from semantic_facts.repository.store import Repository
+
+    empty_backup = tmp_path / "empty-valid-sqlite.db"
+    with sqlite3.connect(empty_backup):
+        pass
+
+    repository = Repository(db_path)
+    repository.write(batch, "restore-empty-backup-protection")
+    before_facts = repository.connection.execute("SELECT fact_key, payload FROM facts ORDER BY fact_key").fetchall()
+    before_sources = repository.connection.execute("SELECT source_id, payload FROM sources ORDER BY source_id").fetchall()
+
+    with pytest.raises(ValueError, match="repository schema"):
+        repository.restore(empty_backup)
+
+    assert repository.connection.execute("SELECT fact_key, payload FROM facts ORDER BY fact_key").fetchall() == before_facts
+    assert repository.connection.execute("SELECT source_id, payload FROM sources ORDER BY source_id").fetchall() == before_sources
+    repository.close()
