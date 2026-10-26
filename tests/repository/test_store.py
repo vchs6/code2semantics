@@ -55,7 +55,7 @@ def test_read_returns_only_selected_fact_and_fields(batch, db_path):
     repository.write(batch, "submission-1")
     result = repository.read(make_query())
 
-    assert [fact["fact_id"] for fact in result["facts"]] == ["fact-a", "fact-b", "fact-old"]
+    assert [fact["fact_id"] for fact in result["facts"]] == ["fact-a", "fact-b"]
     assert all(list(fact["fields"]) == ["strategy"] for fact in result["facts"])
     assert result["sources"] == batch["sources"]
     assert result["navigation"] == []
