@@ -100,3 +100,10 @@ These tasks follow accepted pure parser adapters. They are prerequisites to enab
 - [ ] 7.4 Implement manifest-output orchestration from selected matrix profile through native command → parser registry → observations. Parsers remain pure; executor owns invocation; constructor owns producer selection and aggregation.
 - [ ] 7.5 Extend fact construction only for public-contract-supported F1/F3/F4/F6 fields, preserving manifest evidence and distinct membership/dependency relation kinds. Unsupported fields must remain explicit gaps; do not fabricate F5/F16 inference.
 - [ ] 7.6 Add end-to-end acceptance from real temporary Python/Rust project manifests through nonempty FactBatch, SQLite write/reopen/read and minimal query projection. Run focused tests and strict OpenSpec; only then enable each matching matrix profile with parser-development acceptance evidence.
+
+
+### Task 7.1–7.2 evidence (2026-10-26)
+
+- RED: https://github.com/vchs6/code2semantics/actions/runs/40321016282 — an enabled/accepted Cargo metadata profile was not selected because constructor planning hard-coded the in-process environment.
+- GREEN: https://github.com/vchs6/code2semantics/actions/runs/40321130067 — the planner now searches the information need's declared environments and retains selected producer profile metadata (tool ID, environment, invocation, output kinds). The focused constructor/plan combination passed 58 tests; strict OpenSpec passed. Product delivery gate remains blocked as expected.
+- Remaining 7.3–7.6: actual subprocess execution, native observation to F1/F3/F4/F6 FactBatch mapping, persistence/reopen/query acceptance, and only then matrix enablement. These remain unchecked.
