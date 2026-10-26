@@ -25,3 +25,16 @@ FULL_END_TO_END_ACCEPTANCE: NOT_YET_PASSED
 The first phase supports Python and Rust source inventories. Python is parsed with the standard-library AST. Rust currently uses a deterministic declaration inventory and delimiter-balance checks; it is not a replacement for rustc/rust-analyzer and does not claim type checking, macro expansion, borrow checking, or runtime semantics.
 
 The Rust parser/registry/scanner tests and mixed-language source-to-FactBatch tests are required CI checks. Full product acceptance remains blocked until tool orchestration, induction, full semantic construction, and dependency-aware incremental invalidation are implemented and verified.
+## Python + Rust CI update (2026-10-26)
+
+Latest CI run: https://github.com/vchs6/code2semantics/actions/runs/40259119661
+
+- Repository tests: 35 passed.
+- Capability matrix tests: 14 passed.
+- Parser tests (Python + Rust registry/declarations): 9 passed.
+- Source scanner tests (including mixed Python/Rust project): 5 passed.
+- Runtime acceptance tests (Python and Rust scan → FactBatch → SQLite → query): 3 passed.
+- Strict OpenSpec validation: passed.
+- Product delivery gate: BLOCKED by design; full orchestration, induction, higher-layer semantic construction, and dependency-aware incremental invalidation are still missing.
+
+Rust parsing is intentionally a lightweight deterministic declaration inventory with delimiter checks, not rustc/rust-analyzer type checking. Do not describe this as full Rust semantic analysis.
