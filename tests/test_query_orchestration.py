@@ -429,8 +429,12 @@ def test_query_rebuild_after_source_deletion_keeps_unaffected_current_facts_and_
     project.mkdir()
     stable_file = project / "stable.py"
     removed_file = project / "removed.py"
-    stable_file.write_text("class Stable:\\n    pass\\n", encoding="utf-8")
-    removed_file.write_text("class Removed:\\n    pass\\n", encoding="utf-8")
+    stable_file.write_text("""class Stable:
+    pass
+""", encoding="utf-8")
+    removed_file.write_text("""class Removed:
+    pass
+""", encoding="utf-8")
     repository = Repository(tmp_path / "query-delete-rebuild.db", ASSETS)
     try:
         first = execute_query_with_construction(make_query(project), repository, ASSETS)
