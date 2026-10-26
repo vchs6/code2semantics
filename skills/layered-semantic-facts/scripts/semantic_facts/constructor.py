@@ -236,6 +236,36 @@ def execute_constructor_request(
                                 "granularities": ["L2"], "fields": {field_name: assertion},
                             })
 
+            if any(
+                profile["environment"] == "subprocess"
+                for item in plan_result["plan"]
+                for profile in item.get("producer_profiles", [])
+            ):
+                try:
+                    refreshed = build_fact_batch_with_gaps(root, codec)
+                    refreshed_source = refreshed["batch"]["sources"][0]
+                except (OSError, ValueError, IndexError) as error:
+                    refreshed_source = None
+                    refresh_detail = str(error)
+                else:
+                    refresh_detail = ""
+                if refreshed_source is None or refreshed_source["content_state"] != actual_source["content_state"]:
+                    sources.pop()
+                    gaps.append({
+                        "fact_type": "F2",
+                        "fields": sorted(set().union(*requested_fields.values())) if requested_fields else [],
+                        "target": request["query"]["target"],
+                        "reason": "source_modified",
+                        "detail": (
+                            f"Source changed during external producer execution: {root}"
+                            if refreshed_source is not None
+                            else f"Cannot revalidate source after external producer execution: {root}: {refresh_detail}"
+                        ),
+                        "context": context,
+                        "coverage": {**coverage, "completeness": "partial"},
+                    })
+                    continue
+
             query_target = request["query"]["target"]
             for inventory in produced["direct_nodes"]:
                 if query_target["kind"] == "scope":
