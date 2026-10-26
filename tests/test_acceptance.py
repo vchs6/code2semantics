@@ -802,7 +802,11 @@ def test_root_acceptance_enumerates_all_direct_children_but_projects_only_reques
     assert response["direct_nodes"]
     scope_inventory = next(item for item in response["direct_nodes"] if item["target"]["kind"] == "scope")
     assert scope_inventory["assertion"]["coverage"]["completeness"] == "complete"
-    child_paths = {child.get("path") for child in scope_inventory["children"]}
-    assert child_paths == {"alpha.py", "beta.py"}
+    import hashlib
+    child_node_ids = {child["node_id"] for child in scope_inventory["children"]}
+    assert child_node_ids == {
+        "file-" + hashlib.sha256(name.encode("utf-8")).hexdigest()[:20]
+        for name in ("alpha.py", "beta.py")
+    }
     assert response["results"]
     assert all(set(fact["fields"]) == {"names"} for fact in response["results"])
