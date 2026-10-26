@@ -131,3 +131,32 @@ def test_query_rebuilds_missing_inventory_without_deleting_existing_facts(tmp_pa
         assert repository.connection.execute("SELECT COUNT(*) FROM inventories").fetchone()[0] >= 1
     finally:
         repository.close()
+
+
+def test_node_query_returns_only_target_fact_and_its_direct_inventory(tmp_path):
+    from semantic_facts.repository.contract import ContractCodec
+    from semantic_facts.source_scanner import build_fact_batch
+
+    project = tmp_path / "node-query-project"
+    project.mkdir()
+    (project / "first.py").write_text("""class FirstEngine:
+    pass
+""", encoding="utf-8")
+    (project / "second.py").write_text("""class SecondEngine:
+    pass
+""", encoding="utf-8")
+    batch = build_fact_batch(project, ContractCodec(ASSETS))
+    target_fact = next(fact for fact in batch["facts"] if "first.py" in fact["fields"]["identity"]["value"]["ref"]["node_id"] or fact["fields"]["locators"]["value"]["text"].startswith("first.py"))
+    query = make_query(project)
+    query["target"] = {"kind": "node", "node": target_fact["node"]}
+
+    repository = Repository(tmp_path / "node-query.db", ASSETS)
+    try:
+        response = execute_query_with_construction(query, repository, ASSETS)
+        assert response["termination"] == "satisfied"
+        assert len(response["results"]) == 1
+        assert response["results"][0]["node"] == target_fact["node"]
+        assert len(response["direct_nodes"]) == 1
+        assert response["direct_nodes"][0]["target"]["node"] == target_fact["node"]
+    finally:
+        repository.close()
