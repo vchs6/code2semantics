@@ -129,3 +129,40 @@ def test_changed_source_appends_new_facts_without_deleting_old_versions(tmp_path
     assert all("function version_one" not in fact["fields"]["names"]["value"]["text"] for fact in current["results"])
     assert len(current["sources"]) == 1
     repository.close()
+
+def test_real_rust_source_scan_store_reopen_and_query(tmp_path, capsys):
+    rust_project = tmp_path / "rust-project"
+    (rust_project / "src").mkdir(parents=True)
+    (rust_project / "src" / "lib.rs").write_text(
+        "use std::fmt::Debug;\npub struct Engine;\npub enum Mode { Fast, Safe }\n\nimpl Engine {\n    pub fn run() {}\n}\n",
+        encoding="utf-8",
+    )
+    database = tmp_path / "rust-facts.db"
+    batch_path = tmp_path / "rust-fact-batch.json"
+
+    assert main(["scan-python", "--root", str(rust_project), "--db", str(database), "--output", str(batch_path)]) == 0
+    report = json.loads(capsys.readouterr().out)
+    assert report["status"] == "stored"
+    batch = json.loads(batch_path.read_text(encoding="utf-8"))
+    names = batch["facts"][0]["fields"]["names"]["value"]["text"]
+    assert "struct Engine" in names
+    assert "enum Mode" in names
+    assert "fn run" in names
+    assert batch["facts"][0]["fields"]["names"]["context"]["environment"]["language"] == "Rust"
+
+    query = {
+        "contract_version": "1.0.0",
+        "catalog_id": "semantic-facts-20261025",
+        "request_id": "rust-acceptance-query",
+        "scope": {"scope_id": "rust-scope", "directories": [str(rust_project)], "excludes": [], "defaulted": False},
+        "target": {"kind": "scope"},
+        "granularity": "L3",
+        "selections": [{"fact_type": "F2", "fields": ["identity", "names"]}],
+        "budget": {"max_rounds": 1, "max_new_assertions": 20},
+    }
+    query_path = tmp_path / "rust-query.json"
+    query_path.write_text(json.dumps(query), encoding="utf-8")
+    assert main(["query", "--db", str(database), "--query-file", str(query_path)]) == 0
+    response = json.loads(capsys.readouterr().out)
+    assert response["termination"] == "satisfied"
+    assert any("struct Engine" in fact["fields"]["names"]["value"]["text"] for fact in response["results"])
