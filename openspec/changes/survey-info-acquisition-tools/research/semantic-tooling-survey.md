@@ -124,3 +124,34 @@
 ## 6. 调研边界自查
 
 本报告不含事实需求定义（归语义事实集清单）、不含契约/schema 结构决策（归 epic 设计阶段 fact-catalog → contract-format → output-schema）；信息需求由清单事实类型逐项派生，未新增、未扩张事实范围。
+
+## 5. First-phase Python + Rust catalogue alignment (2026-10-26)
+
+The active first-phase scope is now the fixed development-time catalogue at `skills/layered-semantic-facts/assets/information-needs.json`, derived from `add-semantic-fact-constructor/design.md`. It currently covers four F2/L3 fields: identity, names, boundary and locators. The earlier Rust-only survey above is retained as historical research context; it is not the complete first-phase language scope.
+
+### 5.1 Python candidates
+
+| Candidate | Current use/coverage | Limitations / gate |
+|---|---|---|
+| Python standard-library `ast` | Parses supplied Python text; emits module, class, function/async-function and import observations with line ranges | Does not execute source or prove runtime behavior; parser component tests must pass for the exact profile |
+| `python -m compileall` | Candidate syntax/bytecode compilation signal for later validation | Not used by the current F2 inventory path; can create `__pycache__`; not semantic evidence |
+| `pyproject.toml`, `setup.cfg`, requirements files | Candidate manifest/config evidence for later F1/F3/F5 needs | Not part of the current fixed F2-only catalogue |
+
+### 5.2 Rust candidates
+
+| Candidate | Current use/coverage | Limitations / gate |
+|---|---|---|
+| Built-in deterministic Rust declaration parser | Parses supplied text; emits module/function/struct/enum/trait/impl/type/const/static/use declarations and delimiter diagnostics | Not rustc/rust-analyzer; no type checking, macro expansion, borrow checking or runtime behavior |
+| `cargo metadata --no-deps --format-version 1` | Candidate workspace/target/dependency inventory for a future catalogue extension | Not invoked by current F2 scanner; requires Cargo and an explicit execution policy |
+| `cargo check` / `rustc` | Candidate compile/type-check evidence | Toolchain availability not verified in this CI run; project code must never be executed implicitly as a side effect of a syntax query |
+| `rust-analyzer` | Candidate semantic symbols, references and call hierarchy | Installation/version and project readiness are environment-specific and unverified; no matrix entry enabled from ecosystem presence alone |
+| `Cargo.toml`, `Cargo.lock`, `rust-toolchain.toml` | Candidate manifest/toolchain evidence for later F1/F3/F5 needs | Not part of the current fixed F2-only catalogue |
+
+### 5.3 Current acceptance evidence and matrix state
+
+- Parser registry and declaration tests: `tests/test_info_parser.py`.
+- Mixed-language scanner tests: `tests/test_source_scanner.py`.
+- Real-source integration: `tests/test_acceptance.py` exercises Python and Rust source → parser → FactBatch → SQLite → reopen → query.
+- CI: https://github.com/vchs6/code2semantics/actions/runs/40261330788 (component suites and strict OpenSpec pass; product delivery gate remains intentionally blocked because full constructor orchestration is incomplete).
+- No external tool such as cargo/rustc/rust-analyzer is claimed as installed or accepted. The capability matrix remains empty; this survey does not enable entries.
+- Future needs outside F2 identity/names/boundary/locators must enter via a development-time OpenSpec change, tool research, parser acceptance and a separate matrix enablement action. Runtime code must not extend the catalogue or matrix.
