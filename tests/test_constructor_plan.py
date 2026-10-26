@@ -186,3 +186,42 @@ def test_constructor_plan_selects_accepted_subprocess_producer_for_manifest_need
     assert result["plan"][0]["need_id"] == "source.f4.kind"
     assert result["plan"][0]["producer_ids"] == ["rust.cargo-metadata"]
     assert result["plan"][0]["producer_profiles"][0]["environment"] == "subprocess"
+
+def test_producer_selection_prefers_minimum_sufficient_profile_covering_multiple_needs(tmp_path):
+    from semantic_facts.capability_matrix import CapabilityMatrix
+    from semantic_facts.constructor_plan import select_enabled_producers
+
+    matrix = CapabilityMatrix(tmp_path / "matrix.json")
+    base = {
+        "description": "accepted producer",
+        "output_kinds": ["structured-observations"],
+        "languages": ["python"],
+        "platforms": ["linux"],
+        "environment": "in-process",
+        "invocation": ["producer"],
+        "combinations": [],
+        "limitations": ["bounded declared metadata"],
+        "enabled": True,
+        "acceptance": {"actor": "parser_development", "evidence": ["fixture.json"]},
+        "research_basis": ["test fixture"],
+    }
+    matrix.replace([
+        dict(base, tool_id="tool.all", information_need_ids=["syntax.f2.identity", "syntax.f2.names"]),
+        dict(base, tool_id="tool.identity", information_need_ids=["syntax.f2.identity"]),
+        dict(base, tool_id="tool.names", information_need_ids=["syntax.f2.names"]),
+    ])
+
+    selected = select_enabled_producers(
+        matrix,
+        ["syntax.f2.identity", "syntax.f2.names"],
+        "Python", "Linux", "in-process",
+    )
+
+    chosen_ids = {
+        item["tool_id"]
+        for entries in selected.values()
+        for item in entries
+    }
+    assert chosen_ids == {"tool.all"}
+    assert [item["tool_id"] for item in selected["syntax.f2.identity"]] == ["tool.all"]
+    assert [item["tool_id"] for item in selected["syntax.f2.names"]] == ["tool.all"]
