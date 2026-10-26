@@ -100,3 +100,11 @@ CI run: https://github.com/vchs6/code2semantics/actions/runs/40277417171
 - Navigation projection deduplicates semantically identical edges by source, target, relation and shared conditions while retaining distinct parent edges, reverse/cycle edges, external endpoints, and edges whose conditions contradict each other. It does not recursively walk the graph or claim a contradictory conditional cycle is executable.
 - Added regression coverage for multi-parent shape, duplicate edges, cycle edges, external references and mutually contradictory conditions. Historical relation rows remain stored.
 - Full product delivery gate remains blocked because higher-layer semantic graph inference, dependency-aware reconstruction and full S1–S12 acceptance are not complete.
+## Integrated repository acceptance update (2026-10-26)
+
+CI run: https://github.com/vchs6/code2semantics/actions/runs/40277635793
+
+- Repository suite: 52 passed; capability matrix 15; parser 9; scanner 7; source acceptance 4; packaging 2; bounded executor 3; producer dispatch 3; combined planning/constructor/binding/induction/query 51 passed.
+- Strict OpenSpec and public contract validation passed. The only failed step is the product delivery gate, which remains intentionally blocked for full-system S1–S12 acceptance.
+- Added integrated repository acceptance covering write/reopen, local field invalidation, transitive premise filtering, explicit revalidation, current export and import into a fresh database. It asserts that fact rows remain unchanged throughout invalidation/revalidation and import/export.
+- This verifies the repository lifecycle more completely; it does not close the full product gate for tool orchestration, higher-layer semantic inference, or dependency-aware construction.
