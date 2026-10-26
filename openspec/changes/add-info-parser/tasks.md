@@ -46,3 +46,8 @@ The current parser tasks cover only supplied Python/Rust syntax text. Additional
 - RED: CI run https://github.com/vchs6/code2semantics/actions/runs/40320249864 — new parser tests failed because the adapters did not exist.
 - GREEN component evidence: https://github.com/vchs6/code2semantics/actions/runs/40320586364 — parser component 12 passed; capability matrix 15 passed; constructor/query suite 57 passed; strict OpenSpec passed. Overall workflow remains blocked only by the product delivery gate, as S1–S12 is not complete.
 - Important dependency discovered: `plan_constructor_request` currently queries only `environment="in-process"`; it cannot select these subprocess profiles yet. Therefore the new matrix candidates remain disabled. Task 4.4 stays pending until constructor planning/execution supports the exact subprocess invocation profiles and the acceptance evidence is attached. Do not mark a profile enabled just because its pure parser test passes.
+
+
+### Parser-to-constructor interface review (2026-10-26)
+
+The new parsers return schema-valid observations and preserve provenance, but parser observations alone are not FactBatch facts. The consumer must map the observation's information need to the corresponding fact type/field without conflating workspace membership with dependency. The constructor design/tasks now own that mapping and end-to-end proof. This parser change does not claim full semantic production.
