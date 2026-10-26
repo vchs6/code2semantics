@@ -59,9 +59,12 @@ def build_fact_batch(root: str | Path, codec: ContractCodec) -> dict[str, Any]:
         snapshot_digest.update(relative.encode("utf-8"))
         snapshot_digest.update(b"\\0")
         snapshot_digest.update(hashlib.sha256(source_text.encode("utf-8")).digest())
-    content_state = "sha256:" + snapshot_digest.hexdigest()
+    snapshot_hash = snapshot_digest.hexdigest()
+    content_state = "sha256:" + snapshot_hash
     root_hash = hashlib.sha256(str(project_root).encode("utf-8")).hexdigest()[:20]
-    source_id = "src-" + root_hash
+    # Version source identity by content so re-scans append a new fact set rather
+    # than replacing or deleting facts from an earlier source state.
+    source_id = "src-" + root_hash + "-" + snapshot_hash[:20]
     subject_id = "project-" + root_hash
     dirty, has_untracked = _git_state(project_root)
     source_record = {
