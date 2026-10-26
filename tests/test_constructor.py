@@ -61,3 +61,23 @@ def test_constructor_detects_source_changed_during_construction(tmp_path):
 
     assert result["batch"]["facts"] == []
     assert any(gap["reason"] == "source_modified" for gap in result["gaps"])
+
+def test_constructor_supports_rust_source_with_syntax_only_evidence(tmp_path):
+    project = tmp_path / "rust-constructor-project"
+    (project / "src").mkdir(parents=True)
+    (project / "src" / "lib.rs").write_text(
+        "pub struct Engine;\npub enum Mode { Fast, Safe }\n\nimpl Engine {\n    pub fn run() {}\n}\n",
+        encoding="utf-8",
+    )
+    value = _request_for_project(project)
+
+    result = execute_constructor_request(value, ASSETS)
+
+    assert result["gaps"] == []
+    assert result["batch"]["facts"]
+    names = result["batch"]["facts"][0]["fields"]["names"]["value"]["text"]
+    assert "struct Engine" in names
+    assert "enum Mode" in names
+    assertion = result["batch"]["facts"][0]["fields"]["names"]
+    assert assertion["context"]["environment"]["language"] == "Rust"
+    assert any("No type checking" in limitation or "type checking" in limitation for limitation in assertion["basis"]["limitations"])
