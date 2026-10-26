@@ -293,3 +293,32 @@ def test_existing_field_can_be_enriched_with_new_evidence_without_replacing_old_
     assert "ev-new-tool" in evidence_ids
     assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == 1
     repository.close()
+
+def test_evidence_enrichment_rejects_conflicting_reuse_of_evidence_identity(batch, db_path):
+    import copy
+    from semantic_facts.repository.store import Repository
+    from semantic_facts.repository.types import WriteConflict
+
+    first = copy.deepcopy(batch)
+    first["facts"] = [fact for fact in first["facts"] if fact["fact_id"] == "fact-a"]
+    first["facts"][0]["fields"] = {"strategy": first["facts"][0]["fields"]["strategy"]}
+    first["navigation"] = []
+    first["direct_nodes"] = []
+    first["conflicts"] = []
+
+    second = copy.deepcopy(first)
+    assertion = second["facts"][0]["fields"]["strategy"]
+    changed = copy.deepcopy(assertion["basis"]["evidence"][0])
+    changed["locator"] = "different-locator-for-same-evidence-id"
+    assertion["basis"]["evidence"].append(changed)
+
+    repository = Repository(db_path)
+    repository.write(first, "evidence-conflict-first")
+    with pytest.raises(WriteConflict, match="evidence identity conflict"):
+        repository.write(second, "evidence-conflict-second")
+
+    result = repository.read(make_query(fields=("strategy",)))
+    fact = next(item for item in result["facts"] if item["fact_id"] == "fact-a")
+    assert fact["fields"]["strategy"]["basis"]["evidence"] == first["facts"][0]["fields"]["strategy"]["basis"]["evidence"]
+    assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == 1
+    repository.close()
