@@ -448,8 +448,12 @@ def test_query_cli_rebuilds_current_snapshot_after_source_file_deletion(tmp_path
     project.mkdir()
     stable = project / "stable.py"
     removed = project / "removed.py"
-    stable.write_text("class Stable:\\n    pass\\n", encoding="utf-8")
-    removed.write_text("class Removed:\\n    pass\\n", encoding="utf-8")
+    stable.write_text("""class Stable:
+    pass
+""", encoding="utf-8")
+    removed.write_text("""class Removed:
+    pass
+""", encoding="utf-8")
     database = tmp_path / "query-cli-deleted-source.db"
 
     assert main(["scan-source", "--root", str(project), "--db", str(database)]) == 0
