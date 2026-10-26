@@ -113,7 +113,7 @@ def construct_fact_batch(
     project_context = {
         "source_ids": [source_id],
         "conditions": [],
-        "environment": {"languages": sorted({"Rust" if path.endswith(".rs") else "Python" for path, _ in parsed_files})},
+        "environment": {"languages": ",".join(sorted({"Rust" if path.endswith(".rs") else "Python" for path, _ in parsed_files}))},
         "language_semantics": ["Direct source-file inventory is limited to supported Python/Rust syntax files."],
     }
     project_coverage = {
