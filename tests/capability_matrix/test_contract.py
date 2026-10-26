@@ -57,8 +57,8 @@ def test_current_matrix_separates_accepted_profiles_from_disabled_research_candi
 
     research_candidates = set(entries) - {"python.ast-source", "rust.syntax-source"}
     assert research_candidates == {
-        "python.compileall", "rust.cargo-metadata", "rust.cargo-check",
-        "rust.rust-analyzer", "multi.ctags", "multi.ast-grep",
+        "python.compileall", "python.pyproject-toml", "rust.cargo-metadata",
+        "rust.cargo-check", "rust.rust-analyzer", "multi.ctags", "multi.ast-grep",
     }
     for tool_id in research_candidates:
         entry = entries[tool_id]
