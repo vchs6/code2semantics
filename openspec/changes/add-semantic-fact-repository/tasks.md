@@ -14,11 +14,11 @@
 
 ## 2. SQLite ��ʵ��д���뾫ȷ��ȡ
 
-- [ ] 2.1 ��д `test_store.py`��ͨ��ͳһ `write(batch, submission_key)` д��ͬ�������ʵ��ͬ���Ͳ�ͬ�����ĺ͹�����Դ���رպ��ؿ���ȡ��ֱ�Ӻ��� facts/attributes/relations Ϊ�����ж��� FactBatch blob���� Query �������ֻ������С��ʵ����
-- [ ] 2.2 ���� `python -m pytest tests/repository/test_store.py -q` RED��ȷ��ʧ������ Repository/SQLite API ȱʧ��
-- [ ] 2.3 ʵ�����ӡ�DDL���������Դ�� FactBatch ���桢д��� `read(query)`����ƥ�䷵����ͨ�ռ��ϣ���ɨ����Դ������ȫ��ѯ������
-- [ ] 2.4 �������� 2 RED ���`test_contract.py` ����ʵ��ʱ SQLite �ؿ����� GREEN����¼·��ѡ�񡢲�ѯ���˺Ϳ�ƥ����Ϊ��
-- [ ] 2.5 �ύ store��ͳһ API�����Ժ��ĵ����˶�ֻ���������ļ���
+- [x] 2.1 ��д `test_store.py`��ͨ��ͳһ `write(batch, submission_key)` д��ͬ�������ʵ��ͬ���Ͳ�ͬ�����ĺ͹�����Դ���رպ��ؿ���ȡ��ֱ�Ӻ��� facts/attributes/relations Ϊ�����ж��� FactBatch blob���� Query �������ֻ������С��ʵ����
+- [x] 2.2 ���� `python -m pytest tests/repository/test_store.py -q` RED��ȷ��ʧ������ Repository/SQLite API ȱʧ��
+- [x] 2.3 ʵ�����ӡ�DDL���������Դ�� FactBatch ���桢д��� `read(query)`����ƥ�䷵����ͨ�ռ��ϣ���ɨ����Դ������ȫ��ѯ������
+- [x] 2.4 �������� 2 RED ���`test_contract.py` ����ʵ��ʱ SQLite �ؿ����� GREEN����¼·��ѡ�񡢲�ѯ���˺Ϳ�ƥ����Ϊ��
+- [x] 2.5 �ύ store��ͳһ API�����Ժ��ĵ����˶�ֻ���������ļ���
 
 ## 3. ԭ�ӡ��ݵȺ;ֲ�ά��
 
@@ -30,9 +30,9 @@
 
 ## 4. ��ǰ״̬��ȡ���н��ϵ����
 
-- [ ] 4.1 ��д��Ч�Ժ�ǰ����ԣ�ʧЧ��ʵ��������Ч�������Ҫǰ�ᰴ���ύ״̬��飬֤�ݺ� coverage ԭ���������ֿⲻ������Դ�ļ���
-- [ ] 4.2 ���� `python -m pytest tests/repository/test_validity.py -q` RED��
-- [ ] 4.3 ʵ����ȷǰ��հ���ʧЧ״̬���ˡ�ά����ȡ�� token ��飻������δ����������Ӱ�죬�����Ϳս����
+- [x] 4.1 ��д��Ч�Ժ�ǰ����ԣ�ʧЧ��ʵ��������Ч�������Ҫǰ�ᰴ���ύ״̬��飬֤�ݺ� coverage ԭ���������ֿⲻ������Դ�ļ���
+- [x] 4.2 ���� `python -m pytest tests/repository/test_validity.py -q` RED��
+- [x] 4.3 ʵ����ȷǰ��հ���ʧЧ״̬���ˡ�ά����ȡ�� token ��飻������δ����������Ӱ�죬�����Ϳս����
 - [ ] 4.4 ��дͼ���ԣ��ุ���رߡ���ϵȥ�ء����/��Ԥ�㡢external �˵����С��ʵ��ͶӰ��
 - [ ] 4.5 ������Ч�ԡ�ͼ������ʹ洢���� GREEN���ύʵ�֡����Ժ��ĵ���
 
@@ -55,3 +55,12 @@
 - �������ɲ�ѯ�빹�������ɺ��ٽ��ж˵�����֤��
 - ����ʵ�ֺ���֤��ɺ󣬰���Ŀ������鲢�鵵 OpenSpec �����
 
+
+
+## Verified implementation evidence (2026-10-26)
+
+- Atomic immutable row writes now persist sources, entities, facts, attributes, relations, evidence, evidence links, premises, direct-node inventories, conflicts and conflict links. Repeated identity/payload conflicts are rejected rather than replaced.
+- Repository reads use source_heads, return current source facts only, and filter assertions with non-current validity or stale evidence content states. Invalid/stale rows remain in SQLite; no delete is used for invalidation.
+- Added tests: tests/repository/test_validity.py and tests/repository/test_acceptance.py. Transfer tests restore to a separate database; acceptance tests verify normalized row counts, query, backup/restore equality and conflict rollback.
+- CI run https://github.com/vchs6/code2semantics/actions/runs/40268373808 is validating the updated repository and package suites. The previous completed repository suite passed 39 tests before the newest normalized row and acceptance changes; strict OpenSpec passed. Use the linked run for final pass/fail.
+- Still pending: a public local-mutation API for field/relation/evidence invalidation, complete premise dependency invalidation and graph-cycle traversal tests, current import/export API, and full repository acceptance after those APIs land. These tasks remain pending; this evidence does not claim the whole repository component complete.
