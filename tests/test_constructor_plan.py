@@ -373,7 +373,9 @@ def test_request_plan_does_not_select_producers_for_languages_absent_from_source
 
     project = tmp_path / "python-only"
     project.mkdir()
-    (project / "app.py").write_text("def main():\\n    return 0\\n", encoding="utf-8")
+    (project / "app.py").write_text("""def main():
+    return 0
+""", encoding="utf-8")
     (project / "pyproject.toml").write_text(
         '[project]\\nname = "python-only"\\nversion = "1.0.0"\\n',
         encoding="utf-8",
