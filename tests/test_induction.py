@@ -22,7 +22,7 @@ def fixture(tmp_path):
         "subject": fact["node"],
         "information_need_id": "python.syntax_inventory",
         "payload": {"kind": "text", "text": assertion["value"]["text"]},
-        "evidence": [evidence],
+        "evidence": assertion["basis"]["evidence"],
         "context": assertion["context"],
         "coverage": assertion["coverage"],
     }
