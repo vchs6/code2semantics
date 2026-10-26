@@ -232,6 +232,216 @@ def parse_rust_request(request: dict[str, Any], asset_root: str | Path | None = 
     return result
 
 
+
+def _native_observation(
+    *,
+    profile: dict[str, Any],
+    need_id: str,
+    locator: str,
+    text: str,
+    kind: str,
+    digest: str,
+    ordinal: str,
+) -> dict[str, Any]:
+    source = profile["sources"][0]
+    source_id = source["source_id"]
+    source_path = _slug(locator)
+    return {
+        "observation_id": _slug(f"obs-{source_id}-{need_id}-{ordinal}"),
+        "subject": {
+            "source_id": source_id,
+            "subject_id": _slug(source["root"]),
+            "node_id": _slug(f"{source_path}:{need_id}:{ordinal}"),
+        },
+        "information_need_id": need_id,
+        "payload": {"kind": "text", "text": text},
+        "evidence": [{
+            "evidence_id": _slug(f"ev-{source_id}-{need_id}-{ordinal}"),
+            "source_id": source_id,
+            "content_state": source["content_state"],
+            "kind": kind,
+            "locator": locator,
+            "content_digest": digest,
+            "relation": "supports",
+        }],
+        "context": {
+            "source_ids": [source_id],
+            "conditions": [],
+            "environment": profile["environment"],
+            "language_semantics": ["Native tool output only; no unsupported semantics inferred"],
+        },
+        "coverage": profile["coverage"],
+    }
+
+
+def _native_gap(
+    profile: dict[str, Any],
+    validator: Draft202012Validator,
+    *,
+    fact_type: str,
+    fields: list[str],
+    reason: str,
+    detail: str,
+) -> dict[str, Any]:
+    result = {
+        "kind": "parse_result",
+        "observations": [],
+        "gaps": [{
+            "fact_type": fact_type,
+            "fields": fields,
+            "target": {"kind": "scope"},
+            "reason": reason,
+            "detail": detail,
+            "context": {
+                "source_ids": [source["source_id"] for source in profile["sources"]],
+                "conditions": [],
+                "environment": profile["environment"],
+                "language_semantics": ["Native output could not support a stronger claim"],
+            },
+            "coverage": profile["coverage"],
+        }],
+    }
+    error = next(validator.iter_errors(result), None)
+    if error:
+        raise ParserContractError(f"native parser produced invalid gap {list(error.absolute_path)}: {error.message}")
+    return result
+
+
+def parse_cargo_metadata_request(
+    request: dict[str, Any], asset_root: str | Path | None = None
+) -> dict[str, Any]:
+    """Convert supplied Cargo metadata JSON into evidence-backed manifest observations."""
+    if asset_root is None:
+        asset_root = Path(__file__).resolve().parents[2] / "assets"
+    request_validator, result_validator = _validators(Path(asset_root))
+    error = next(request_validator.iter_errors(request), None)
+    if error:
+        raise ParserContractError(f"parse request {list(error.absolute_path)}: {error.message}")
+    profile = request["invocation_profile"]
+    if profile["tool_id"] != "rust.cargo-metadata":
+        return _unsupported(profile, result_validator)
+    if len(profile["sources"]) != 1:
+        return _native_gap(profile, result_validator, fact_type="F4", fields=["enumeration"],
+                           reason="unsupported_profile", detail="cargo metadata requires exactly one source")
+    raw = request["tool_native_output"]["text"]
+    digest = "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
+    try:
+        document = json.loads(raw)
+    except json.JSONDecodeError as error:
+        return _native_gap(profile, result_validator, fact_type="F4", fields=["enumeration"],
+                           reason="unparseable", detail=f"Cargo metadata JSON parse error at line {error.lineno}: {error.msg}")
+    if not isinstance(document, dict) or document.get("version") != 1:
+        return _native_gap(profile, result_validator, fact_type="F4", fields=["enumeration"],
+                           reason="unsupported_profile", detail="Unsupported Cargo metadata JSON version; expected version 1")
+    packages = document.get("packages")
+    members = document.get("workspace_members")
+    if not isinstance(packages, list) or not isinstance(members, list):
+        return _native_gap(profile, result_validator, fact_type="F4", fields=["enumeration"],
+                           reason="unparseable", detail="Cargo metadata requires packages and workspace_members arrays")
+    observations: list[dict[str, Any]] = []
+    package_ids = {p.get("id") for p in packages if isinstance(p, dict) and isinstance(p.get("id"), str)}
+    for index, member in enumerate(members):
+        if not isinstance(member, str):
+            return _native_gap(profile, result_validator, fact_type="F4", fields=["enumeration"],
+                               reason="unparseable", detail=f"workspace_members[{index}] must be a string")
+        if member not in package_ids:
+            return _native_gap(profile, result_validator, fact_type="F4", fields=["enumeration"],
+                               reason="unparseable", detail=f"workspace member {member!r} has no package record")
+        package = next(p for p in packages if isinstance(p, dict) and p.get("id") == member)
+        name = package.get("name", member)
+        observations.append(_native_observation(
+            profile=profile, need_id="source.f4.kind",
+            locator=f"cargo-metadata:/workspace_members/{index}",
+            text=f"workspace member: {name} ({member})",
+            kind="manifest", digest=digest, ordinal=f"member-{index}",
+        ))
+    for package_index, package in enumerate(packages):
+        if not isinstance(package, dict) or not isinstance(package.get("name"), str) or not isinstance(package.get("id"), str):
+            return _native_gap(profile, result_validator, fact_type="F3", fields=["entries"],
+                               reason="unparseable", detail=f"packages[{package_index}] is missing required name/id")
+        manifest_path = package.get("manifest_path")
+        if isinstance(manifest_path, str):
+            observations.append(_native_observation(
+                profile=profile, need_id="source.f3.entries",
+                locator=f"cargo-metadata:/packages/{package_index}/manifest_path",
+                text=f"Cargo package manifest: {manifest_path}; package: {package['name']}",
+                kind="manifest", digest=digest, ordinal=f"manifest-{package_index}",
+            ))
+        targets = package.get("targets", [])
+        dependencies = package.get("dependencies", [])
+        if not isinstance(targets, list) or not isinstance(dependencies, list):
+            return _native_gap(profile, result_validator, fact_type="F6", fields=["enumeration"],
+                               reason="unparseable", detail=f"packages[{package_index}] targets/dependencies must be arrays")
+        for target_index, target in enumerate(targets):
+            if not isinstance(target, dict) or not isinstance(target.get("name"), str):
+                return _native_gap(profile, result_validator, fact_type="F3", fields=["entries"],
+                                   reason="unparseable", detail=f"packages[{package_index}].targets[{target_index}] is malformed")
+            observations.append(_native_observation(
+                profile=profile, need_id="source.f3.entries",
+                locator=f"cargo-metadata:/packages/{package_index}/targets/{target_index}",
+                text=f"Cargo target: {package['name']}::{target['name']} kind={target.get('kind', [])} src={target.get('src_path', 'unknown')}",
+                kind="manifest", digest=digest, ordinal=f"target-{package_index}-{target_index}",
+            ))
+        for dependency_index, dependency in enumerate(dependencies):
+            if not isinstance(dependency, dict) or not isinstance(dependency.get("name"), str):
+                return _native_gap(profile, result_validator, fact_type="F6", fields=["enumeration"],
+                                   reason="unparseable", detail=f"packages[{package_index}].dependencies[{dependency_index}] is malformed")
+            observations.append(_native_observation(
+                profile=profile, need_id="source.f6.kind",
+                locator=f"cargo-metadata:/packages/{package_index}/dependencies/{dependency_index}",
+                text=f"declared package dependency: {package['name']} -> {dependency['name']} kind={dependency.get('kind') or 'normal'} optional={dependency.get('optional', False)}",
+                kind="manifest", digest=digest, ordinal=f"dependency-{package_index}-{dependency_index}",
+            ))
+    observations.sort(key=lambda item: (item["evidence"][0]["locator"], item["observation_id"]))
+    result = {"kind": "parse_result", "observations": observations, "gaps": []}
+    error = next(result_validator.iter_errors(result), None)
+    if error:
+        raise ParserContractError(f"Cargo metadata parser produced invalid result {list(error.absolute_path)}: {error.message}")
+    return result
+
+
+def parse_compileall_request(
+    request: dict[str, Any], asset_root: str | Path | None = None
+) -> dict[str, Any]:
+    """Convert supplied compileall diagnostics; success is only a syntax signal."""
+    if asset_root is None:
+        asset_root = Path(__file__).resolve().parents[2] / "assets"
+    request_validator, result_validator = _validators(Path(asset_root))
+    error = next(request_validator.iter_errors(request), None)
+    if error:
+        raise ParserContractError(f"parse request {list(error.absolute_path)}: {error.message}")
+    profile = request["invocation_profile"]
+    if profile["tool_id"] != "python.compileall":
+        return _unsupported(profile, result_validator)
+    if len(profile["sources"]) != 1:
+        return _native_gap(profile, result_validator, fact_type="F9", fields=["language_semantics"],
+                           reason="unsupported_profile", detail="compileall requires exactly one source")
+    raw = request["tool_native_output"]["text"]
+    digest = "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
+    if not raw.strip():
+        observations = [_native_observation(
+            profile=profile, need_id="source.f9.language-semantics",
+            locator="compileall:stdout",
+            text="compileall completed without diagnostics for the invoked scope; syntax/bytecode signal only, no runtime behavior inferred",
+            kind="observation", digest=digest, ordinal="no-diagnostics",
+        )]
+    else:
+        if "Error compiling" not in raw and "SyntaxError" not in raw and "Traceback" not in raw:
+            return _native_gap(profile, result_validator, fact_type="F9", fields=["language_semantics"],
+                               reason="unparseable", detail="Unrecognized compileall diagnostic format")
+        observations = [_native_observation(
+            profile=profile, need_id="source.f9.language-semantics",
+            locator="compileall:stdout",
+            text="compileall diagnostic (not a runtime claim): " + raw.strip(),
+            kind="observation", digest=digest, ordinal="diagnostic",
+        )]
+    result = {"kind": "parse_result", "observations": observations, "gaps": []}
+    error = next(result_validator.iter_errors(result), None)
+    if error:
+        raise ParserContractError(f"compileall parser produced invalid result {list(error.absolute_path)}: {error.message}")
+    return result
+
+
 def _unsupported(profile: dict[str, Any], validator: Draft202012Validator) -> dict[str, Any]:
     return _gap_result(profile, "unsupported_profile", f"unsupported tool profile: {profile['tool_id']}", validator)
 
@@ -276,6 +486,8 @@ class ParserRegistry:
         self._parsers: dict[str, Any] = {}
         self.register("python.ast-source", lambda request: parse_python_request(request, self.asset_root))
         self.register("rust.syntax-source", lambda request: parse_rust_request(request, self.asset_root))
+        self.register("rust.cargo-metadata", lambda request: parse_cargo_metadata_request(request, self.asset_root))
+        self.register("python.compileall", lambda request: parse_compileall_request(request, self.asset_root))
 
     def register(self, tool_id: str, parser: Any) -> None:
         if not isinstance(tool_id, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]*", tool_id):
