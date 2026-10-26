@@ -168,3 +168,20 @@ def test_provider_rejects_untrusted_commands_from_request_payload():
 
     with pytest.raises(ValueError, match="provider_command"):
         invoke_induction_provider("fixture-provider", request, registry)
+
+def test_provider_missing_executable_fails_closed(tmp_path):
+    request = _request(tmp_path / "source")
+    registry = InductionProviderRegistry({
+        "fixture-provider": {
+            "argv": [str(tmp_path / "missing-provider-executable")],
+            "timeout_seconds": 1,
+            "max_stdout_bytes": 1024,
+            "max_stderr_bytes": 1024,
+        }
+    })
+
+    result = invoke_induction_provider("fixture-provider", request, registry)
+
+    assert result["execution_status"] == "unavailable_tool"
+    assert result["induction_result"]["batch"]["facts"] == []
+    assert result["induction_result"]["gaps"]
