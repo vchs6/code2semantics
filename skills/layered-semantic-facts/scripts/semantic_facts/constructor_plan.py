@@ -62,7 +62,10 @@ def _available_source_languages(request: dict[str, Any]) -> set[str] | None:
     existing_root = False
     languages: set[str] = set()
     for source in roots:
-        root = Path(source.get("root", ""))
+        root_value = source.get("root")
+        if not isinstance(root_value, str) or not root_value:
+            continue
+        root = Path(root_value)
         if not root.is_dir():
             continue
         existing_root = True
