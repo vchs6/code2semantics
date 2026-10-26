@@ -303,3 +303,48 @@ def test_constructor_reports_gap_when_subprocess_profile_is_accepted_but_executo
 
     assert not any(fact["fact_type"] == "F4" for fact in result["batch"]["facts"])
     assert any(gap["reason"] == "unavailable_tool" and "executor" in gap["detail"].lower() for gap in result["gaps"])
+
+def test_constructor_consumes_accepted_pyproject_profile_into_runtime_and_dependency_facts(tmp_path):
+    import json
+    import shutil
+
+    project = tmp_path / "pyproject-consumer"
+    project.mkdir()
+    (project / "app.py").write_text("def main():\n    return 0\n", encoding="utf-8")
+    (project / "pyproject.toml").write_text(
+        '[project]\nname = "pyproject-consumer"\nversion = "1.0"\n'
+        'dependencies = ["requests>=2"]\n',
+        encoding="utf-8",
+    )
+    assets = tmp_path / "assets"
+    shutil.copytree(ASSETS, assets)
+    matrix_path = assets / "capability-matrix.json"
+    matrix = json.loads(matrix_path.read_text(encoding="utf-8"))
+    candidate = next(entry for entry in matrix["entries"] if entry["tool_id"] == "python.pyproject-toml")
+    candidate["enabled"] = True
+    candidate["acceptance"] = {
+        "actor": "parser_development",
+        "evidence": ["tests/test_info_parser.py::test_pyproject_toml_parser_emits_manifest_and_script_observations"],
+    }
+    matrix_path.write_text(json.dumps(matrix), encoding="utf-8")
+    value = _request_for_project(project)
+    value["query"]["selections"] = [
+        {"fact_type": "F2", "fields": ["identity", "names"]},
+        {"fact_type": "F3", "fields": ["runtime"]},
+        {"fact_type": "F6", "fields": ["kind"]},
+    ]
+
+    result = execute_constructor_request(value, assets)
+
+    assert any(fact["fact_type"] == "F3" for fact in result["batch"]["facts"])
+    assert any(fact["fact_type"] == "F6" for fact in result["batch"]["facts"])
+    assert any(
+        "pyproject-consumer" in assertion["value"].get("text", "")
+        for fact in result["batch"]["facts"] if fact["fact_type"] == "F3"
+        for assertion in fact["fields"].values()
+    )
+    assert any(
+        "requests>=2" in assertion["value"].get("text", "")
+        for fact in result["batch"]["facts"] if fact["fact_type"] == "F6"
+        for assertion in fact["fields"].values()
+    )
