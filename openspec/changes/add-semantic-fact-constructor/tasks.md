@@ -69,3 +69,14 @@ Implementation is TDD: write a failing behavior test (RED), implement the smalle
 - Tests: `tests/test_producer_dispatch.py` covers successful subprocess→parser conversion, subprocess failure gaps, and disabled producer rejection. `tests/test_source_scanner.py` and `tests/test_constructor.py` cover independent file failure preservation. `tests/test_constructor_binding.py` covers source/subject/content/locator binding.
 - CI `https://github.com/vchs6/code2semantics/actions/runs/40276135137`: repository 45, matrix 15, parser 9, scanner 7, source acceptance 4, packaging 2, bounded executor 3, producer dispatch 3, combined planning/constructor/binding/induction/query 51 passed; strict OpenSpec passed. The product delivery gate remains blocked for full S1–S12 system acceptance.
 - Boundary: subprocess dispatch is implemented and tested as an injected, allowlisted path. The first-phase checked-in Python/Rust matrix continues to use in-process parsers; no external tool is marked enabled without parser-development acceptance.
+
+## 6. S1–S12 source-project information needs (next apply; prerequisite to tool survey)
+
+These tasks are deliberately pending. The existing checked tasks validate only the initial F2/L3 slice and must not be interpreted as delivery of the full source-information model.
+
+- [ ] 6.1 Derive a requirement-to-information-needs table from research scenarios S1–S12 and fact catalogue F1–F18. Include scope/project identity, workspace membership, physical/logical organization, dependencies/interactions/interfaces, types/bindings/dispatch, data/control flow, state/error/algorithm evidence, knowledge/completeness and higher-to-lower refinement. Preserve the distinction between direct evidence and cognitive inference.
+- [ ] 6.2 Expand `assets/information-needs.json` and its schema/tests with stable need IDs, fact fields, evidence kinds, expected native output, source/current-state binding, completeness criteria, language/platform/environment constraints, limitations, fixture and research basis. A need may list multiple candidate producer families; do not claim any candidate is installed or accepted here.
+- [ ] 6.3 Add RED tests proving unknown, unsupported, incomplete-coverage and missing-evidence needs are not silently marked covered; run focused information-needs and constructor-plan tests.
+- [ ] 6.4 Update `references/information-needs.md`, this task list and `traceability.md` to map S1–S12 → fact fields → information needs → required evidence. Strict-validate the constructor change and record the actual CI result before handing the catalogue to tool research.
+- [ ] 6.5 Only after 6.1–6.4 pass, hand the immutable needs catalogue to `survey-info-acquisition-tools`; do not expand the tool survey before the needs catalogue is reviewed and validated.
+
