@@ -76,7 +76,8 @@
       },
       "research_basis": [
         "openspec/changes/survey-info-acquisition-tools/research/semantic-tooling-survey.md#5",
-        "skills/layered-semantic-facts/references/information-needs.md"
+        "skills/layered-semantic-facts/references/information-needs.md",
+        "https://github.com/vchs6/code2semantics/actions/runs/40319334019"
       ],
       "tool_id": "rust.syntax-source",
       "description": "Deterministic Rust declaration inventory parser for supplied source text; returns declaration observations and delimiter diagnostics.",
@@ -121,12 +122,14 @@
       "limitations": [
         "DISABLED: native-output parser and invocation-profile acceptance not completed.",
         "Compile success does not prove runtime behavior or semantic correctness.",
-        "Must avoid or isolate generated __pycache__ output."
+        "Must avoid or isolate generated __pycache__ output.",
+        "Observed on Ubuntu 24.04 / Python 3.12.15: temporary syntax fixture compiled with exit 0 in https://github.com/vchs6/code2semantics/actions/runs/40319334019."
       ],
       "enabled": false,
       "research_basis": [
         "openspec/changes/survey-info-acquisition-tools/research/semantic-tooling-survey.md#5.1",
-        "skills/layered-semantic-facts/assets/information-needs.json"
+        "skills/layered-semantic-facts/assets/information-needs.json",
+        "https://github.com/vchs6/code2semantics/actions/runs/40319334019"
       ]
     },
     {
@@ -175,12 +178,14 @@
       "limitations": [
         "DISABLED: cargo availability/version/output probe and parser acceptance are pending.",
         "Manifest graph does not prove source-level runtime calls or logical responsibility.",
-        "Workspace membership must remain distinct from dependency edges."
+        "Workspace membership must remain distinct from dependency edges.",
+        "Observed on Ubuntu 24.04 / Cargo 1.99.0: temporary minimal Cargo project returned valid metadata JSON with exit 0 in https://github.com/vchs6/code2semantics/actions/runs/40319334019."
       ],
       "enabled": false,
       "research_basis": [
         "openspec/changes/survey-info-acquisition-tools/research/semantic-tooling-survey.md#5.2",
-        "skills/layered-semantic-facts/assets/information-needs.json"
+        "skills/layered-semantic-facts/assets/information-needs.json",
+        "https://github.com/vchs6/code2semantics/actions/runs/40319334019"
       ]
     },
     {
@@ -214,12 +219,14 @@
       "limitations": [
         "DISABLED: rustc/cargo availability, project opt-in policy, native-output parser and acceptance pending.",
         "Build scripts/dependencies may execute or access network; sandbox policy required.",
-        "Type-check diagnostics do not prove runtime behavior."
+        "Type-check diagnostics do not prove runtime behavior.",
+        "Ubuntu CI reports rustc 1.99.0 and Cargo 1.99.0 present; cargo check was not run and no compile-diagnostics parser was accepted (https://github.com/vchs6/code2semantics/actions/runs/40319334019)."
       ],
       "enabled": false,
       "research_basis": [
         "openspec/changes/survey-info-acquisition-tools/research/semantic-tooling-survey.md#5.2",
-        "skills/layered-semantic-facts/assets/information-needs.json"
+        "skills/layered-semantic-facts/assets/information-needs.json",
+        "https://github.com/vchs6/code2semantics/actions/runs/40319334019"
       ]
     },
     {
@@ -264,12 +271,14 @@
       "limitations": [
         "DISABLED: installation/version and LSP integration probe pending.",
         "Workspace readiness, macros, dynamic dispatch and incomplete indexes must be represented explicitly.",
-        "No acceptance evidence for a ParseResult adapter."
+        "No acceptance evidence for a ParseResult adapter.",
+        "Ubuntu CI: rust-analyzer path resolved but --version exited 1 because the official toolchain had no rust-analyzer binary (https://github.com/vchs6/code2semantics/actions/runs/40319334019)."
       ],
       "enabled": false,
       "research_basis": [
         "openspec/changes/survey-info-acquisition-tools/research/semantic-tooling-survey.md#5.2",
-        "skills/layered-semantic-facts/assets/information-needs.json"
+        "skills/layered-semantic-facts/assets/information-needs.json",
+        "https://github.com/vchs6/code2semantics/actions/runs/40319334019"
       ]
     },
     {
@@ -311,13 +320,15 @@
       "limitations": [
         "DISABLED: binary availability/version and output-format probe pending.",
         "Tag output may not resolve semantic binding, dynamic dispatch or runtime behavior.",
-        "Need parser fixture for each accepted version/profile."
+        "Need parser fixture for each accepted version/profile.",
+        "Ubuntu CI probe found no ctags executable (https://github.com/vchs6/code2semantics/actions/runs/40319334019)."
       ],
       "enabled": false,
       "research_basis": [
         "openspec/changes/survey-info-acquisition-tools/research/semantic-tooling-survey.md#5.1",
         "openspec/changes/survey-info-acquisition-tools/research/semantic-tooling-survey.md#5.2",
-        "skills/layered-semantic-facts/assets/information-needs.json"
+        "skills/layered-semantic-facts/assets/information-needs.json",
+        "https://github.com/vchs6/code2semantics/actions/runs/40319334019"
       ]
     },
     {
@@ -365,12 +376,14 @@
       "limitations": [
         "DISABLED: binary availability/version and JSON output probe pending.",
         "Pattern matches are syntax candidates, not resolved semantic references or proof of runtime execution.",
-        "Rules and native output need acceptance fixtures."
+        "Rules and native output need acceptance fixtures.",
+        "Ubuntu CI probe found no ast-grep executable (https://github.com/vchs6/code2semantics/actions/runs/40319334019)."
       ],
       "enabled": false,
       "research_basis": [
         "openspec/changes/survey-info-acquisition-tools/research/semantic-tooling-survey.md#5.1",
-        "skills/layered-semantic-facts/assets/information-needs.json"
+        "skills/layered-semantic-facts/assets/information-needs.json",
+        "https://github.com/vchs6/code2semantics/actions/runs/40319334019"
       ]
     }
   ]
