@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import hashlib
 import sqlite3
+import sqlite3
 from pathlib import Path
 from typing import Any
 
@@ -491,7 +492,12 @@ def execute_query_with_construction(
         if round_index == max_rounds - 1:
             response["termination"] = "budget_exhausted"
 
-    stored = repository.read(query)
+    try:
+        stored = repository.read(query)
+    except (sqlite3.Error, OSError, ValueError) as error:
+        return _repository_unavailable_response(
+            query, current_sources, f"Fact repository is unavailable: {error}", response_validator
+        )
     stored = {**stored, "facts": [fact for fact in stored["facts"] if fact["node"]["source_id"] in current_ids]}
     response = execute_query(query, repository, assets, stored_result=stored, source_override=current_sources)
     if last_constructor_gaps:
