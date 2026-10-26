@@ -161,7 +161,7 @@ def execute_constructor_request(
                                 "coverage": coverage,
                             })
                             continue
-                        entry = next(entry for entry in matrix.entries if entry["tool_id"] == tool_id)
+                        entry = next(entry for entry in matrix.load()["entries"] if entry["tool_id"] == tool_id)
                         parse_request = {
                             "kind": "parse_request",
                             "tool_native_output": {"encoding": "utf-8", "text": ""},
