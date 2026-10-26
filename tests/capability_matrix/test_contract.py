@@ -75,6 +75,8 @@ def test_current_matrix_separates_accepted_profiles_from_disabled_research_candi
     assert research_candidates == {
         "python.compileall", "rust.cargo-check", "rust.rust-analyzer", "multi.ctags", "multi.ast-grep",
     }
+    assert entries["python.compileall"]["information_need_ids"] == ["source.f9.language-semantics"]
+    assert any("has not yet accepted a FactBatch mapping" in limit for limit in entries["python.compileall"]["limitations"])
     for tool_id in research_candidates:
         entry = entries[tool_id]
         assert entry["enabled"] is False
