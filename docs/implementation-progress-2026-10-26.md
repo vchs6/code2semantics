@@ -37,3 +37,8 @@ Baseline: `main`, direct commits only. This record separates verified behavior f
 - Repository `read()` and `export_current()` now share transitive premise-closure behavior: a target field with stale/invalid premise or a premise cycle is excluded from current projection; no rows are deleted. `invalidate_premise()` and `invalidate_inventory()` are explicit append-only APIs.
 - Navigation projection deduplicates exact semantic duplicates but retains separate parent edges, reverse/cycle edges, external references, and edges under contradictory conditions. It stores/projects graph shape without claiming that a conditional cycle is executable.
 - Tests added in `tests/repository/test_validity.py` and `tests/repository/test_store.py`; latest CI `https://github.com/vchs6/code2semantics/actions/runs/40277417171` passed all component suites and strict OpenSpec. Product gate remains blocked as designed.
+## Integrated repository lifecycle acceptance
+
+- Added a combined repository test for write/reopen, field invalidation, transitive premise filtering, explicit revalidation, current export and import into a fresh database. Fact row counts are asserted unchanged across invalidation and transfer.
+- CI `https://github.com/vchs6/code2semantics/actions/runs/40277635793`: repository 52 passed; matrix 15; parser 9; scanner 7; source acceptance 4; packaging 2; executor 3; producer dispatch 3; combined planning/constructor/binding/induction/query 51 passed; contract validation and strict OpenSpec passed.
+- Product delivery gate remains the sole failing CI step by design until full S1–S12 product behavior is implemented and verified.
