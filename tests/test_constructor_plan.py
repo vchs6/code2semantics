@@ -112,3 +112,49 @@ def test_checked_in_matrix_exposes_only_accepted_first_phase_profiles():
         )
         for need_id, entries in selected.items():
             assert [entry["tool_id"] for entry in entries] == [expected_tool], need_id
+
+def test_unknown_need_returns_explicit_uncovered_gap():
+    result = plan_constructor_request(request(("purpose",)), ASSETS)
+    assert result["plan"] == []
+    assert result["gaps"][0]["reason"] == "uncovered_need"
+    assert result["gaps"][0]["fields"] == ["purpose"]
+
+
+def test_stale_existing_assertion_does_not_satisfy_current_request(tmp_path):
+    from semantic_facts.repository.contract import ContractCodec
+    from semantic_facts.source_scanner import build_fact_batch
+
+    project = tmp_path / "stale-project"
+    project.mkdir()
+    (project / "service.py").write_text("class Example:\\n    pass\\n", encoding="utf-8")
+    batch = build_fact_batch(project, ContractCodec(ASSETS))
+    source = batch["sources"][0]
+    stale_fact = dict(batch["facts"][0])
+    stale_identity = dict(stale_fact["fields"]["identity"])
+    stale_identity["validity"] = {"state": "modified", "sources": [{"source_id": source["source_id"], "content_state": source["content_state"]}], "reason": "stale"}
+    stale_fact["fields"] = {"identity": stale_identity}
+
+    value = request(("identity",))
+    value["query"]["scope"]["directories"] = [str(project.resolve())]
+    value["existing_valid_facts"]["sources"] = [source]
+    value["existing_valid_facts"]["facts"] = [stale_fact]
+    value["current_source_context"]["sources"] = [source]
+
+    result = plan_constructor_request(value, ASSETS)
+    assert [item["need_id"] for item in result["plan"]] == ["syntax.f2.identity"]
+
+
+def test_empty_query_scope_is_rejected():
+    value = request(("identity",))
+    value["query"]["scope"]["directories"] = []
+    try:
+        plan_constructor_request(value, ASSETS)
+    except ValueError as error:
+        assert "invalid ConstructRequest" in str(error)
+    else:
+        raise AssertionError("empty source scope must be rejected")
+
+
+def test_constructor_plan_is_deterministic_for_identical_requests():
+    value = request(("locators", "names", "identity"))
+    assert plan_constructor_request(value, ASSETS) == plan_constructor_request(value, ASSETS)
