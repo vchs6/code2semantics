@@ -153,7 +153,7 @@ def test_node_query_returns_only_target_fact_and_its_direct_inventory(tmp_path):
     repository = Repository(tmp_path / "node-query.db", ASSETS)
     try:
         response = execute_query_with_construction(query, repository, ASSETS)
-        assert response["termination"] == "satisfied"
+        assert response["termination"] == "satisfied", response
         assert len(response["results"]) == 1
         assert response["results"][0]["node"] == target_fact["node"]
         assert len(response["direct_nodes"]) == 1
