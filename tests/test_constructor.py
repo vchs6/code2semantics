@@ -155,3 +155,71 @@ def test_constructor_runs_accepted_manifest_profile_and_preserves_manifest_obser
         for assertion in fact["fields"].values()
     )
     assert all(assertion["basis"]["evidence"] for fact in result["batch"]["facts"] for assertion in fact["fields"].values())
+
+def test_constructor_manifest_facts_survive_repository_reopen_and_minimal_query(tmp_path):
+    import json
+    import shutil
+
+    from semantic_facts.query_engine import execute_query
+    from semantic_facts.repository.store import Repository
+    from semantic_facts.tool_executor import SubprocessToolExecutor
+
+    project = tmp_path / "manifest-persist-project"
+    (project / "src").mkdir(parents=True)
+    (project / "Cargo.toml").write_text(
+        '[package]\nname = "manifest-persist"\nversion = "0.1.0"\nedition = "2021"\n',
+        encoding="utf-8",
+    )
+    (project / "src" / "lib.rs").write_text("pub fn run() {}\n", encoding="utf-8")
+    assets = tmp_path / "assets"
+    shutil.copytree(ASSETS, assets)
+    matrix_path = assets / "capability-matrix.json"
+    matrix = json.loads(matrix_path.read_text(encoding="utf-8"))
+    candidate = next(entry for entry in matrix["entries"] if entry["tool_id"] == "rust.cargo-metadata")
+    candidate["enabled"] = True
+    candidate["acceptance"] = {
+        "actor": "parser_development",
+        "evidence": ["tests/test_info_parser.py::test_cargo_metadata_parser_emits_workspace_and_dependency_observations_separately"],
+    }
+    matrix_path.write_text(json.dumps(matrix), encoding="utf-8")
+    request_value = _request_for_project(project)
+    request_value["query"]["selections"] = [
+        {"fact_type": "F2", "fields": ["identity", "names"]},
+        {"fact_type": "F4", "fields": ["kind"]},
+    ]
+    executor = SubprocessToolExecutor({
+        "rust.cargo-metadata": ["cargo", "metadata", "--no-deps", "--format-version", "1"],
+    })
+    constructed = execute_constructor_request(request_value, assets, external_executor=executor)
+    assert any(fact["fact_type"] == "F4" for fact in constructed["batch"]["facts"])
+
+    database = tmp_path / "manifest-facts.db"
+    repository = Repository(database, assets)
+    repository.write(constructed["batch"], "manifest-integration-write")
+    repository.close()
+
+    reopened = Repository(database, assets)
+    try:
+        query = {
+            "contract_version": "1.0.0",
+            "catalog_id": "semantic-facts-20261025",
+            "request_id": "manifest-reopen-minimal-query",
+            "scope": {
+                "scope_id": "manifest-reopen-scope",
+                "directories": [str(project.resolve())],
+                "excludes": [],
+                "defaulted": False,
+            },
+            "target": {"kind": "scope"},
+            "granularity": "L2",
+            "selections": [{"fact_type": "F4", "fields": ["kind"]}],
+            "budget": {"max_rounds": 1, "max_new_assertions": 10},
+        }
+        response = execute_query(query, reopened, assets)
+        assert response["termination"] == "satisfied", response
+        assert response["results"]
+        assert all(set(fact["fields"]) == {"kind"} for fact in response["results"])
+        assert all(fact["fact_type"] == "F4" for fact in response["results"])
+        assert all(fact["fields"]["kind"]["basis"]["evidence"] for fact in response["results"])
+    finally:
+        reopened.close()
