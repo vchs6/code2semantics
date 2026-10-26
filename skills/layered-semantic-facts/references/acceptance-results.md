@@ -55,3 +55,13 @@ Latest completed CI: https://github.com/vchs6/code2semantics/actions/runs/402684
 - Product delivery gate: BLOCKED by design because full S1–S12 acceptance, direct-node completeness/ancestor obligations, full dependency-aware invalidation, and configured induction-provider/tool orchestration are still incomplete.
 
 This is strong evidence for the implemented component boundaries, not a claim that the full semantic-facts product is complete.
+
+
+## Direct-node completeness and query scoping (2026-10-26)
+
+CI run: https://github.com/vchs6/code2semantics/actions/runs/40269286038
+
+- Repository: 39 passed; capability matrix: 15; parser: 9; source scanner/inventory: 6; source acceptance: 4; copied packaging: 2; bounded executor: 3; combined planning/constructor/induction/query: 37.
+- Strict OpenSpec and public contract validation passed.
+- The constructor now persists complete scope and per-file direct-node inventories for supported Python/Rust syntax; query refuses to claim completeness without a current evidence-backed inventory. Tests verify inventory repair and target-node scoping without deleting prior facts.
+- Product delivery gate remains BLOCKED because necessary ancestor-path planning, dependency-aware invalidation, multi-project/overlapping-root and graph-cycle cases, tool orchestration/induction provider, and full S1–S12 acceptance remain pending.
