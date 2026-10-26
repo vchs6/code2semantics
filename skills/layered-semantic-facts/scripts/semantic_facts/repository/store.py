@@ -58,9 +58,23 @@ class Repository:
                 if not integrity or integrity[0] != "ok":
                     raise ValueError("backup failed SQLite integrity check")
                 tables = {row[0] for row in backup.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
-                expected = {"sources", "entities", "facts", "attributes", "relations", "submissions", "source_heads"}
-                if not expected.issubset(tables):
+                expected_columns = {
+                    "sources": {"source_id", "payload"},
+                    "entities": {"entity_key", "source_id", "subject_id", "node_id", "payload"},
+                    "facts": {"fact_key", "source_id", "subject_id", "node_id", "fact_id", "fact_type", "payload"},
+                    "attributes": {"attribute_key", "fact_key", "field_name", "payload"},
+                    "relations": {"relation_key", "owner_key", "payload", "navigation"},
+                    "submissions": {"submission_key", "digest", "receipt"},
+                    "source_heads": {"root", "source_id"},
+                }
+                if not set(expected_columns).issubset(tables):
                     raise ValueError("backup does not contain the repository schema")
+                for table, required_columns in expected_columns.items():
+                    actual_columns = {
+                        row[1] for row in backup.execute(f"PRAGMA table_info({table})")
+                    }
+                    if not required_columns.issubset(actual_columns):
+                        raise ValueError(f"backup does not contain the repository schema: {table}")
                 backup.backup(self.connection)
         except sqlite3.DatabaseError as error:
             raise ValueError("invalid SQLite backup: " + str(error)) from error
