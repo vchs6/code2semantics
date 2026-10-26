@@ -139,3 +139,11 @@
 - RED/GREEN for a current-head local mutation bug: RED run https://github.com/vchs6/code2semantics/actions/runs/40310626084; GREEN run https://github.com/vchs6/code2semantics/actions/runs/40310872678.
 - GREEN evidence: repository 59 passed; transaction 6; transfer 8; repository acceptance 5; matrix 15; parser 9; scanner 7; runtime acceptance 9; packaging 2; executor 3; producer dispatch 3; combined planning/constructor/binding/induction/query 52 passed; strict OpenSpec passed.
 - Next dependency is query acceptance 7.1 / child task 4.4, then root integration tasks 8.1–8.5. Product delivery gate remains blocked until full S1–S12 acceptance passes.
+
+
+## Query acceptance progress (2026-10-26)
+
+- Added explicit handling for an unavailable/closed fact repository: query returns a schema-validated `termination=unavailable` response with `repository_unavailable` gaps, no alternate-store fallback, and no fabricated facts.
+- RED/GREEN for bounded budget semantics: a real mixed Python source scope with one valid and one malformed file initially lost `budget_exhausted` during final projection; the loop now preserves the reason after final re-read.
+- CI GREEN: https://github.com/vchs6/code2semantics/actions/runs/40311963317 — repository 59 passed; transaction 6; transfer 8; repository acceptance 5; matrix 15; parser 9; scanner 7; runtime acceptance 9; packaging 2; executor 3; producer dispatch 3; combined planning/constructor/binding/induction/query 55 passed; strict OpenSpec passed.
+- Root task 7.1 and 8.1–8.5 remain pending. F2/L3 runtime tests do not satisfy full S1–S12 semantic scenarios, especially workspace membership vs dependency, conditional-cycle satisfiability, higher-layer algorithm semantics, and bounded negative-evidence reasoning.
