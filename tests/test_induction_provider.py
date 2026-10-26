@@ -146,7 +146,7 @@ def test_provider_failure_modes_fail_closed(tmp_path, program, timeout, stdout_l
     })
 
     result = invoke_induction_provider(
-        "fixture-provider", _request(), registry, timeout_seconds=timeout
+        "fixture-provider", _request(tmp_path / "source"), registry, timeout_seconds=timeout
     )
 
     assert result["execution_status"] == expected_status
@@ -154,7 +154,7 @@ def test_provider_failure_modes_fail_closed(tmp_path, program, timeout, stdout_l
     assert result["induction_result"]["gaps"]
 
 
-def test_provider_rejects_untrusted_commands_from_request_payload():
+def test_provider_rejects_untrusted_commands_from_request_payload(tmp_path):
     request = _request(tmp_path / "source")
     request["provider_command"] = [sys.executable, "-c", "print('injected')"]
     registry = InductionProviderRegistry({
