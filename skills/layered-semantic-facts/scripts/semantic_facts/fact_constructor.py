@@ -12,6 +12,8 @@ def construct_fact_batch(
     subject_id: str,
     parsed_files: list[tuple[str, dict[str, Any]]],
     codec: ContractCodec,
+    *,
+    coverage_complete: bool = True,
 ) -> dict[str, Any]:
     """Convert parser observations into observed F2 facts without inventing semantics."""
     source_id = source["source_id"]
@@ -146,7 +148,7 @@ def construct_fact_batch(
         "domain": "direct supported source files in the exact requested root",
         "checked": sorted(relative for relative, _ in parsed_files),
         "excluded": list(source.get("excludes", [])),
-        "completeness": "complete",
+        "completeness": "complete" if coverage_complete else "partial",
         "method": "deterministic Python/Rust source scan",
     }
     project_assertion = {
@@ -163,13 +165,14 @@ def construct_fact_batch(
         "value": {"kind": "text", "text": f"Enumerated {len(project_children)} supported direct source files."},
         "validity": {"state": "current", "sources": [{"source_id": source_id, "content_state": content_state}]},
     }
-    direct_nodes.append({
-        "target": {"kind": "scope"},
-        "granularity": "L3",
-        "boundary": "Direct supported Python/Rust source files under the exact requested root; excluded directories are not scanned.",
-        "children": sorted(project_children, key=lambda item: (item["source_id"], item["subject_id"], item["node_id"])),
-        "assertion": project_assertion,
-    })
+    if parsed_files:
+        direct_nodes.append({
+            "target": {"kind": "scope"},
+            "granularity": "L3",
+            "boundary": "Direct supported Python/Rust source files under the exact requested root; excluded directories are not scanned.",
+            "children": sorted(project_children, key=lambda item: (item["source_id"], item["subject_id"], item["node_id"])),
+            "assertion": project_assertion,
+        })
 
     batch = {
         "contract_version": "1.0.0",
