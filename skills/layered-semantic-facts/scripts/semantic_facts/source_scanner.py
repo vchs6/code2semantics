@@ -3,10 +3,13 @@ from __future__ import annotations
 
 import hashlib
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
 from .fact_constructor import construct_fact_batch
+from .constructor_plan import select_enabled_producers
+from .capability_matrix import CapabilityMatrix
 from .info_parser import ParserRegistry
 from .repository.contract import ContractCodec
 
@@ -79,9 +82,18 @@ def build_fact_batch(root: str | Path, codec: ContractCodec) -> dict[str, Any]:
 
     parsed_files: list[tuple[str, dict[str, Any]]] = []
     parser_registry = ParserRegistry(codec.schema_root)
+    matrix = CapabilityMatrix(Path(__file__).resolve().parents[2] / "assets" / "capability-matrix.json")
+    platform = "windows" if sys.platform.startswith("win") else "darwin" if sys.platform == "darwin" else "linux"
+    required_need_ids = ["syntax.f2.identity", "syntax.f2.names", "syntax.f2.boundary", "syntax.f2.locators"]
     for relative, source_text in raw:
         language = "Rust" if Path(relative).suffix == ".rs" else "Python"
-        tool_id = "rust.syntax-source" if language == "Rust" else "python.ast-source"
+        selected_by_need = select_enabled_producers(matrix, required_need_ids, language, platform, "in-process")
+        common_tool_ids = set.intersection(*(
+            {entry["tool_id"] for entry in entries} for entries in selected_by_need.values()
+        )) if selected_by_need else set()
+        if not common_tool_ids:
+            raise ValueError(f"no accepted enabled parser covers all required F2 needs for {language} in {platform}")
+        tool_id = sorted(common_tool_ids)[0]
         coverage = {
             "domain": language + " syntax in " + relative,
             "checked": [relative],
