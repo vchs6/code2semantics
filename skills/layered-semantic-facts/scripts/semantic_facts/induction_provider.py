@@ -6,6 +6,9 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import tempfile
+import threading
+import time
 from typing import Any, Mapping, Sequence
 
 from .induction import _validate, _validators, build_induction_requests, validate_induction_result
@@ -80,6 +83,79 @@ def _source_modified_result(request: dict[str, Any], asset_root: str | Path | No
     return result
 
 
+
+def _run_bounded_process(
+    registration: ProviderRegistration,
+    payload: str,
+    *,
+    cwd: str | Path | None,
+    timeout: float,
+) -> tuple[str, int | None, bytes, bytes, str]:
+    """Capture output to temporary files and terminate when a limit is exceeded."""
+    payload_bytes = payload.encode("utf-8")
+    if len(payload_bytes) > 2_000_000:
+        return "input_limit", None, b"", b"", "Induction request exceeds the 2 MB protocol input limit."
+    with tempfile.TemporaryFile() as stdout_file, tempfile.TemporaryFile() as stderr_file:
+        try:
+            process = subprocess.Popen(
+                registration.argv,
+                stdin=subprocess.PIPE,
+                stdout=stdout_file,
+                stderr=stderr_file,
+                cwd=str(Path(cwd).resolve()) if cwd is not None else None,
+                shell=False,
+            )
+        except OSError as error:
+            return "unavailable_tool", None, b"", b"", f"Induction provider could not execute: {error}"
+
+        def write_request() -> None:
+            try:
+                assert process.stdin is not None
+                process.stdin.write(payload_bytes)
+                process.stdin.close()
+            except (BrokenPipeError, OSError):
+                pass
+
+        writer = threading.Thread(target=write_request, daemon=True)
+        writer.start()
+        deadline = time.monotonic() + timeout
+        status = "completed"
+        detail = ""
+        while process.poll() is None:
+            stdout_size = os.fstat(stdout_file.fileno()).st_size
+            stderr_size = os.fstat(stderr_file.fileno()).st_size
+            if stdout_size > registration.max_stdout_bytes or stderr_size > registration.max_stderr_bytes:
+                status = "output_limit"
+                detail = "Induction provider output exceeded the registered byte limit."
+                process.kill()
+                break
+            if time.monotonic() >= deadline:
+                status = "timeout"
+                detail = f"Induction provider exceeded {timeout} seconds."
+                process.kill()
+                break
+            time.sleep(0.005)
+        try:
+            process.wait(timeout=1)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.wait()
+        writer.join(timeout=0.2)
+
+        stdout_size = os.fstat(stdout_file.fileno()).st_size
+        stderr_size = os.fstat(stderr_file.fileno()).st_size
+        if status == "completed" and (
+            stdout_size > registration.max_stdout_bytes or stderr_size > registration.max_stderr_bytes
+        ):
+            status = "output_limit"
+            detail = "Induction provider output exceeded the registered byte limit."
+        stdout_file.seek(0)
+        stderr_file.seek(0)
+        stdout_bytes = stdout_file.read(registration.max_stdout_bytes + 1)
+        stderr_bytes = stderr_file.read(registration.max_stderr_bytes + 1)
+        return status, process.returncode, stdout_bytes, stderr_bytes, detail
+
+
 def invoke_induction_provider(
     provider_id: str,
     request: dict[str, Any],
@@ -105,68 +181,43 @@ def invoke_induction_provider(
             f"timeout must be in (0, {registration.timeout_seconds}] seconds"
         )
     payload = json.dumps(request, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
-    try:
-        completed = subprocess.run(
-            registration.argv,
-            input=payload,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="strict",
-            cwd=str(Path(cwd).resolve()) if cwd is not None else None,
-            timeout=timeout,
-            check=False,
-            shell=False,
-        )
-    except subprocess.TimeoutExpired as error:
-        return {
-            "provider_id": provider_id,
-            "execution_status": "timeout",
-            "detail": f"Induction provider exceeded {timeout} seconds.",
-            "induction_result": _empty_failed_result(request, asset_root),
-        }
-    except subprocess.TimeoutExpired:
-        changed = _source_state_changed(request)
-        return {
-            "provider_id": provider_id,
-            "execution_status": "source_modified" if changed else "timeout",
-            "detail": "Source state changed during provider execution." if changed else f"Induction provider exceeded {timeout} seconds.",
-            "induction_result": _source_modified_result(request, asset_root) if changed else _empty_failed_result(request, asset_root),
-        }
-    except (OSError, UnicodeError) as error:
-        return {
-            "provider_id": provider_id,
-            "execution_status": "unavailable_tool",
-            "detail": f"Induction provider could not execute or decode output: {error}",
-            "induction_result": _empty_failed_result(request, asset_root),
-        }
-
-    if _source_state_changed(request):
+    payload = json.dumps(request, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    execution_status, returncode, stdout_bytes, stderr_bytes, execution_detail = _run_bounded_process(
+        registration, payload, cwd=cwd, timeout=timeout
+    )
+    if _source_state_changed(request) and execution_status != "unavailable_tool":
         return {
             "provider_id": provider_id,
             "execution_status": "source_modified",
             "detail": "Source state changed during provider execution; proposal output was discarded.",
             "induction_result": _source_modified_result(request, asset_root),
         }
-
-    stdout_bytes = completed.stdout.encode("utf-8")
-    stderr_bytes = completed.stderr.encode("utf-8")
-    if len(stdout_bytes) > registration.max_stdout_bytes or len(stderr_bytes) > registration.max_stderr_bytes:
+    if execution_status != "completed":
         return {
             "provider_id": provider_id,
-            "execution_status": "output_limit",
-            "detail": "Induction provider output exceeded the registered byte limit.",
+            "execution_status": execution_status,
+            "detail": execution_detail or execution_status,
             "induction_result": _empty_failed_result(request, asset_root),
         }
-    if completed.returncode != 0:
+    if returncode != 0:
         return {
             "provider_id": provider_id,
             "execution_status": "nonzero_exit",
-            "detail": f"Induction provider exited with status {completed.returncode}.",
+            "detail": f"Induction provider exited with status {returncode}.",
             "induction_result": _empty_failed_result(request, asset_root),
         }
     try:
-        document = json.loads(completed.stdout)
+        stdout_text = stdout_bytes.decode("utf-8", errors="strict")
+    except UnicodeDecodeError as error:
+        return {
+            "provider_id": provider_id,
+            "execution_status": "malformed_output",
+            "detail": f"Induction provider output is not UTF-8 at byte {error.start}.",
+            "induction_result": _empty_failed_result(request, asset_root),
+        }
+
+    try:
+        document = json.loads(stdout_text)
     except json.JSONDecodeError as error:
         return {
             "provider_id": provider_id,
