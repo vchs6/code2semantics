@@ -601,3 +601,97 @@ def test_integrated_parser_constructor_induction_gap_repository_reopen_and_minim
         assert reopened.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == len(batch["facts"])
     finally:
         reopened.close()
+
+def test_mixed_python_rust_manifest_chain_through_cli_store_reopen_and_minimal_projection(tmp_path, capsys):
+    python_root = tmp_path / "python-project"
+    python_root.mkdir()
+    (python_root / "app.py").write_text(
+        """def main():
+    return 0
+""",
+        encoding="utf-8",
+    )
+    (python_root / "pyproject.toml").write_text(
+        """[project]
+name = "acceptance-python"
+version = "1.0.0"
+dependencies = ["requests>=2"]
+""",
+        encoding="utf-8",
+    )
+
+    rust_root = tmp_path / "rust-workspace"
+    (rust_root / "crates" / "app" / "src").mkdir(parents=True)
+    (rust_root / "crates" / "core" / "src").mkdir(parents=True)
+    (rust_root / "Cargo.toml").write_text(
+        '[workspace]\nmembers = ["crates/app", "crates/core"]\nresolver = "2"\n',
+        encoding="utf-8",
+    )
+    (rust_root / "crates" / "app" / "Cargo.toml").write_text(
+        '[package]\nname = "acceptance-app"\nversion = "0.1.0"\nedition = "2021"\n'
+        '[dependencies]\nacceptance-core = { path = "../core" }\n',
+        encoding="utf-8",
+    )
+    (rust_root / "crates" / "core" / "Cargo.toml").write_text(
+        '[package]\nname = "acceptance-core"\nversion = "0.1.0"\nedition = "2021"\n',
+        encoding="utf-8",
+    )
+    (rust_root / "crates" / "app" / "src" / "lib.rs").write_text("pub fn run() {}\n", encoding="utf-8")
+    (rust_root / "crates" / "core" / "src" / "lib.rs").write_text("pub fn core() {}\n", encoding="utf-8")
+
+    query = {
+        "contract_version": "1.0.0",
+        "catalog_id": "semantic-facts-20261025",
+        "request_id": "root-mixed-manifest-acceptance",
+        "scope": {
+            "scope_id": "root-mixed-manifest-scope",
+            "directories": [str(python_root.resolve()), str(rust_root.resolve())],
+            "excludes": [],
+            "defaulted": False,
+        },
+        "target": {"kind": "scope"},
+        "granularity": "L2",
+        "selections": [
+            {"fact_type": "F2", "fields": ["names"]},
+            {"fact_type": "F3", "fields": ["runtime"]},
+            {"fact_type": "F4", "fields": ["kind"]},
+            {"fact_type": "F6", "fields": ["kind"]},
+        ],
+        "budget": {"max_rounds": 2, "max_new_assertions": 30},
+    }
+    query_path = tmp_path / "mixed-query.json"
+    query_path.write_text(json.dumps(query), encoding="utf-8")
+    database = tmp_path / "mixed-acceptance.sqlite"
+
+    assert main(["query", "--db", str(database), "--query-file", str(query_path)]) == 0
+    response = json.loads(capsys.readouterr().out)
+    assert response["termination"] == "satisfied", response["gaps"]
+    assert {fact["fact_type"] for fact in response["results"]} == {"F2", "F3", "F4", "F6"}
+    assert all(set(fact["fields"]) <= {"names", "runtime", "kind"} for fact in response["results"])
+    values = [
+        field["value"].get("text", "")
+        for fact in response["results"]
+        for field in fact["fields"].values()
+    ]
+    assert any("acceptance-python" in value for value in values)
+    assert any("workspace member: acceptance-app" in value for value in values)
+    assert any("workspace member: acceptance-core" in value for value in values)
+    assert any("acceptance-app -> acceptance-core" in value for value in values)
+    assert all(
+        evidence
+        for fact in response["results"]
+        for assertion in fact["fields"].values()
+        for evidence in assertion["basis"]["evidence"]
+    )
+
+    reopened = Repository(database)
+    try:
+        minimal = dict(query)
+        minimal["request_id"] = "root-mixed-minimal-replay"
+        minimal["selections"] = [{"fact_type": "F6", "fields": ["kind"]}]
+        replay = execute_query(minimal, reopened, ROOT / "skills" / "layered-semantic-facts" / "assets")
+        assert replay["termination"] == "satisfied", replay
+        assert replay["results"]
+        assert all(fact["fact_type"] == "F6" and set(fact["fields"]) == {"kind"} for fact in replay["results"])
+    finally:
+        reopened.close()
