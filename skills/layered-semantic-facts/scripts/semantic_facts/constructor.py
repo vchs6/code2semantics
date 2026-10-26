@@ -59,9 +59,15 @@ def _merge_request_fact_contributions(
                 continue
             left = json.loads(json.dumps(previous))
             right = json.loads(json.dumps(assertion))
-            left_evidence = left.get("basis", {}).pop("evidence", [])
-            right_evidence = right.get("basis", {}).pop("evidence", [])
-            if left != right:
+            left_basis = left.pop("basis", {})
+            right_basis = right.pop("basis", {})
+            left_evidence = left_basis.get("evidence", [])
+            right_evidence = right_basis.get("evidence", [])
+            # Producer-specific method/limitations may differ while both
+            # observations support the same semantic assertion. Core assertion
+            # context/value/validity/coverage and inference premises must agree;
+            # methods and limitations are retained as merged provenance.
+            if left != right or left_basis.get("premises", []) != right_basis.get("premises", []):
                 conflicted.add(field_key)
                 current["fields"].pop(field_name, None)
                 gaps.append({
@@ -96,7 +102,23 @@ def _merge_request_fact_contributions(
                 by_id.setdefault(evidence_id, item)
             if field_key not in conflicted:
                 merged = json.loads(json.dumps(previous))
-                merged.setdefault("basis", {})["evidence"] = list(by_id.values())
+                basis = merged.setdefault("basis", {})
+                basis["evidence"] = list(by_id.values())
+                methods = {
+                    value for value in (left_basis.get("method"), right_basis.get("method"))
+                    if isinstance(value, str) and value
+                }
+                if methods:
+                    basis["method"] = " | ".join(sorted(methods))
+                limitations = {
+                    value
+                    for value in [
+                        *left_basis.get("limitations", []),
+                        *right_basis.get("limitations", []),
+                    ]
+                    if isinstance(value, str) and value
+                }
+                basis["limitations"] = sorted(limitations)
                 current["fields"][field_name] = merged
     result: list[dict[str, Any]] = []
     for key in sorted(grouped):
