@@ -19,3 +19,9 @@ Observed CI results: repository 35 passed; capability matrix 14 passed; parser r
 This is a partial runtime integration check, not full system acceptance. It does not yet verify tool capability selection, external tool execution, registered parser dispatch from native tool output, induction batching, multi-layer construction, source-change invalidation, the complete public query response, or the required cross-component scenarios S1–S12.
 
 FULL_END_TO_END_ACCEPTANCE: NOT_YET_PASSED
+
+## First-phase language scope: Python + Rust
+
+The first phase supports Python and Rust source inventories. Python is parsed with the standard-library AST. Rust currently uses a deterministic declaration inventory and delimiter-balance checks; it is not a replacement for rustc/rust-analyzer and does not claim type checking, macro expansion, borrow checking, or runtime semantics.
+
+The Rust parser/registry/scanner tests and mixed-language source-to-FactBatch tests are required CI checks. Full product acceptance remains blocked until tool orchestration, induction, full semantic construction, and dependency-aware incremental invalidation are implemented and verified.
