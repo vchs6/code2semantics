@@ -87,7 +87,10 @@ def test_query_requires_and_returns_current_scope_direct_node_completeness(tmp_p
     project = tmp_path / "inventory-query-project"
     project.mkdir()
     (project / "engine.py").write_text(
-        "class Engine:\\n    def run(self):\\n        return True\\n",
+        """class Engine:
+    def run(self):
+        return True
+""",
         encoding="utf-8",
     )
     repository = Repository(tmp_path / "inventory.db", ASSETS)
@@ -110,7 +113,9 @@ def test_query_rebuilds_missing_inventory_without_deleting_existing_facts(tmp_pa
 
     project = tmp_path / "missing-inventory-project"
     project.mkdir()
-    (project / "engine.py").write_text("class Engine:\\n    pass\\n", encoding="utf-8")
+    (project / "engine.py").write_text("""class Engine:
+    pass
+""", encoding="utf-8")
     batch = build_fact_batch(project, ContractCodec(ASSETS))
     batch["direct_nodes"] = []
     repository = Repository(tmp_path / "missing-inventory.db", ASSETS)
