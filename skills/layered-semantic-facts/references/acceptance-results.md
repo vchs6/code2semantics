@@ -83,3 +83,12 @@ Latest complete component CI: https://github.com/vchs6/code2semantics/actions/ru
 - Constructor request-binding rejects mismatched source, subject, content state and out-of-scope evidence locators. Same-source immutable fact identities reject conflicting field rewrites; new source snapshots append separate rows.
 - Query tests cover multiple disjoint roots, nested roots, same-named nodes with distinct identities, unavailable sources, out-of-scope node references rejected before repository reads, mixed supported/out-of-catalog fields, and projection of external references/conflict evidence.
 - Product delivery gate intentionally remains BLOCKED. Multi-parent/dependency-cycle semantics, full dependency-aware invalidation, configured cognitive induction provider, full higher-layer semantic construction, and all S1–S12 acceptance remain incomplete.
+## Repository validity and premise-closure update (2026-10-26)
+
+CI run: https://github.com/vchs6/code2semantics/actions/runs/40277063506
+
+- Repository suite: 49 passed; capability matrix 15; parser 9; scanner 7; source acceptance 4; packaging 2; bounded executor 3; producer dispatch 3; combined planning/constructor/binding/induction/query 51 passed. Strict OpenSpec passed.
+- Source snapshot changes now append `source` and dependent fact/field/evidence/relation/premise/conflict/inventory validity events. Older rows remain stored; returning to an exact prior snapshot can reactivate its retained records with new `current` events.
+- `Repository.read()` and `Repository.export_current()` now validate transitive premise closure. Invalid targets, stale content states, explicitly invalidated premise links, and premise cycles do not qualify as current results; they are excluded from current projections without deleting rows.
+- Added explicit `invalidate_premise()` and `invalidate_inventory()` APIs. Tests verify premise-target invalidation, cycle rejection, inventory projection filtering, export/read consistency and unchanged row counts.
+- Full product delivery gate remains blocked for full system acceptance: higher-layer behavior semantics, graph-specific multi-parent/cycle interpretation, complete dependency-aware reconstruction, and all S1–S12 scenarios remain incomplete.
