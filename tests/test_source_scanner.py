@@ -131,3 +131,17 @@ def test_partial_scan_preserves_valid_files_when_another_file_is_unparseable(tmp
     assert result["gaps"][0]["path"] == "broken.py"
     assert result["gaps"][0]["reason"] == "unparseable"
     assert next(item for item in result["batch"]["direct_nodes"] if item["target"]["kind"] == "scope")["assertion"]["coverage"]["completeness"] == "partial"
+
+def test_source_state_changes_when_project_manifest_changes(tmp_path, codec):
+    project = tmp_path / "manifest-bound-project"
+    project.mkdir()
+    (project / "app.py").write_text("def run():\n    return True\n", encoding="utf-8")
+    manifest = project / "pyproject.toml"
+    manifest.write_text('[project]\nname = "first-name"\nversion = "0.1.0"\n', encoding="utf-8")
+
+    first = build_fact_batch(project, codec)
+    manifest.write_text('[project]\nname = "changed-name"\nversion = "0.1.0"\n', encoding="utf-8")
+    second = build_fact_batch(project, codec)
+
+    assert first["sources"][0]["content_state"] != second["sources"][0]["content_state"]
+    assert first["sources"][0]["source_id"] != second["sources"][0]["source_id"]
