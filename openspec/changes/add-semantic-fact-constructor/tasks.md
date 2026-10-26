@@ -162,3 +162,12 @@ These tasks follow accepted pure parser adapters. They are prerequisites to enab
 - Request-local fact contributions are grouped by source/subject/node/fact type/granularity. Equal assertion bodies merge independent evidence by evidence ID. Incompatible assertions or reused evidence IDs with different content produce an explicit conflict gap and the conflicted field is omitted from the batch; repository duplicate identity validation remains strict.
 - Product delivery gate remains BLOCKED because `references/acceptance-results.md` lacks the full acceptance success marker on a standalone line; the gate explicitly rejects a partial source-to-store smoke test as proof of full component integration. Do not alter the gate marker without completing full S1–S12 acceptance.
 - Task 10.6 remains pending. Full producer→FactBatch→repository→reopen→minimal response coverage across S1–S12 is not yet demonstrated.
+
+## 11. Query-runtime subprocess integration
+
+- [ ] 11.1 Add a RED integration test calling `execute_query_with_construction` with a temporary accepted Cargo profile and a real multi-member workspace; assert current runtime does not invoke the executor or return F4/F6 facts yet.
+- [ ] 11.2 Add optional executor injection to query orchestration and pass it to `execute_constructor_request` without changing the pure `execute_query` read/projection path.
+- [ ] 11.3 Add a host-owned default executor factory with fixed argv prefixes for specifically accepted tool IDs; never build commands from query or matrix input. Wire CLI `query` and `construct` entrypoints to this factory.
+- [ ] 11.4 Verify real Cargo metadata invocation through query runtime produces distinct workspace-membership F4 and dependency F6 facts, writes SQLite, survives close/reopen and returns only requested fields/evidence.
+- [ ] 11.5 Verify missing Cargo, timeout, non-zero exit, malformed output and source mutation all fail closed with explicit gaps and no fabricated facts.
+- [ ] 11.6 Keep production matrix entries disabled until the full runtime invocation profile and failure modes pass; run strict OpenSpec and all component suites, then continue root S1–S12 scenarios.
