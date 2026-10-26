@@ -405,3 +405,20 @@ def test_query_reports_repository_unavailable_without_fabricating_results(tmp_pa
     assert response["gaps"]
     assert all(gap["reason"] == "repository_unavailable" for gap in response["gaps"])
     assert before == 0
+
+def test_query_preserves_budget_exhaustion_after_partial_source_progress(tmp_path):
+    project = tmp_path / "partial-budget-project"
+    project.mkdir()
+    (project / "good.py").write_text("class Good:\\n    def run(self):\\n        return True\\n", encoding="utf-8")
+    (project / "bad.py").write_text("def broken(:\\n    pass\\n", encoding="utf-8")
+    repository = Repository(tmp_path / "partial-budget.db", ASSETS)
+    query = make_query(project)
+    query["budget"]["max_rounds"] = 1
+    try:
+        response = execute_query_with_construction(query, repository, ASSETS)
+        assert any("class Good" in fact["fields"]["names"]["value"]["text"] for fact in response["results"])
+        assert response["gaps"]
+        assert response["termination"] == "budget_exhausted"
+        assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] >= 1
+    finally:
+        repository.close()
