@@ -196,3 +196,27 @@ CI now runs `scripts/research/probe_candidate_tools.py` on the Ubuntu runner. Th
 4. Preserve separate evidence and knowledge status for direct observations, interpretations and inferences.
 5. Keep every candidate disabled until the parser accepts the exact tool/version/output/invocation profile with positive, negative and missing-tool tests.
 6. After parser acceptance, test constructor selection and multi-producer composition. Only then may the matrix entry be enabled.
+
+### 7.5 Observed CI probe results (Ubuntu 24.04, Python 3.12.15)
+
+Probe run: https://github.com/vchs6/code2semantics/actions/runs/40319334019
+
+The probe used temporary fixtures only and did not execute project source.
+
+| Candidate | Observed result | Evidence / decision |
+|---|---|---|
+| Python | Python 3.12.15 present | `python --version` exit 0 |
+| `python -m compileall` | Sample Python fixture compiled successfully, exit 0 | Output is a syntax/bytecode diagnostic only; profile remains disabled until parser and no-generated-artifact acceptance is added |
+| Cargo | Cargo 1.99.0 present | `cargo --version` exit 0 |
+| `cargo metadata --no-deps --format-version 1` | Temporary minimal Cargo project returned valid JSON, exit 0; output contained package, target, workspace member and manifest paths | Strong candidate for workspace/target/dependency-manifest needs; profile remains disabled pending parser tests and policy acceptance |
+| rustc | rustc 1.99.0 present | `rustc --version` exit 0; no compile/type-check sample was run in this probe |
+| rust-analyzer | A shim/path exists, but `rust-analyzer --version` failed with “Unknown binary … in official toolchain” (exit 1) | Not usable in this CI environment; do not treat as installed |
+| universal-ctags | No executable found | Not installed in this CI environment; no output fixture observed |
+| ast-grep | No executable found | Not installed in this CI environment; no output fixture observed |
+| tree-sitter CLI | No executable found | Not installed in this CI environment; no output fixture observed |
+
+The first probe run exposed invalid newline escaping in the temporary fixtures; that run is retained as RED evidence and is not used as a positive tool result. The corrected probe run above is the accepted evidence. These results are specific to this GitHub-hosted Ubuntu runner and do not claim availability on developer workstations or other platforms.
+
+### 7.6 Matrix hand-off
+
+The capability matrix now contains the two previously accepted syntax profiles plus six disabled candidate profiles. No candidate was enabled by research. The matrix unit test was updated to assert the distinction between enabled/accepted profiles and disabled/research-only candidates. CI: https://github.com/vchs6/code2semantics/actions/runs/40319334019 — component tests and strict OpenSpec passed; overall CI remains blocked only by the expected product delivery gate.
