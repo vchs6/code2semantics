@@ -106,6 +106,8 @@ def test_constructor_runs_accepted_manifest_profile_and_preserves_manifest_obser
     import shutil
     import sys
 
+    from semantic_facts.tool_executor import SubprocessToolExecutor
+
     project = tmp_path / "manifest-project"
     (project / "src").mkdir(parents=True)
     (project / "Cargo.toml").write_text(
