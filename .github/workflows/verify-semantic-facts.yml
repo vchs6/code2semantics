@@ -14,6 +14,8 @@ jobs:
           python-version: '3.12'
       - name: Install dependencies
         run: python -m pip install -r skills/layered-semantic-facts/scripts/requirements.txt
+      - name: Probe optional information-acquisition tool candidates
+        run: python scripts/research/probe_candidate_tools.py
       - name: Repository tests
         env:
           PYTHONPATH: skills/layered-semantic-facts/scripts
