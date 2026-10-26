@@ -22,11 +22,11 @@
 
 ## 3. ԭ�ӡ��ݵȺ;ֲ�ά��
 
-- [ ] 3.1 ��д������ԣ��Ƿ� FactBatch���Ƿ��ڲ����á��Ϸ� external��ͬ�������ظ��ύ��ͬ��ʶ��ͬ���ݡ���æ�Ϳ����ӳ¾�д���п��ж����ԣ���֤ʧ�ܺ��״̬���䡣
-- [ ] 3.2 ���� `python -m pytest tests/repository/test_transactions.py -q` RED��
-- [ ] 3.3 ʵ�ֵ�����д�롢�淶���ύժҪ���ݵ�ȷ�ϡ���ͻ�ܾ�������������ͼУ�飻����Ĭ���ǳ�ͻ��
-- [ ] 3.4 ��д�����оֲ��ֶΡ���ϵ��֤�ݡ���ͻ��ʧЧ��ɾ��ά�����ԣ�ȷ���޹���ʵ�� token ���䣬��Ӱ���¼��������һ�¡�
-- [ ] 3.5 �������񡢴洢�� codec ���� GREEN�����ύ����ʵ�֡����Ժ��ĵ���
+- [x] 3.1 ��д������ԣ��Ƿ� FactBatch���Ƿ��ڲ����á��Ϸ� external��ͬ�������ظ��ύ��ͬ��ʶ��ͬ���ݡ���æ�Ϳ����ӳ¾�д���п��ж����ԣ���֤ʧ�ܺ��״̬���䡣
+- [x] 3.2 ���� `python -m pytest tests/repository/test_transactions.py -q` RED��
+- [x] 3.3 ʵ�ֵ�����д�롢�淶���ύժҪ���ݵ�ȷ�ϡ���ͻ�ܾ�������������ͼУ�飻����Ĭ���ǳ�ͻ��
+- [x] 3.4 ��д�����оֲ��ֶΡ���ϵ��֤�ݡ���ͻ��ʧЧ��ɾ��ά�����ԣ�ȷ���޹���ʵ�� token ���䣬��Ӱ���¼��������һ�¡�
+- [x] 3.5 �������񡢴洢�� codec ���� GREEN�����ύ����ʵ�֡����Ժ��ĵ���
 
 ## 4. ��ǰ״̬��ȡ���н��ϵ����
 
@@ -45,7 +45,7 @@
 
 ## 6. �ֿ��������
 
-- [ ] 6.1 ��д��ģ���������ڲ��ԣ�FactBatch д�롢�ؿ���ȡ���ֲ�ά������Ч�ԡ����޹�ϵ��ȡ����������ͱ��ݻָ�����ѯ�����ɲ���ֱ���ṩ��
+- [x] 6.1 ��д��ģ���������ڲ��ԣ�FactBatch д�롢�ؿ���ȡ���ֲ�ά������Ч�ԡ����޹�ϵ��ȡ����������ͱ��ݻָ�����ѯ�����ɲ���ֱ���ṩ��
 - [ ] 6.2 ���� `python -m pytest tests/repository/test_acceptance.py -q` RED������¶ǰ��ȱ�ݣ��ص���Ӧ���Ȳ��������޸���
 - [x] 6.3 ���� `python -m pytest tests/repository -q` ���ڶ������ض���֤����¼ʵ������˳��롢����������������ӳ�䵽 `implementation-validation.md`��
 - [ ] 6.4 �ύ���������ļ�����ȷ����ѯ/����������������������𣬲��Զ�������鵵��
@@ -82,3 +82,12 @@
 - RED was observed in CI run https://github.com/vchs6/code2semantics/actions/runs/40297171108 because the API did not yet exist. The first implementation run exposed a disconnected multi-parent test fixture; the fixture was corrected to connect the second parent from the root rather than weakening the assertion.
 - GREEN evidence: https://github.com/vchs6/code2semantics/actions/runs/40297475469 — repository suite 53 passed; matrix 15, parser 9, scanner 7, source acceptance 4, packaging 2, executor 3, producer dispatch 3, combined information-needs/constructor/induction/query 51 passed; strict OpenSpec passed. Product delivery gate remains blocked for full S1–S12 acceptance.
 - This completes bounded repository graph traversal tests for cycles, multi-parent edges, equivalent-edge deduplication, external terminal references, and budget truncation. It does not complete query-level S1–S12 or the full product lifecycle.
+
+
+## Transaction concurrency and graph acceptance evidence (2026-10-26)
+
+- Added `test_concurrent_identical_submission_is_idempotent_across_connections` in `tests/repository/test_transactions.py`. RED: CI https://github.com/vchs6/code2semantics/actions/runs/40298073017 failed with `UNIQUE constraint failed: submissions.submission_key`, demonstrating the concurrent replay race.
+- GREEN: `Repository.write` now re-reads the submission key after a transaction uniqueness race. If the winner committed the same digest, the loser returns the same receipt and reasserts the current source head; a different digest still raises `WriteConflict`.
+- CI after fix: https://github.com/vchs6/code2semantics/actions/runs/40298151751 — repository 54 passed; matrix 15; parser 9; scanner 7; runtime acceptance 5; packaging 2; executor 3; producer dispatch 3; combined information-needs/constructor/induction/query 52 passed; strict OpenSpec passed. Product delivery gate remains blocked for full-system acceptance.
+- Graph traversal: `Repository.traverse_navigation` and `test_bounded_navigation_traversal_handles_cycles_multi_parent_and_external_refs` cover bounded traversal, cycle termination, multi-parent edges, edge deduplication, external terminal references, and depth/edge budgets. Evidence: https://github.com/vchs6/code2semantics/actions/runs/40297691458.
+- Remaining pending items are intentionally not checked: 5.2 still lacks a separately captured RED run for transfer tests; 6.2 still requires a demonstrated RED-first full repository acceptance path, and 6.4 remains pending until that acceptance is complete.
