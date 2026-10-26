@@ -381,20 +381,10 @@
     },
     {
       "tool_id": "python.pyproject-toml",
-      "description": "Research candidate only: read-only TOML manifest metadata for Python project identity, build backend, scripts and declared dependencies.",
+      "description": "Accepted read-only pyproject.toml metadata producer for declared Python runtime identity and package dependencies.",
       "information_need_ids": [
-        "source.f1.selection",
-        "source.f1.included",
-        "source.f1.excluded",
-        "source.f1.observation",
-        "source.f1.limitations",
-        "source.f3.entries",
         "source.f3.runtime",
-        "source.f3.deployment",
-        "source.f3.environment",
-        "source.f6.kind",
-        "source.f6.scope",
-        "source.f6.necessity"
+        "source.f6.kind"
       ],
       "output_kinds": [
         "toml_manifest_records"
@@ -416,15 +406,24 @@
         "python.ast-source"
       ],
       "limitations": [
-        "DISABLED: no manifest parser or acceptance fixtures yet.",
-        "Only declared metadata is observed; it does not prove runtime entrypoint use or dependency resolution.",
-        "Workspace semantics vary by build backend and must be represented explicitly."
+        "Only F3.runtime declared project metadata and F6.kind declared package dependencies are accepted; other pyproject observations remain uncovered.",
+        "Manifest declarations do not prove runtime entrypoint use or dependency resolution.",
+        "Only standard pyproject.toml project/build-system metadata is interpreted; backend-specific workspace semantics are not inferred."
       ],
-      "enabled": false,
+      "enabled": true,
       "research_basis": [
         "openspec/changes/survey-info-acquisition-tools/research/semantic-tooling-survey.md#7.1",
         "skills/layered-semantic-facts/assets/information-needs.json"
-      ]
+      ],
+      "acceptance": {
+        "actor": "parser_development",
+        "evidence": [
+          "tests/test_info_parser.py::test_pyproject_toml_parser_emits_manifest_and_script_observations",
+          "tests/test_manifest_acceptance.py::test_python_manifest_to_factbatch_sqlite_reopen_and_minimal_query",
+          "tests/test_runtime_producer_acceptance.py::test_cli_query_uses_python_manifest_profile_without_subprocess_and_persists_incrementally",
+          "https://github.com/vchs6/code2semantics/actions/runs/40348349667"
+        ]
+      }
     }
   ]
 }
