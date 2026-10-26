@@ -186,3 +186,35 @@ SyntaxError: invalid syntax
     assert any("SyntaxError" in item["payload"]["text"] for item in result["observations"])
     assert all(item["evidence"][0]["kind"] == "observation" for item in result["observations"])
     assert all("no runtime behavior inferred" in item["context"]["language_semantics"][0] for item in result["observations"])
+
+def test_pyproject_toml_parser_emits_manifest_and_script_observations():
+    from semantic_facts.info_parser import parse_pyproject_toml_request
+
+    native = """[project]
+name = "sample-app"
+version = "1.2.3"
+dependencies = ["requests>=2"]
+
+[project.scripts]
+sample-cli = "sample_app.cli:main"
+"""
+    value = request(native, tool_id="python.pyproject-toml")
+    value["invocation_profile"]["command"] = ["tomllib.loads", "pyproject.toml"]
+    result = parse_pyproject_toml_request(value)
+
+    assert result["gaps"] == []
+    needs = {item["information_need_id"] for item in result["observations"]}
+    assert "source.f3.entries" in needs
+    assert "source.f6.kind" in needs
+    assert any("sample-cli" in item["payload"]["text"] for item in result["observations"])
+    assert any("requests>=2" in item["payload"]["text"] for item in result["observations"])
+    assert all(item["evidence"][0]["kind"] == "manifest" for item in result["observations"])
+    assert all(item["evidence"][0]["content_digest"].startswith("sha256:") for item in result["observations"])
+
+
+def test_pyproject_toml_parser_returns_gap_for_malformed_toml():
+    from semantic_facts.info_parser import parse_pyproject_toml_request
+
+    result = parse_pyproject_toml_request(request('[project\nname = "broken"', tool_id="python.pyproject-toml"))
+    assert result["observations"] == []
+    assert result["gaps"][0]["reason"] == "unparseable"
