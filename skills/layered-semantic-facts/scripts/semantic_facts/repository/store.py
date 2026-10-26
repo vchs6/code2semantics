@@ -63,9 +63,17 @@ class Repository:
                     "entities": {"entity_key", "source_id", "subject_id", "node_id", "payload"},
                     "facts": {"fact_key", "source_id", "subject_id", "node_id", "fact_id", "fact_type", "payload"},
                     "attributes": {"attribute_key", "fact_key", "field_name", "payload"},
+                    "attribute_versions": {"version_key", "attribute_key", "fact_key", "field_name", "payload"},
+                    "validity_events": {"event_id", "target_kind", "target_key", "state", "reason"},
                     "relations": {"relation_key", "owner_key", "payload", "navigation"},
                     "submissions": {"submission_key", "digest", "receipt"},
                     "source_heads": {"root", "source_id"},
+                    "evidence": {"evidence_key", "payload"},
+                    "evidence_links": {"link_key", "owner_key", "evidence_key", "pointer", "relation", "ordinal"},
+                    "premises": {"premise_key", "owner_key", "target_kind", "target_key", "payload"},
+                    "inventories": {"inventory_key", "payload"},
+                    "conflicts": {"conflict_key", "payload"},
+                    "conflict_links": {"link_key", "conflict_key", "target_kind", "target_key", "payload"},
                 }
                 if not set(expected_columns).issubset(tables):
                     raise ValueError("backup does not contain the repository schema")
