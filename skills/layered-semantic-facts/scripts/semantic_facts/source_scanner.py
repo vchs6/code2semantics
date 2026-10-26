@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from .fact_constructor import construct_fact_batch
-from .info_parser import parse_python_request
+from .info_parser import ParserRegistry
 from .repository.contract import ContractCodec
 
 
@@ -55,6 +55,7 @@ def build_fact_batch(root: str | Path, codec: ContractCodec) -> dict[str, Any]:
     }
 
     parsed_files: list[tuple[str, dict[str, Any]]] = []
+    parser_registry = ParserRegistry(codec.schema_root)
     for relative, source_text in raw:
         coverage = {
             "domain": f"Python syntax in {relative}",
@@ -76,6 +77,6 @@ def build_fact_batch(root: str | Path, codec: ContractCodec) -> dict[str, Any]:
                 "evidence": [],
             },
         }
-        parsed_files.append((relative, parse_python_request(request, codec.schema_root)))
+        parsed_files.append((relative, parser_registry.parse(request)))
 
     return construct_fact_batch(source_record, subject_id, parsed_files, codec)
