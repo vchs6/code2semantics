@@ -122,6 +122,8 @@ def execute_constructor_request(
                 elif inventory["target"]["kind"] == "node" and inventory["target"]["node"] == query_target["node"]:
                     direct_nodes.append(inventory)
             for fact in produced["facts"]:
+                if request["query"]["target"]["kind"] == "node" and fact["node"] != request["query"]["target"]["node"]:
+                    continue
                 fields = requested_fields.get(fact["fact_type"], set())
                 projected = dict(fact)
                 projected["fields"] = {
