@@ -48,7 +48,7 @@ def test_real_source_scan_store_reopen_and_query(tmp_path, capsys):
     reopened = Repository(database)
     result = reopened.read(query)
     assert result["facts"]
-    assert any("class:RepositoryReader" in fact["fields"]["names"]["value"]["text"] for fact in result["facts"])
+    assert any("class RepositoryReader" in fact["fields"]["names"]["value"]["text"] for fact in result["facts"])
     assert all(fact["fields"]["names"]["basis"]["evidence"] for fact in result["facts"])
     counts_before = reopened.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
     reopened.close()
