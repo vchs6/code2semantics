@@ -153,3 +153,9 @@
 - Added a root-harness test in `tests/test_acceptance.py` covering actual CLI query → Python/Rust manifest producers → parser observations → FactBatch → SQLite → reopen → minimal F6.kind response. The test distinguishes Cargo workspace membership (F4) from package dependency (F6), checks Python runtime metadata (F3), and verifies source evidence on all returned fields.
 - GREEN CI: https://github.com/vchs6/code2semantics/actions/runs/40353437920. Root/runtime acceptance 21 passed; constructor/induction/provider/query group 84 passed; repository 63; transactions 6; transfer 8; repository acceptance 5; matrix 15; parser 14; scanner 9; strict OpenSpec passed.
 - Root tasks 8.1–8.5 remain unchecked because this is one integrated slice, not the complete S1–S12 scenario set. Provider-backed induction is not yet available; no full acceptance marker was added.
+
+### Multi-project invalidation isolation progress (2026-10-26)
+
+- Root acceptance now tests two real Python project roots in one query. After changing and re-scanning one root, the query returns the changed root's new fact and the unchanged root's fact; validity events for the unrelated project's facts remain current.
+- GREEN CI: https://github.com/vchs6/code2semantics/actions/runs/40354905438 — root/runtime acceptance 22 passed; provider/constructor/query 86 passed; repository 63; transaction 6; transfer 8; repository acceptance 5; matrix 15; parser 14; scanner 9; strict OpenSpec passed.
+- This closes one cross-project invalidation scenario only. Full S1–S12 acceptance and provider-backed cognitive induction remain pending; product gate remains blocked.
