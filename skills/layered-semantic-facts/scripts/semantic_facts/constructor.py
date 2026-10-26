@@ -4,6 +4,7 @@ This component never persists facts or assembles the final query response.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -13,6 +14,9 @@ from jsonschema import Draft202012Validator
 from referencing import Registry, Resource
 
 from .constructor_plan import plan_constructor_request
+from .capability_matrix import CapabilityMatrix
+from .info_parser import ParserRegistry
+from .producer_dispatch import dispatch_registered_producer
 from .repository.contract import ContractCodec
 from .source_scanner import build_fact_batch_with_gaps
 from .tool_executor import SubprocessToolExecutor
@@ -129,6 +133,107 @@ def execute_constructor_request(
                 continue
 
             sources.append(actual_source)
+
+            # Consume accepted subprocess producers selected by the fixed plan.
+            if external_executor is not None and any(
+                profile["environment"] == "subprocess"
+                for item in plan_result["plan"]
+                for profile in item.get("producer_profiles", [])
+            ):
+                matrix = CapabilityMatrix(assets / "capability-matrix.json")
+                parser_registry = ParserRegistry(assets)
+                for item in plan_result["plan"]:
+                    for profile in item.get("producer_profiles", []):
+                        if profile["environment"] != "subprocess":
+                            continue
+                        tool_id = profile["tool_id"]
+                        if tool_id != "rust.cargo-metadata":
+                            continue
+                        manifest = root / "Cargo.toml"
+                        if not manifest.is_file():
+                            gaps.append({
+                                "fact_type": item["fact_type"],
+                                "fields": item["fields"],
+                                "target": request["query"]["target"],
+                                "reason": "unavailable_tool",
+                                "detail": f"Cargo manifest not found: {manifest}",
+                                "context": context,
+                                "coverage": coverage,
+                            })
+                            continue
+                        entry = next(entry for entry in matrix.entries if entry["tool_id"] == tool_id)
+                        parse_request = {
+                            "kind": "parse_request",
+                            "tool_native_output": {"encoding": "utf-8", "text": ""},
+                            "invocation_profile": {
+                                "tool_id": tool_id,
+                                "tool_version": "observed-by-execution",
+                                "command": list(profile["invocation"]),
+                                "environment": {"language": "Rust", "platform": sys.platform},
+                                "sources": [actual_source],
+                                "coverage": {
+                                    "domain": "Cargo workspace/package metadata for the explicit project root",
+                                    "checked": ["Cargo.toml"],
+                                    "excluded": list(actual_source.get("excludes", [])),
+                                    "completeness": "complete",
+                                    "method": "cargo metadata --no-deps --format-version 1",
+                                },
+                                "evidence": [],
+                            },
+                        }
+                        parsed = dispatch_registered_producer(
+                            entry, parse_request, parser_registry,
+                            external_executor=external_executor, cwd=root,
+                            args=["--manifest-path", str(manifest)], timeout_seconds=20.0,
+                        )
+                        if parsed.get("gaps"):
+                            for parser_gap in parsed["gaps"]:
+                                gaps.append({**parser_gap, "target": request["query"]["target"]})
+                            continue
+                        for observation in parsed["observations"]:
+                            need_id = observation["information_need_id"]
+                            mapping = {
+                                "source.f4.kind": ("F4", "kind"),
+                                "source.f6.kind": ("F6", "kind"),
+                                "source.f3.entries": ("F3", "entries"),
+                            }
+                            mapped = mapping.get(need_id)
+                            if mapped is None:
+                                gaps.append({
+                                    "fact_type": item["fact_type"], "fields": item["fields"],
+                                    "target": request["query"]["target"], "reason": "uncovered_need",
+                                    "detail": f"No FactBatch mapping is accepted for observation need {need_id}.",
+                                    "context": observation["context"], "coverage": observation["coverage"],
+                                })
+                                continue
+                            fact_type, field_name = mapped
+                            if field_name not in requested_fields.get(fact_type, set()):
+                                continue
+                            assertion = {
+                                "origin": "observed", "knowledge": "supported",
+                                "context": observation["context"], "coverage": observation["coverage"],
+                                "basis": {
+                                    "evidence": observation["evidence"], "premises": [],
+                                    "method": f"native {tool_id} output parser",
+                                    "limitations": [
+                                        "Manifest declaration only; does not prove runtime behavior.",
+                                        "Workspace membership and package dependency are distinct relation kinds.",
+                                    ],
+                                },
+                                "value": observation["payload"],
+                                "validity": {"state": "current", "sources": [{
+                                    "source_id": actual_source["source_id"],
+                                    "content_state": actual_source["content_state"],
+                                }]},
+                            }
+                            produced["facts"].append({
+                                "fact_id": "fact-" + hashlib.sha256(
+                                    (observation["observation_id"] + ":" + fact_type + ":" + field_name).encode("utf-8")
+                                ).hexdigest()[:24],
+                                "node": observation["subject"], "fact_type": fact_type,
+                                "granularities": ["L2"], "fields": {field_name: assertion},
+                            })
+
             query_target = request["query"]["target"]
             for inventory in produced["direct_nodes"]:
                 if query_target["kind"] == "scope":
