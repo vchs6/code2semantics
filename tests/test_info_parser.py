@@ -66,3 +66,22 @@ def test_parser_returns_explicit_gap_for_unsupported_tool_profile():
 
     assert result["observations"] == []
     assert result["gaps"][0]["reason"] == "unsupported_profile"
+
+
+def test_registry_discovers_builtin_parser_and_reports_unknown_profiles():
+    from semantic_facts.info_parser import ParserRegistry
+
+    registry = ParserRegistry()
+    assert registry.supported_tools() == ("python.ast-source",)
+    unsupported = request("raw output", tool_id="not.registered")
+    result = registry.parse(unsupported)
+    assert result["gaps"][0]["reason"] == "unsupported_profile"
+
+
+def test_registry_rejects_duplicate_registration():
+    import pytest
+    from semantic_facts.info_parser import ParserRegistry
+
+    registry = ParserRegistry()
+    with pytest.raises(ValueError, match="already registered"):
+        registry.register("python.ast-source", lambda value: value)
