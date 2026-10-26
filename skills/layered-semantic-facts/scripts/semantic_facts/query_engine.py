@@ -219,6 +219,58 @@ def execute_query_with_construction(
         current_sources.append(_unavailable_source(".", "query scope contains no source roots"))
 
     current_ids = {source["source_id"] for source in current_sources if source["status"] == "available"}
+    if query["target"]["kind"] == "node" and query["target"]["node"]["source_id"] not in current_ids:
+        # Do not query the repository for a node outside the explicitly authorized
+        # source roots. Return an explicit gap without probing the foreign identity.
+        context = {
+            "source_ids": sorted(current_ids),
+            "conditions": [],
+            "environment": {},
+            "language_semantics": ["Out-of-scope target rejected before repository read"],
+        }
+        coverage = {
+            "domain": "explicitly requested project roots",
+            "checked": list(query["scope"]["directories"]),
+            "excluded": list(query["scope"]["excludes"]),
+            "completeness": "unknown",
+            "method": "source-boundary authorization check",
+        }
+        gaps = [{
+            "fact_type": selection["fact_type"],
+            "fields": list(selection["fields"]),
+            "target": query["target"],
+            "reason": "invalid_reference",
+            "detail": "The requested node source is outside the explicitly authorized project roots.",
+            "context": context,
+            "coverage": coverage,
+        } for selection in query["selections"]]
+        gaps.append({
+            "fact_type": "F2",
+            "fields": ["direct_nodes"],
+            "target": query["target"],
+            "reason": "invalid_reference",
+            "detail": "The requested node source is outside the explicitly authorized project roots.",
+            "context": context,
+            "coverage": coverage,
+        })
+        response = {
+            "contract_version": "1.0.0",
+            "catalog_id": "semantic-facts-20261025",
+            "query": query,
+            "sources": current_sources,
+            "results": [],
+            "direct_nodes": [],
+            "premise_checks": [],
+            "conflicts": [],
+            "gaps": gaps,
+            "out_of_catalog": [],
+            "termination": "no_progress",
+        }
+        error = next(response_validator.iter_errors(response), None)
+        if error:
+            raise QueryContractError(f"response {list(error.absolute_path)}: {error.message}")
+        return response
+
     stored = repository.read(query)
     stored = {**stored, "facts": [fact for fact in stored["facts"] if fact["node"]["source_id"] in current_ids]}
     if any(source["status"] != "available" for source in current_sources):
