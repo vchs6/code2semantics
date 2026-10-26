@@ -4,12 +4,13 @@ import json
 import shutil
 
 from semantic_facts.query_engine import execute_query_with_construction
+from semantic_facts import cli
 from semantic_facts.repository.store import Repository
 from semantic_facts.tool_executor import SubprocessToolExecutor
 from test_information_needs import ASSETS
 
 
-def test_query_runtime_invokes_cargo_once_and_returns_distinct_membership_and_dependency(tmp_path):
+def test_cli_query_invokes_cargo_once_and_returns_distinct_membership_and_dependency(tmp_path, monkeypatch, capsys):
     project = tmp_path / "runtime-workspace"
     (project / "crates" / "app" / "src").mkdir(parents=True)
     (project / "crates" / "core" / "src").mkdir(parents=True)
@@ -73,22 +74,22 @@ def test_query_runtime_invokes_cargo_once_and_returns_distinct_membership_and_de
 
     executor = CountingExecutor()
     database = tmp_path / "runtime-workspace.sqlite"
-    repository = Repository(database, assets)
-    try:
-        response = execute_query_with_construction(
-            query, repository, assets, external_executor=executor
-        )
-        assert response["termination"] == "satisfied", {"gaps": [(gap["reason"], gap["detail"]) for gap in response["gaps"]], "calls": executor.calls}
-        assert {fact["fact_type"] for fact in response["results"]} == {"F4", "F6"}
-        assert all(set(fact["fields"]) == {"kind"} for fact in response["results"])
-        values = [fact["fields"]["kind"]["value"].get("text", "") for fact in response["results"]]
-        assert any("workspace member: runtime-app" in value for value in values)
-        assert any("workspace member: runtime-core" in value for value in values)
-        assert any("runtime-app -> runtime-core" in value for value in values)
-        assert all(fact["fields"]["kind"]["basis"]["evidence"] for fact in response["results"])
-        assert len(executor.calls) == 1, executor.calls
-    finally:
-        repository.close()
+    query_path = tmp_path / "runtime-query.json"
+    query_path.write_text(json.dumps(query), encoding="utf-8")
+    monkeypatch.setattr(cli, "_assets", lambda: assets)
+    monkeypatch.setattr(cli, "build_default_tool_executor", lambda: executor)
+
+    assert cli.main(["query", "--db", str(database), "--query-file", str(query_path)]) == 0
+    response = json.loads(capsys.readouterr().out)
+    assert response["termination"] == "satisfied", {"gaps": [(gap["reason"], gap["detail"]) for gap in response["gaps"]], "calls": executor.calls}
+    assert {fact["fact_type"] for fact in response["results"]} == {"F4", "F6"}
+    assert all(set(fact["fields"]) == {"kind"} for fact in response["results"])
+    values = [fact["fields"]["kind"]["value"].get("text", "") for fact in response["results"]]
+    assert any("workspace member: runtime-app" in value for value in values)
+    assert any("workspace member: runtime-core" in value for value in values)
+    assert any("runtime-app -> runtime-core" in value for value in values)
+    assert all(fact["fields"]["kind"]["basis"]["evidence"] for fact in response["results"])
+    assert len(executor.calls) == 1, executor.calls
 
     reopened = Repository(database, assets)
     try:
