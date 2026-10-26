@@ -15,6 +15,7 @@ from referencing import Registry, Resource
 from .constructor_plan import plan_constructor_request
 from .repository.contract import ContractCodec
 from .source_scanner import build_fact_batch_with_gaps
+from .tool_executor import SubprocessToolExecutor
 
 
 def _validate_result(result: dict[str, Any], asset_root: Path) -> None:
@@ -37,6 +38,8 @@ def _validate_result(result: dict[str, Any], asset_root: Path) -> None:
 def execute_constructor_request(
     request: dict[str, Any],
     asset_root: str | Path | None = None,
+    *,
+    external_executor: SubprocessToolExecutor | None = None,
 ) -> dict[str, Any]:
     """Execute the currently supported deterministic Python/Rust F2 constructor.
 
@@ -88,7 +91,7 @@ def execute_constructor_request(
         for current_source in current_sources:
             root = Path(current_source["root"])
             try:
-                scan_result = build_fact_batch_with_gaps(root, codec)
+                scan_result = build_fact_batch_with_gaps(root, codec, external_executor=external_executor)
                 produced = scan_result["batch"]
                 for scan_gap in scan_result["gaps"]:
                     gaps.append({
