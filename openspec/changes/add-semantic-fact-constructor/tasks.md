@@ -142,10 +142,10 @@ These tasks follow accepted pure parser adapters. They are prerequisites to enab
 ## 10. Minimum sufficient producer selection for a request
 
 - [x] 10.1 Add RED tests where one accepted producer covers two unmet needs while two separate producers cover one each; assert the planner selects the single producer when its profile meets every constraint.
-- [ ] 10.2 Add RED tests where no single producer covers all needs; assert a deterministic minimum combination is selected and uncovered needs remain explicit gaps.
-- [ ] 10.3 Add tests proving language/platform/environment, evidence-kind, completeness and limitations constraints cannot be traded away for fewer invocations.
-- [ ] 10.4 Implement request-level deterministic minimum sufficient producer selection over all unmet needs; keep a separate demand-to-selected-producer mapping and execute each selected invocation once.
-- [ ] 10.5 Test overlap handling: redundant same-value contribution is not duplicated; new fields/evidence survive; incompatible values create an explicit conflict/gap before FactBatch validation.
+- [x] 10.2 Add RED tests where no single producer covers all needs; assert a deterministic minimum combination is selected and uncovered needs remain explicit gaps.
+- [x] 10.3 Add tests proving language/platform/environment, evidence-kind, completeness and limitations constraints cannot be traded away for fewer invocations.
+- [x] 10.4 Implement request-level deterministic minimum sufficient producer selection over all unmet needs; keep a separate demand-to-selected-producer mapping and execute each selected invocation once.
+- [x] 10.5 Test overlap handling: redundant same-value contribution is not duplicated; new fields/evidence survive; incompatible values create an explicit conflict/gap before FactBatch validation.
 - [ ] 10.6 Run constructor planning/execution, repository incremental enrichment, SQLite reopen/minimal query, strict OpenSpec and full CI. Only mark complete from observed evidence.
 
 ### Minimum producer selection progress (2026-10-26)
@@ -154,3 +154,11 @@ These tasks follow accepted pure parser adapters. They are prerequisites to enab
 - Added helper-level and planner-level tests proving one accepted profile covering identity+names is preferred over two narrow profiles across the full request. Implementation now gathers all unmet need IDs per compatible language/environment group before selecting producers, then applies deterministic greedy set cover by maximum newly covered needs and stable tool-ID tie-break.
 - GREEN component evidence: https://github.com/vchs6/code2semantics/actions/runs/40338995823 — information-needs/constructor-plan group 65 passed; repository 63; transaction 6; transfer 8; repository acceptance 5; matrix 15; parser 14; scanner 8; runtime acceptance 11; executor 3; producer dispatch 3; constructor/query combined 65; quality gate 2; strict OpenSpec passed. Overall run remains blocked only by the full S1–S12 product gate.
 - Task 10.1 is complete. Tasks 10.2–10.6 remain pending: complementary minimum coverage, hard constraint tests, overlap conflict aggregation, and full integration acceptance are not yet proven.
+
+### Request-wide selection and overlap handling evidence (2026-10-26)
+
+- CI GREEN: https://github.com/vchs6/code2semantics/actions/runs/40340224549. OpenSpec validation passed. Component results: repository 63; transactions 6; transfer 8; repository acceptance 5; capability matrix 15; parser 14; scanner 8; runtime acceptance 11; packaging 2; executor 3; producer dispatch 3; information-needs/constructor-plan/constructor/contribution merge/binding/induction/query group 70 passed; quality-gate tests 2 passed.
+- Minimum producer selection now evaluates the full set of unmet needs per compatible language/environment group and uses deterministic greedy set cover. A single accepted profile covering multiple needs is preferred; complementary profiles are selected only when needed. Hard language/platform/environment/disabled-profile constraints are tested.
+- Request-local fact contributions are grouped by source/subject/node/fact type/granularity. Equal assertion bodies merge independent evidence by evidence ID. Incompatible assertions or reused evidence IDs with different content produce an explicit conflict gap and the conflicted field is omitted from the batch; repository duplicate identity validation remains strict.
+- Product delivery gate remains BLOCKED because `references/acceptance-results.md` lacks the full acceptance success marker on a standalone line; the gate explicitly rejects a partial source-to-store smoke test as proof of full component integration. Do not alter the gate marker without completing full S1–S12 acceptance.
+- Task 10.6 remains pending. Full producer→FactBatch→repository→reopen→minimal response coverage across S1–S12 is not yet demonstrated.
