@@ -158,3 +158,44 @@ def test_repository_acceptance_graph_and_invalidation_survive_backup_without_del
     for table, count in original_counts.items():
         assert restored.connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0] == count
     restored.close()
+
+def test_local_mutation_requires_source_scope_when_fact_ids_collide(batch, db_path, tmp_path, codec):
+    import hashlib
+    import pytest
+
+    from semantic_facts.repository.store import Repository
+    from semantic_facts.source_scanner import build_fact_batch
+
+    root_a = tmp_path / "project-a"
+    root_b = tmp_path / "project-b"
+    root_a.mkdir()
+    root_b.mkdir()
+    (root_a / "module.py").write_text("def alpha():\n    return 1\n", encoding="utf-8")
+    (root_b / "module.py").write_text("def beta():\n    return 2\n", encoding="utf-8")
+
+    repository = Repository(db_path)
+    first = build_fact_batch(root_a, codec)
+    second = build_fact_batch(root_b, codec)
+    repository.write(first, "project-a-snapshot")
+    repository.write(second, "project-b-snapshot")
+
+    fact_id = "fact-" + hashlib.sha256(("module.py" + "\\0F2").encode("utf-8")).hexdigest()[:20]
+    source_a = first["sources"][0]["source_id"]
+    source_b = second["sources"][0]["source_id"]
+    with pytest.raises(ValueError, match="ambiguous"):
+        repository.invalidate_field(fact_id, "names", "scope required")
+
+    rows = repository.connection.execute(
+        "SELECT f.source_id, a.attribute_key FROM facts f JOIN attributes a ON a.fact_key = f.fact_key "
+        "WHERE f.fact_id = ? AND a.field_name = ?",
+        (fact_id, "names"),
+    ).fetchall()
+    key_b = next(key for source_id, key in rows if source_id == source_b)
+    repository.invalidate_field(fact_id, "names", "scoped mutation", source_id=source_b)
+    event_key = repository.connection.execute(
+        "SELECT target_key FROM validity_events WHERE target_kind = 'field' ORDER BY event_id DESC LIMIT 1"
+    ).fetchone()[0]
+    assert event_key == key_b
+    assert repository.connection.execute("SELECT COUNT(*) FROM facts WHERE fact_id = ?", (fact_id,)).fetchone()[0] == 2
+    assert source_a != source_b
+    repository.close()
