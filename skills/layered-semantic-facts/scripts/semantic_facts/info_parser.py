@@ -10,6 +10,7 @@ import ast
 import hashlib
 import json
 import re
+import tomllib
 from pathlib import Path
 from typing import Any
 
