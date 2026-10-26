@@ -36,7 +36,15 @@ def _request():
         "existing_valid_facts": {
             "contract_version": "1.0.0",
             "catalog_id": "semantic-facts-20261025",
-            "sources": [],
+            "sources": [{
+                "source_id": "src-fixture",
+                "root": "/fixture",
+                "content_state": "sha256:" + "a" * 64,
+                "status": "available",
+                "dirty": False,
+                "has_untracked": False,
+                "excludes": [],
+            }],
             "facts": [],
             "navigation": [],
             "direct_nodes": [],
