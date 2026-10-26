@@ -101,6 +101,8 @@ def parse_python_request(request: dict[str, Any], asset_root: str | Path | None 
             "coverage": coverage,
         })
 
+    add("module", Path(source_path).stem, 1, max(1, len(source_text.splitlines())),
+        f"module {Path(source_path).stem}")
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             add("function", node.name, node.lineno, getattr(node, "end_lineno", None),
