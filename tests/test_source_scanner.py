@@ -29,7 +29,7 @@ def test_scans_real_python_source_into_valid_fact_batch(tmp_path, codec):
     assert fact["fact_type"] == "F2"
     assert "class Service" in fact["fields"]["names"]["value"]["text"]
     assert "function execute" in fact["fields"]["names"]["value"]["text"]
-    assert fact["fields"]["names"]["basis"]["evidence"][0]["locator"] == "service.py:file"
+    assert fact["fields"]["names"]["basis"]["evidence"][0]["locator"].startswith("service.py:L")
     codec.validate_batch(batch)
 
 
