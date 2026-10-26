@@ -151,6 +151,8 @@ def test_bounded_navigation_traversal_handles_cycles_multi_parent_and_external_r
 
     value = copy.deepcopy(batch)
     first = copy.deepcopy(value["navigation"][0])
+    duplicate_first = copy.deepcopy(first)
+    duplicate_first["edge_id"] = "duplicate-member-a"
     second_parent = copy.deepcopy(first)
     second_parent["edge_id"] = "parent-b-to-child"
     second_parent["source"] = {
@@ -177,7 +179,7 @@ def test_bounded_navigation_traversal_handles_cycles_multi_parent_and_external_r
             "kind": "subject", "source_id": "src-a", "subject_id": "project-a"
         },
     }
-    value["navigation"] = [first, second_parent_root, second_parent, cycle, external]
+    value["navigation"] = [first, duplicate_first, second_parent_root, second_parent, cycle, external]
     repository = Repository(db_path)
     repository.write(value, "bounded-graph-traversal")
 
@@ -188,6 +190,8 @@ def test_bounded_navigation_traversal_handles_cycles_multi_parent_and_external_r
     )
     edge_ids = {edge["edge_id"] for edge in result["edges"]}
     assert {"member-a", "root-to-parent-b", "parent-b-to-child", "child-to-root-cycle", "child-to-external"} <= edge_ids
+    assert "duplicate-member-a" not in edge_ids
+    assert sum(edge["source"] == first["source"] and edge["target"] == first["target"] for edge in result["edges"]) == 1
     assert len(result["nodes"]) == len({repr(node) for node in result["nodes"]})
     assert any(node.get("node_id") == "parent-b" for node in result["nodes"])
     assert any(node.get("kind") == "external" for node in result["terminal_references"])
