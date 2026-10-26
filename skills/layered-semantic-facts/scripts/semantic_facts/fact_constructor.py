@@ -17,6 +17,9 @@ def construct_fact_batch(
     source_id = source["source_id"]
     content_state = source["content_state"]
     facts: list[dict[str, Any]] = []
+    direct_nodes: list[dict[str, Any]] = []
+    project_children: list[dict[str, Any]] = []
+    project_evidence: dict[str, dict[str, Any]] = {}
 
     for relative, parsed in parsed_files:
         if parsed.get("kind") != "parse_result":
@@ -70,9 +73,14 @@ def construct_fact_batch(
                 "validity": {"state": "current", "sources": [{"source_id": source_id, "content_state": content_state}]},
             }
 
+        file_node = {"source_id": source_id, "subject_id": subject_id, "node_id": node_id}
+        project_children.append(file_node)
+        for item in evidence_items:
+            project_evidence[item["evidence_id"]] = item
+
         facts.append({
             "fact_id": fact_id,
-            "node": {"source_id": source_id, "subject_id": subject_id, "node_id": node_id},
+            "node": file_node,
             "fact_type": "F2",
             "granularities": ["L3"],
             "fields": {
@@ -85,13 +93,65 @@ def construct_fact_batch(
             },
         })
 
+        declaration_children = []
+        for observation in observations:
+            child = observation["subject"]
+            if child not in declaration_children:
+                declaration_children.append(child)
+        declaration_children.sort(key=lambda item: (item["source_id"], item["subject_id"], item["node_id"]))
+        direct_nodes.append({
+            "target": {"kind": "node", "node": file_node},
+            "granularity": "L3",
+            "boundary": f"Direct supported declarations in {relative}; syntax only, no descendant expansion.",
+            "children": declaration_children,
+            "assertion": assertion({
+                "kind": "text",
+                "text": f"Enumerated {len(declaration_children)} direct syntax declarations in {relative}.",
+            }),
+        })
+
+    project_context = {
+        "source_ids": [source_id],
+        "conditions": [],
+        "environment": {"languages": sorted({"Rust" if path.endswith(".rs") else "Python" for path, _ in parsed_files})},
+        "language_semantics": ["Direct source-file inventory is limited to supported Python/Rust syntax files."],
+    }
+    project_coverage = {
+        "domain": "direct supported source files in the exact requested root",
+        "checked": sorted(relative for relative, _ in parsed_files),
+        "excluded": list(source.get("excludes", [])),
+        "completeness": "complete",
+        "method": "deterministic Python/Rust source scan",
+    }
+    project_assertion = {
+        "origin": "observed",
+        "knowledge": "supported",
+        "context": project_context,
+        "coverage": project_coverage,
+        "basis": {
+            "evidence": [project_evidence[key] for key in sorted(project_evidence)],
+            "premises": [],
+            "method": "deterministic direct-source inventory",
+            "limitations": ["Completeness applies only to supported Python/Rust source files under this exact root."],
+        },
+        "value": {"kind": "text", "text": f"Enumerated {len(project_children)} supported direct source files."},
+        "validity": {"state": "current", "sources": [{"source_id": source_id, "content_state": content_state}]},
+    }
+    direct_nodes.append({
+        "target": {"kind": "scope"},
+        "granularity": "L3",
+        "boundary": "Direct supported Python/Rust source files under the exact requested root; excluded directories are not scanned.",
+        "children": sorted(project_children, key=lambda item: (item["source_id"], item["subject_id"], item["node_id"])),
+        "assertion": project_assertion,
+    })
+
     batch = {
         "contract_version": "1.0.0",
         "catalog_id": "semantic-facts-20261025",
         "sources": [source],
         "facts": facts,
         "navigation": [],
-        "direct_nodes": [],
+        "direct_nodes": direct_nodes,
         "conflicts": [],
     }
     codec.validate_batch(batch)
