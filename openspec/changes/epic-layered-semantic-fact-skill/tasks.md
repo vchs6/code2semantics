@@ -36,7 +36,7 @@
 
 - [x] 6.1 按第3组归纳契约推进 `../add-induction-batch-trigger/` 的规划补齐与 apply，接收未满足触发和字段分组的实现、非空不足/unknown/证据不足/冲突保留测试及接口说明；验收按事实类型+主体+当前来源内容状态+上下文分组，不直接持久化或组装 response。子 tasks 先固定交付路径和命令，主接收证据。
 - [x] 6.2 在5.0首阶段需求清单、5.3与6.1完成后推进 `../add-semantic-fact-constructor/` 的规划补齐与 apply，接收仅消费开发期既定清单、匹配请求/未满足项形成当前获取计划、读取已点亮说明并运行时选择组合执行、纯解析接入和归纳返回的实现及局部证据；核验合法观察边界内必要上级路径与完整直接节点识别、不递归构造所有 child 完整事实、不读写事实仓库、不组装最终响应。未点亮/环境不符/清单未覆盖必须 gap，不擅自扩权；核验运行构造器不生成/扩展清单、不触发工具研究/解析器开发/点亮，待开发期变更处理。
-- [ ] 6.3 按公共事实契约推进 `../add-semantic-fact-repository/` 的规划补齐与 apply，接收 SQLite 结构化事实/证据关联/当前有效性、事务回滚和关闭重开读取实现及测试；核验修改/删除/前提失效不当当前命中、冲突保留、非法数据拒绝且原数据未因测试删除，存储接口不使用最终 response，不要求旧历史或用户版本协议。
+- [x] 6.3 按公共事实契约推进 `../add-semantic-fact-repository/` 的规划补齐与 apply，接收 SQLite 结构化事实/证据关联/当前有效性、事务回滚和关闭重开读取实现及测试；核验修改/删除/前提失效不当当前命中、冲突保留、非法数据拒绝且原数据未因测试删除，存储接口不使用最终 response，不要求旧历史或用户版本协议。
 
 ## 7. 推进查询与包装子交付（D6/D7）
 
@@ -131,3 +131,11 @@
 - Backup restore rejects empty SQLite files and malformed databases with expected table names but incorrect columns. The target's fact/source history remains unchanged on rejection.
 - CI: https://github.com/vchs6/code2semantics/actions/runs/40299401934 — repository 57 passed; transaction 6; transfer 8; repository acceptance 3; matrix 15; parser 9; scanner 7; runtime acceptance 8; packaging 2; executor 3; producer dispatch 3; combined planning/constructor/induction/query 52 passed; strict OpenSpec passed.
 - Root tasks 8.1–8.5 remain pending: this is expanded but not complete S1–S12 coverage; the full external tool/provider → parse → constructor/induction → FactBatch → repository → minimal response path is not yet fully demonstrated. Product gate remains BLOCKED.
+
+
+## Repository dependency closure (2026-10-26)
+
+- Root dependency 6.3 is now satisfied by the repository component's immutable normalized writes, source-head validity, append-only validity events, atomic transactions, backup/restore and current export/import tests.
+- RED/GREEN for a current-head local mutation bug: RED run https://github.com/vchs6/code2semantics/actions/runs/40310626084; GREEN run https://github.com/vchs6/code2semantics/actions/runs/40310872678.
+- GREEN evidence: repository 59 passed; transaction 6; transfer 8; repository acceptance 5; matrix 15; parser 9; scanner 7; runtime acceptance 9; packaging 2; executor 3; producer dispatch 3; combined planning/constructor/binding/induction/query 52 passed; strict OpenSpec passed.
+- Next dependency is query acceptance 7.1 / child task 4.4, then root integration tasks 8.1–8.5. Product delivery gate remains blocked until full S1–S12 acceptance passes.
