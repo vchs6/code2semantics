@@ -38,3 +38,10 @@ The existing survey acceptance covers the initial F2/L3 catalogue only. It is no
 - Corrected CI probe evidence: https://github.com/vchs6/code2semantics/actions/runs/40319334019. Python 3.12.15 `compileall` fixture and Cargo 1.99.0 `cargo metadata --no-deps --format-version 1` fixture succeeded. rustc 1.99.0 is present, but `cargo check` was not probed. rust-analyzer path resolved but was not runnable; ctags, ast-grep and tree-sitter CLI were absent in this runner.
 - The first probe run is retained as RED evidence because fixture newline escaping caused sample failures; only the corrected run above is treated as positive evidence.
 - Candidate entries remain disabled until exact native-output parser fixtures and parser-development acceptance pass.
+
+
+## Parser handoff evidence (2026-10-26)
+
+- Cargo metadata and compileall native-output formats now have pure parser adapters and focused tests; the adapter tests passed in CI run https://github.com/vchs6/code2semantics/actions/runs/40320586364.
+- Probe evidence is still runner-specific: cargo metadata and compileall samples passed on Ubuntu 24.04; rust-analyzer was not runnable; ctags and ast-grep were absent.
+- Survey work is complete, but candidates remain disabled because constructor planning does not yet select subprocess profiles. The next dependency is constructor runtime selection and bounded executor wiring; matrix enablement follows that acceptance, not the survey alone.
