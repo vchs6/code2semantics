@@ -112,7 +112,7 @@ def test_registry_registers_python_and_rust_parsers():
     from semantic_facts.info_parser import ParserRegistry
 
     registry = ParserRegistry()
-    assert registry.supported_tools() == ("python.ast-source", "python.compileall", "rust.cargo-metadata", "rust.syntax-source")
+    assert registry.supported_tools() == ("python.ast-source", "python.compileall", "python.pyproject-toml", "rust.cargo-metadata", "rust.syntax-source")
     result = registry.parse(request("pub enum State { Ready, Busy }", tool_id="rust.syntax-source"))
     assert any(item["payload"]["text"] == "enum State" for item in result["observations"])
 
