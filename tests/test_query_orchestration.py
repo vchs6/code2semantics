@@ -388,3 +388,19 @@ def test_query_handles_multi_parent_cycle_and_external_edges_without_recursive_e
         assert all("fixture graph edge" not in json.dumps(fact) for fact in response["results"])
     finally:
         repository.close()
+
+def test_query_reports_repository_unavailable_without_fabricating_results(tmp_path):
+    project = tmp_path / "unavailable-repository-project"
+    project.mkdir()
+    (project / "engine.py").write_text("class Engine:\\n    pass\\n", encoding="utf-8")
+    repository = Repository(tmp_path / "closed.db", ASSETS)
+    before = repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
+    repository.close()
+
+    response = execute_query_with_construction(make_query(project), repository, ASSETS)
+
+    assert response["termination"] == "unavailable"
+    assert response["results"] == []
+    assert response["gaps"]
+    assert all(gap["reason"] == "repository_unavailable" for gap in response["gaps"])
+    assert before == 0
