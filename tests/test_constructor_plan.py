@@ -158,3 +158,31 @@ def test_empty_query_scope_is_rejected():
 def test_constructor_plan_is_deterministic_for_identical_requests():
     value = request(("locators", "names", "identity"))
     assert plan_constructor_request(value, ASSETS) == plan_constructor_request(value, ASSETS)
+
+def test_constructor_plan_selects_accepted_subprocess_producer_for_manifest_need(tmp_path):
+    import json
+    import shutil
+
+    for source in ASSETS.iterdir():
+        if source.is_file():
+            shutil.copy(source, tmp_path / source.name)
+    matrix_path = tmp_path / "capability-matrix.json"
+    matrix = json.loads(matrix_path.read_text(encoding="utf-8"))
+    entry = next(item for item in matrix["entries"] if item["tool_id"] == "rust.cargo-metadata")
+    entry["enabled"] = True
+    entry["acceptance"] = {
+        "actor": "parser_development",
+        "evidence": ["tests/test_info_parser.py::test_cargo_metadata_parser_emits_workspace_and_dependency_observations_separately"],
+    }
+    matrix_path.write_text(json.dumps(matrix), encoding="utf-8")
+
+    value = request()
+    value["query"]["selections"] = [{"fact_type": "F4", "fields": ["kind"]}]
+    value["query"]["granularity"] = "L2"
+    result = plan_constructor_request(value, tmp_path)
+
+    assert result["gaps"] == []
+    assert len(result["plan"]) == 1
+    assert result["plan"][0]["need_id"] == "source.f4.kind"
+    assert result["plan"][0]["producer_ids"] == ["rust.cargo-metadata"]
+    assert result["plan"][0]["producer_profiles"][0]["environment"] == "subprocess"
