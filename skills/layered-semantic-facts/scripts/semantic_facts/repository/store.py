@@ -827,6 +827,7 @@ class Repository:
                 )
             ]
         navigation = []
+        seen_navigation: set[str] = set()
         for relation_key, payload in self.connection.execute(
             "SELECT relation_key, payload FROM relations WHERE navigation = 1"
         ):
@@ -838,6 +839,14 @@ class Repository:
                 continue
             if target and source_ref != target:
                 continue
+            assertion = edge.get("assertion", {})
+            signature = _canonical((
+                edge.get("source"), edge.get("target"), edge.get("relation"),
+                assertion.get("context", {}).get("conditions", []),
+            ))
+            if signature in seen_navigation:
+                continue
+            seen_navigation.add(signature)
             navigation.append(edge)
 
         direct_nodes = []
