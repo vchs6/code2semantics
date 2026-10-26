@@ -72,7 +72,7 @@ def test_read_with_no_match_returns_an_empty_fact_set(batch, db_path):
     result = repository.read(make_query(subject_id="missing"))
 
     assert result["facts"] == []
-    assert result["sources"] == []
+    assert [source["source_id"] for source in result["sources"]] == ["src-a"]
     assert result["navigation"] == []
     repository.close()
 
