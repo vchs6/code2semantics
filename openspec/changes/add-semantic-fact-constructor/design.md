@@ -96,3 +96,13 @@ The constructor plan is demand-oriented, but execution is task-oriented. A query
 Aggregate FactBatch contributions by repository fact identity, not by observation ID alone. If several producers support the same field and values agree, merge evidence deterministically into one fact. If values disagree, preserve both contributions in a conflict record and emit a structured gap; do not append duplicate facts or silently choose a winner. Repository duplicate-identity validation remains strict.
 
 Execution records must make the selected source snapshot, tool profile, normalized arguments, invocation count and output digest observable in tests. If source content changes while a producer is running, discard all outputs and facts derived from that snapshot. An execution error is represented once per unique task and fanned out to affected needs without rerunning the same command per need.
+
+## Boundary with repository incremental storage
+
+Constructor scheduling has no authority over persisted-record deduplication. It derives unique execution tasks for the current request and source snapshot so a tool is not invoked once per requested field. That is a resource/execution optimization only.
+
+Within the returned FactBatch, compatible observations for the same fact field must be aggregated into one contract-valid field assertion with merged evidence. If values conflict, return explicit conflict/gap data; do not emit duplicate fact identities or silently select a value. This is batch construction, not cross-request storage deduplication.
+
+The repository owns persistence semantics: stable identity, atomic incremental writes, idempotent submission keys, evidence/field additions, and conflict handling against existing rows. The constructor must not implement a second persistent identity index or skip writes based on an assumption that a prior request already stored the fact. Repository contract validation must remain strict.
+
+Acceptance separates three concerns: (1) same request/source/profile executes a producer once; (2) one FactBatch has no unresolved duplicate identity; (3) repeated/subsequent Repository.write calls prove idempotency and incremental evidence/field storage. Passing one does not imply the others.
