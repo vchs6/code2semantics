@@ -107,3 +107,10 @@ These tasks follow accepted pure parser adapters. They are prerequisites to enab
 - RED: https://github.com/vchs6/code2semantics/actions/runs/40321016282 — an enabled/accepted Cargo metadata profile was not selected because constructor planning hard-coded the in-process environment.
 - GREEN: https://github.com/vchs6/code2semantics/actions/runs/40321130067 — the planner now searches the information need's declared environments and retains selected producer profile metadata (tool ID, environment, invocation, output kinds). The focused constructor/plan combination passed 58 tests; strict OpenSpec passed. Product delivery gate remains blocked as expected.
 - Remaining 7.3–7.6: actual subprocess execution, native observation to F1/F3/F4/F6 FactBatch mapping, persistence/reopen/query acceptance, and only then matrix enablement. These remain unchecked.
+
+### Task 7 progress evidence (2026-10-26)
+
+- 7.1–7.2: environment-aware producer planning has RED/GREEN evidence in https://github.com/vchs6/code2semantics/actions/runs/40321130067.
+- 7.3–7.5: first accepted Cargo metadata subprocess is now executed and parsed, with F4.kind/F6.kind observations mapped into a schema-valid FactBatch. Source/manifest state is included in source identity, and a post-execution rescan rejects stale output. RED/GREEN evidence: https://github.com/vchs6/code2semantics/actions/runs/40324281385 and https://github.com/vchs6/code2semantics/actions/runs/40324323776.
+- 7.6: narrow Cargo F4 persistence/reopen/minimal-query test passes in the same GREEN run. The task remains unchecked because the full requested contract includes broader F1/F3/F4/F6 mapping, missing-tool/timeout coverage and Python/Rust project manifest acceptance.
+- Matrix decision: keep all research candidates disabled in the checked-in production matrix. Parser and constructor acceptance has been exercised against a temporary test matrix, not yet sufficient for enabling the profile globally.
