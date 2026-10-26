@@ -142,13 +142,15 @@ def execute_constructor_request(
             ):
                 matrix = CapabilityMatrix(assets / "capability-matrix.json")
                 parser_registry = ParserRegistry(assets)
+                executed_profiles: set[str] = set()
                 for item in plan_result["plan"]:
                     for profile in item.get("producer_profiles", []):
                         if profile["environment"] != "subprocess":
                             continue
                         tool_id = profile["tool_id"]
-                        if tool_id != "rust.cargo-metadata":
+                        if tool_id != "rust.cargo-metadata" or tool_id in executed_profiles:
                             continue
+                        executed_profiles.add(tool_id)
                         manifest = root / "Cargo.toml"
                         if not manifest.is_file():
                             gaps.append({
