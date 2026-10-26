@@ -102,3 +102,10 @@
 - Parser adapters were test-first: RED run https://github.com/vchs6/code2semantics/actions/runs/40320249864 failed because the parser functions were absent; GREEN run https://github.com/vchs6/code2semantics/actions/runs/40320586364 reports 12 parser tests passed, 15 capability-matrix tests passed, 57 combined constructor/query tests passed, and strict OpenSpec success.
 - Product gate remained BLOCKED, which is expected. No candidate was enabled because constructor planning currently hard-codes `environment="in-process"`; subprocess dispatch/configuration is a downstream dependency and must be completed before matrix enablement.
 - No subagent tool is available in this harness; final review must be recorded as self-review if no independent reviewer becomes available.
+
+
+## Task 3 ruling and progress (2026-10-26)
+
+- RED/GREEN for environment-aware producer planning: RED https://github.com/vchs6/code2semantics/actions/runs/40321016282; GREEN https://github.com/vchs6/code2semantics/actions/runs/40321130067. The plan now records accepted producer profiles across declared environments.
+- Ruling: Do not enable Cargo metadata or compileall yet. Although the pure output adapters pass tests, current runtime FactBatch construction only maps F2 syntax observations; enabling manifest candidates now would advertise a production capability that cannot yet yield F1/F3/F4/F6 facts. Cost if wrong: users would receive unavailable/gap-only results or misleading matrix coverage.
+- Next task is constructor execution and fact mapping, then end-to-end repository re-read/minimal response acceptance. Matrix enablement remains gated on that consumer acceptance.
