@@ -68,3 +68,17 @@
 - 该 CI 失败是有意的 fail-closed 结果，表明项目当前不能宣称产品端到端验收完成。门禁通过后仍须执行真实源码集成测试，不能只依靠文件存在性。
 
 以上均直接提交 main。下一步应先按现有 OpenSpec 流程补齐真实运行入口和集成产物，再运行门禁；不得通过降低门禁要求恢复绿色。
+
+
+## 2026-10-26 组件实现增量
+
+直接提交至 `main`，未创建分支：
+
+- `skills/layered-semantic-facts/scripts/semantic_facts/info_parser.py`：确定性 Python AST 解析器、来源证据和行范围、语法错误显式 gap、ParserRegistry 注册/发现。
+- `skills/layered-semantic-facts/scripts/semantic_facts/fact_constructor.py`：将解析 observations 转换为符合公共 FactBatch Schema 的 F2/L3 源码语法清单事实；不把语法观察冒充运行时行为。
+- `skills/layered-semantic-facts/scripts/semantic_facts/source_scanner.py`：扫描 Python 源文件，计算内容状态，保守记录 Git dirty/untracked 状态，并串接 ParserRegistry 与 FactBatch 构造器。
+- `skills/layered-semantic-facts/scripts/semantic_facts/cli.py`：`scan-python` 持久化与 `query` 查询命令。
+- `skills/layered-semantic-facts/SKILL.md`：记录当前可执行入口和支持边界。
+- 新增 `tests/test_info_parser.py`、`tests/test_source_scanner.py`、`tests/test_acceptance.py` 和真实源码 fixture；端到端测试覆盖真实 Python 源码→解析→FactBatch→SQLite→关闭重开→查询，并验证重复扫描不减少事实行。
+- CI 运行：https://github.com/vchs6/code2semantics/actions/runs/40257745511 。结果：repository 35 passed，capability matrix 14 passed，parser 6 passed，source scanner 4 passed，runtime acceptance 1 passed；严格 OpenSpec 通过。
+- 产品交付门禁按预期仍 BLOCKED：当前链路只覆盖 Python F2/L3 语法清单，不包括工具矩阵调度与外部工具执行、受约束归纳、完整多层构造、源码变更后的受影响事实失效/重构，以及完整公共查询响应。未将该局部链路标记为完整系统验收。
