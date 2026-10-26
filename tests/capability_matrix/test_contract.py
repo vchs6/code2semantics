@@ -41,19 +41,31 @@ def test_cold_start_empty_matrix_matches_public_schema() -> None:
     validator().validate(document)
 
 
-def test_current_matrix_contains_only_accepted_python_and_rust_parser_profiles() -> None:
+def test_current_matrix_separates_accepted_profiles_from_disabled_research_candidates() -> None:
     document = load_fixture()
     validator().validate(document)
-    assert {entry["tool_id"] for entry in document["entries"]} == {
-        "python.ast-source", "rust.syntax-source"
-    }
-    for entry in document["entries"]:
+    entries = {entry["tool_id"]: entry for entry in document["entries"]}
+    assert {"python.ast-source", "rust.syntax-source"} <= set(entries)
+    for tool_id in ("python.ast-source", "rust.syntax-source"):
+        entry = entries[tool_id]
         assert entry["enabled"] is True
         assert entry["acceptance"]["actor"] == "parser_development"
         assert entry["acceptance"]["evidence"]
         assert set(entry["information_need_ids"]) == {
             "syntax.f2.identity", "syntax.f2.names", "syntax.f2.boundary", "syntax.f2.locators"
         }
+
+    research_candidates = set(entries) - {"python.ast-source", "rust.syntax-source"}
+    assert research_candidates == {
+        "python.compileall", "rust.cargo-metadata", "rust.cargo-check",
+        "rust.rust-analyzer", "multi.ctags", "multi.ast-grep",
+    }
+    for tool_id in research_candidates:
+        entry = entries[tool_id]
+        assert entry["enabled"] is False
+        assert "acceptance" not in entry
+        assert entry["information_need_ids"]
+        assert any("DISABLED" in limit for limit in entry["limitations"])
 
 
 def test_schema_rejects_invalid_entries() -> None:
