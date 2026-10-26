@@ -207,3 +207,53 @@ def test_bounded_navigation_traversal_handles_cycles_multi_parent_and_external_r
     assert bounded["reason"] in {"depth", "edges"}
     assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == len(value["facts"])
     repository.close()
+
+def test_existing_semantic_entity_is_incrementally_enriched_with_new_fact_field(batch, db_path):
+    import copy
+    from semantic_facts.repository.store import Repository
+
+    first = copy.deepcopy(batch)
+    first["facts"] = [fact for fact in first["facts"] if fact["fact_id"] == "fact-a"]
+    first["facts"][0]["fields"] = {"strategy": first["facts"][0]["fields"]["strategy"]}
+    first["navigation"] = []
+    first["direct_nodes"] = []
+    first["conflicts"] = []
+
+    second = copy.deepcopy(first)
+    second["facts"][0]["fields"] = {
+        "open_items": copy.deepcopy(first["facts"][0]["fields"]["strategy"])
+    }
+
+    repository = Repository(db_path)
+    repository.write(first, "entity-enrichment-first")
+    repository.write(second, "entity-enrichment-second")
+
+    query = make_query(fields=("strategy", "open_items"))
+    result = repository.read(query)
+    matching = [fact for fact in result["facts"] if fact["fact_id"] == "fact-a"]
+    assert len(matching) == 1
+    assert set(matching[0]["fields"]) == {"strategy", "open_items"}
+    assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == 1
+    assert repository.connection.execute("SELECT COUNT(*) FROM attributes").fetchone()[0] == 2
+    repository.close()
+
+
+def test_identical_incremental_fact_field_replay_is_idempotent(batch, db_path):
+    import copy
+    from semantic_facts.repository.store import Repository
+
+    value = copy.deepcopy(batch)
+    value["facts"] = [fact for fact in value["facts"] if fact["fact_id"] == "fact-a"]
+    value["facts"][0]["fields"] = {"strategy": value["facts"][0]["fields"]["strategy"]}
+    value["navigation"] = []
+    value["direct_nodes"] = []
+    value["conflicts"] = []
+
+    repository = Repository(db_path)
+    repository.write(value, "entity-field-replay-a")
+    repository.write(value, "entity-field-replay-b")
+
+    assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == 1
+    assert repository.connection.execute("SELECT COUNT(*) FROM attributes").fetchone()[0] == 1
+    assert repository.connection.execute("SELECT COUNT(*) FROM evidence_links").fetchone()[0] == 1
+    repository.close()
