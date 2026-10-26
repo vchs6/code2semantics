@@ -180,12 +180,23 @@ def test_constructor_manifest_facts_survive_repository_reopen_and_minimal_query(
     from semantic_facts.tool_executor import SubprocessToolExecutor
 
     project = tmp_path / "manifest-persist-project"
-    (project / "src").mkdir(parents=True)
+    (project / "crates" / "app" / "src").mkdir(parents=True)
+    (project / "crates" / "core" / "src").mkdir(parents=True)
     (project / "Cargo.toml").write_text(
-        '[package]\nname = "manifest-persist"\nversion = "0.1.0"\nedition = "2021"\n',
+        '[workspace]\nmembers = ["crates/app", "crates/core"]\nresolver = "2"\n',
         encoding="utf-8",
     )
-    (project / "src" / "lib.rs").write_text("pub fn run() {}\n", encoding="utf-8")
+    (project / "crates" / "app" / "Cargo.toml").write_text(
+        '[package]\nname = "manifest-app"\nversion = "0.1.0"\nedition = "2021"\n'
+        '[dependencies]\nmanifest-core = { path = "../core" }\n',
+        encoding="utf-8",
+    )
+    (project / "crates" / "core" / "Cargo.toml").write_text(
+        '[package]\nname = "manifest-core"\nversion = "0.1.0"\nedition = "2021"\n',
+        encoding="utf-8",
+    )
+    (project / "crates" / "app" / "src" / "lib.rs").write_text("pub fn run() {}\n", encoding="utf-8")
+    (project / "crates" / "core" / "src" / "lib.rs").write_text("pub fn core() {}\n", encoding="utf-8")
     assets = tmp_path / "assets"
     shutil.copytree(ASSETS, assets)
     matrix_path = assets / "capability-matrix.json"
@@ -201,6 +212,7 @@ def test_constructor_manifest_facts_survive_repository_reopen_and_minimal_query(
     request_value["query"]["selections"] = [
         {"fact_type": "F2", "fields": ["identity", "names"]},
         {"fact_type": "F4", "fields": ["kind"]},
+        {"fact_type": "F6", "fields": ["kind"]},
     ]
     executor = SubprocessToolExecutor({
         "rust.cargo-metadata": ["cargo", "metadata", "--no-deps", "--format-version", "1"],
@@ -227,15 +239,23 @@ def test_constructor_manifest_facts_survive_repository_reopen_and_minimal_query(
             },
             "target": {"kind": "scope"},
             "granularity": "L2",
-            "selections": [{"fact_type": "F4", "fields": ["kind"]}],
+            "selections": [
+                {"fact_type": "F4", "fields": ["kind"]},
+                {"fact_type": "F6", "fields": ["kind"]},
+            ],
             "budget": {"max_rounds": 1, "max_new_assertions": 10},
         }
         response = execute_query(query, reopened, assets)
         assert response["termination"] == "satisfied", response
         assert response["results"]
         assert all(set(fact["fields"]) == {"kind"} for fact in response["results"])
-        assert all(fact["fact_type"] == "F4" for fact in response["results"])
+        assert {fact["fact_type"] for fact in response["results"]} == {"F4", "F6"}
+        assert all(set(fact["fields"]) == {"kind"} for fact in response["results"])
         assert all(fact["fields"]["kind"]["basis"]["evidence"] for fact in response["results"])
+        values = [fact["fields"]["kind"]["value"].get("text", "") for fact in response["results"]]
+        assert any("workspace member: manifest-app" in value for value in values)
+        assert any("workspace member: manifest-core" in value for value in values)
+        assert any("manifest-app -> manifest-core" in value for value in values)
     finally:
         reopened.close()
 
