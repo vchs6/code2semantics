@@ -66,10 +66,37 @@ def request(fields=("identity", "names", "boundary", "locators")):
 
 def test_information_needs_catalogue_is_valid_and_fixed():
     catalogue = load_information_needs(ASSETS)
-    assert {need["need_id"] for need in catalogue["needs"]} == {
-        "syntax.f2.identity", "syntax.f2.names", "syntax.f2.boundary", "syntax.f2.locators"
+    fact_catalogue = json.loads((ASSETS / "fact-catalog.json").read_text(encoding="utf-8"))
+    expected = {
+        (fact["id"], field)
+        for fact in fact_catalogue["fact_types"]
+        for field in fact["fields"]
     }
+    actual = {
+        (need["fact_type"], field)
+        for need in catalogue["needs"]
+        for field in need["fields"]
+    }
+    assert actual == expected
+    assert len(catalogue["needs"]) == len(actual) == 127
     assert all(set(need["languages"]) == {"Python", "Rust"} for need in catalogue["needs"])
+    assert {scenario for need in catalogue["needs"] for scenario in need["scenario_ids"]} == {
+        "S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9", "S10", "S11", "S12"
+    }
+    assert all(need["output_kinds"] for need in catalogue["needs"])
+    assert all(need["candidate_producer_families"] for need in catalogue["needs"])
+    assert all(need["platforms"] and need["environments"] for need in catalogue["needs"])
+    assert all(need["limitations"] and need["research_basis"] for need in catalogue["needs"])
+    assert all(
+        need["acceptance_status"] == "accepted_initial_slice"
+        for need in catalogue["needs"]
+        if need["need_id"].startswith("syntax.f2.")
+    )
+    assert all(
+        need["acceptance_status"] == "research_required"
+        for need in catalogue["needs"]
+        if not need["need_id"].startswith("syntax.f2.")
+    )
 
 
 def test_plan_is_deterministic_and_covers_supported_f2_fields():
@@ -157,3 +184,23 @@ def test_loader_rejects_duplicate_need_ids(tmp_path):
     path.write_text(json.dumps(catalogue), encoding="utf-8")
     with pytest.raises(InformationNeedsError, match="duplicate need_id"):
         load_information_needs(tmp_path)
+
+def test_catalogue_rejects_missing_output_or_incomplete_coverage_metadata(tmp_path):
+    import shutil
+
+    for filename in ("information-needs.schema.json", "information-needs.json", "fact-catalog.json"):
+        shutil.copy(ASSETS / filename, tmp_path / filename)
+    path = tmp_path / "information-needs.json"
+    catalogue = json.loads(path.read_text(encoding="utf-8"))
+    catalogue["needs"][4].pop("output_kinds")
+    path.write_text(json.dumps(catalogue), encoding="utf-8")
+    with pytest.raises(InformationNeedsError, match="output_kinds"):
+        load_information_needs(tmp_path)
+
+
+def test_research_required_need_is_not_treated_as_accepted_production():
+    value = request(("roles",))
+    result = plan_constructor_request(value, ASSETS)
+    assert result["plan"] == []
+    assert result["gaps"][0]["reason"] == "unavailable_tool"
+    assert result["gaps"][0]["fields"] == ["roles"]
