@@ -32,7 +32,15 @@ def request(fields=("identity", "names", "boundary", "locators")):
         "existing_valid_facts": {
             "contract_version": "1.0.0",
             "catalog_id": "semantic-facts-20261025",
-            "sources": [],
+            "sources": [{
+                "source_id": "source-current",
+                "root": "/workspace/project",
+                "content_state": "sha256:current",
+                "status": "available",
+                "dirty": True,
+                "has_untracked": True,
+                "excludes": [],
+            }],
             "facts": [],
             "navigation": [],
             "direct_nodes": [],
