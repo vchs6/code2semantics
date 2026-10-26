@@ -4,11 +4,13 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 import json
+import sys
 
 from jsonschema import Draft202012Validator
 from referencing import Registry, Resource
 
 from .information_needs import load_information_needs
+from .capability_matrix import CapabilityMatrix
 
 
 def _supported_current_assertion(assertion: Any, current_states: dict[str, str]) -> bool:
@@ -99,6 +101,29 @@ def plan_constructor_request(
                 continue
 
             key = need["need_id"]
+            platform = "windows" if sys.platform.startswith("win") else "darwin" if sys.platform == "darwin" else "linux"
+            producers_by_id: dict[str, dict[str, Any]] = {}
+            for language in need["languages"]:
+                selected = select_enabled_producers(
+                    CapabilityMatrix(root / "capability-matrix.json"),
+                    [key],
+                    language,
+                    platform,
+                    "in-process",
+                )
+                for entry in selected.get(key, []):
+                    producers_by_id[entry["tool_id"]] = entry
+            if not producers_by_id:
+                gaps.append({
+                    "fact_type": fact_type,
+                    "fields": [field],
+                    "target": query["target"],
+                    "reason": "unavailable_tool",
+                    "detail": f"No accepted enabled producer is available for {need['need_id']}.",
+                    "need_id": need["need_id"],
+                })
+                continue
+
             item = planned.setdefault(key, {
                 "need_id": key,
                 "fact_type": need["fact_type"],
@@ -107,6 +132,7 @@ def plan_constructor_request(
                 "production_mode": need["production_mode"],
                 "evidence_kinds": list(need["evidence_kinds"]),
                 "acceptance_fixture": need["acceptance_fixture"],
+                "producer_ids": sorted(producers_by_id),
             })
             if field not in item["fields"]:
                 item["fields"].append(field)
