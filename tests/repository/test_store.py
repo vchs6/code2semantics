@@ -145,3 +145,56 @@ def test_navigation_deduplicates_edges_and_preserves_cycles_multi_parent_and_ext
     )
     assert any(edge["target"].get("kind") == "external" for edge in result["navigation"])
     repository.close()
+def test_bounded_navigation_traversal_handles_cycles_multi_parent_and_external_refs(batch, db_path):
+    import copy
+    from semantic_facts.repository.store import Repository
+
+    value = copy.deepcopy(batch)
+    first = copy.deepcopy(value["navigation"][0])
+    second_parent = copy.deepcopy(first)
+    second_parent["edge_id"] = "parent-b-to-child"
+    second_parent["source"] = {
+        "source_id": "src-a", "subject_id": "project-a", "node_id": "parent-b"
+    }
+    cycle = copy.deepcopy(first)
+    cycle["edge_id"] = "child-to-root-cycle"
+    cycle["source"], cycle["target"] = first["target"], first["source"]
+    external = copy.deepcopy(first)
+    external["edge_id"] = "child-to-external"
+    external["source"] = first["target"]
+    external["target"] = {
+        "kind": "external",
+        "reference_id": "external-crate",
+        "label": "outside crate",
+        "reason": "outside_authorized_scope",
+        "boundary": "not scanned",
+        "observed_in": {
+            "kind": "subject", "source_id": "src-a", "subject_id": "project-a"
+        },
+    }
+    value["navigation"] = [first, second_parent, cycle, external]
+    repository = Repository(db_path)
+    repository.write(value, "bounded-graph-traversal")
+
+    result = repository.traverse_navigation(
+        {"source_id": "src-a", "subject_id": "project-a", "node_id": "unit-a"},
+        max_depth=8,
+        max_edges=20,
+    )
+    edge_ids = {edge["edge_id"] for edge in result["edges"]}
+    assert {"member-a", "parent-b-to-child", "child-to-root-cycle", "child-to-external"} <= edge_ids
+    assert len(result["nodes"]) == len({repr(node) for node in result["nodes"]})
+    assert any(node.get("node_id") == "parent-b" for node in result["nodes"])
+    assert any(node.get("kind") == "external" for node in result["terminal_references"])
+    assert result["truncated"] is False
+    assert result["reason"] is None
+
+    bounded = repository.traverse_navigation(
+        {"source_id": "src-a", "subject_id": "project-a", "node_id": "unit-a"},
+        max_depth=1,
+        max_edges=1,
+    )
+    assert bounded["truncated"] is True
+    assert bounded["reason"] in {"depth", "edges"}
+    assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == len(value["facts"])
+    repository.close()
