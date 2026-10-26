@@ -89,3 +89,14 @@ These tasks are deliberately pending. The existing checked tasks validate only t
 - Updated the validation fixture and traceability table so the public design-asset validator uses the current catalogue.
 - CI GREEN for the focused information-needs/constructor-plan/constructor/binding/induction/query suite: https://github.com/vchs6/code2semantics/actions/runs/40318346289 — 57 passed in the combined step; strict OpenSpec passed. The overall workflow remains BLOCKED only at the product delivery gate, which is expected until S1–S12 end-to-end acceptance.
 - Stage 1 is complete as a needs specification and validation deliverable only. No tool has been researched or enabled as a result of these candidate-family entries. Task 6.5 remains pending until this catalogue is handed to the survey change through its ordered workflow.
+
+## 7. Constructor integration for researched native-output producers (next apply)
+
+These tasks follow accepted pure parser adapters. They are prerequisites to enabling `rust.cargo-metadata` or `python.compileall`; do not treat parser registration as production capability.
+
+- [ ] 7.1 Add RED tests proving `plan_constructor_request` can plan an enabled/accepted producer by environment for an unmet non-F2 information need, while disabled/unaccepted entries and platform/language mismatches remain gaps. The plan must preserve multiple complementary producer IDs for a need.
+- [ ] 7.2 Implement environment-aware planning across `in-process` and `subprocess`, preserving fixed catalogue semantics and no mutation of needs/matrix. Keep producer invocation commands out of user-controlled query input.
+- [ ] 7.3 Add RED tests for constructor execution of accepted manifest profiles through `SubprocessToolExecutor` using a temporary Cargo workspace and a Python `pyproject.toml`; verify bounded argv-only execution, explicit missing-tool/timeout/failed-command gaps, and source-state recheck after execution.
+- [ ] 7.4 Implement manifest-output orchestration from selected matrix profile through native command → parser registry → observations. Parsers remain pure; executor owns invocation; constructor owns producer selection and aggregation.
+- [ ] 7.5 Extend fact construction only for public-contract-supported F1/F3/F4/F6 fields, preserving manifest evidence and distinct membership/dependency relation kinds. Unsupported fields must remain explicit gaps; do not fabricate F5/F16 inference.
+- [ ] 7.6 Add end-to-end acceptance from real temporary Python/Rust project manifests through nonempty FactBatch, SQLite write/reopen/read and minimal query projection. Run focused tests and strict OpenSpec; only then enable each matching matrix profile with parser-development acceptance evidence.
