@@ -55,10 +55,17 @@ def test_current_matrix_separates_accepted_profiles_from_disabled_research_candi
             "syntax.f2.identity", "syntax.f2.names", "syntax.f2.boundary", "syntax.f2.locators"
         }
 
-    research_candidates = set(entries) - {"python.ast-source", "rust.syntax-source"}
+    cargo = entries["rust.cargo-metadata"]
+    assert cargo["enabled"] is True
+    assert cargo["acceptance"]["actor"] == "parser_development"
+    assert set(cargo["information_need_ids"]) == {"source.f4.kind", "source.f6.kind"}
+    assert any("test_runtime_producer_acceptance.py" in item for item in cargo["acceptance"]["evidence"])
+    assert not any("DISABLED" in limit for limit in cargo["limitations"])
+
+    research_candidates = set(entries) - {"python.ast-source", "rust.syntax-source", "rust.cargo-metadata"}
     assert research_candidates == {
-        "python.compileall", "python.pyproject-toml", "rust.cargo-metadata",
-        "rust.cargo-check", "rust.rust-analyzer", "multi.ctags", "multi.ast-grep",
+        "python.compileall", "python.pyproject-toml", "rust.cargo-check",
+        "rust.rust-analyzer", "multi.ctags", "multi.ast-grep",
     }
     for tool_id in research_candidates:
         entry = entries[tool_id]
