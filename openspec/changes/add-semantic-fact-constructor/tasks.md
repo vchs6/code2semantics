@@ -21,12 +21,12 @@ Implementation is TDD: write a failing behavior test (RED), implement the smalle
 - [x] 3.1 Define an injected executor protocol with bounded timeout, argv-only invocation, captured stdout/stderr/exit code and explicit invocation profile; test that no shell string execution is used.
 - [ ] 3.2 Implement a registry-driven execution loop that selects only enabled matching matrix entries, invokes the registered executor, passes output to `ParserRegistry`, and converts unsupported profiles/failures into explicit gaps.
 - [x] 3.3 Add Python and Rust source fixtures for module/symbol inventories and malformed input; verify deterministic evidence locators and content digests.
-- [ ] 3.4 Ensure one failed producer does not discard independent valid observations; reject malformed parser results before construction.
+- [x] 3.4 Ensure one failed producer does not discard independent valid observations; reject malformed parser results before construction.
 
 ## 4. FactBatch construction and evidence discipline
 
 - [x] 4.1 Reuse the current constructor implementation through a stable interface and add tests for F2 reference identity, names, boundary, locators, evidence, content state, coverage and limitations.
-- [ ] 4.2 Add conflict and request-binding checks: do not silently replace existing facts; do not accept observations for another source, subject, content state or out-of-scope target.
+- [x] 4.2 Add conflict and request-binding checks: do not silently replace existing facts; do not accept observations for another source, subject, content state or out-of-scope target.
 - [x] 4.3 Validate the complete FactBatch against public schemas before returning; on failure return a structured error and no partial batch.
 - [x] 4.4 Verify no repository import/write occurs in the constructor package and no final output-schema response is assembled here.
 
@@ -54,3 +54,11 @@ Implementation is TDD: write a failing behavior test (RED), implement the smalle
 - Bounded external executor boundary: `semantic_facts/tool_executor.py`; tests cover allowlisted argv execution, stdout/stderr/exit code capture, timeout and rejected profiles. It is not yet wired as an external producer in the runtime loop because the accepted first-phase matrix contains in-process parser profiles only.
 - CI: https://github.com/vchs6/code2semantics/actions/runs/40268078346. Prior completed regression run passed repository 39, matrix 15, parser 9, scanner 5, source acceptance 3 and the combined information-needs/plan/constructor/induction/query suite 30; strict OpenSpec passed. Product delivery gate remains blocked for missing full-system acceptance.
 - Still pending: 3.2 registry-driven external tool execution loop; 3.4 independent producer failure preservation; 4.2 complete request-binding/conflict checks at constructor boundary; full multi-layer semantic construction and configured induction-provider integration. Do not mark these complete based on syntax inventory tests.
+
+## Focused completion evidence (2026-10-26)
+
+- Failure isolation: `source_scanner.build_fact_batch_with_gaps` preserves valid per-file observations and returns explicit parse/producer gaps for failures; project direct-node inventory is marked partial when any file fails. `execute_constructor_request` carries these gaps into `ConstructResult` without discarding successful files.
+- Request binding: `construct_fact_batch` rejects mismatched source IDs, subject IDs, content states, missing/duplicate observation IDs, missing evidence, and evidence locators outside the requested file before building any FactBatch.
+- Tests: `tests/test_source_scanner.py` partial-scan test; `tests/test_constructor.py` mixed-validity constructor test; `tests/test_constructor_binding.py` source/subject/state/locator binding tests.
+- CI run `https://github.com/vchs6/code2semantics/actions/runs/40275399143`: repository 45, matrix 15, parser 9, scanner 7, source acceptance 4, packaging 2, executor 3, combined information-needs/plan/constructor/binding/induction/query 47 passed; strict OpenSpec passed. Product delivery gate remains blocked by full-system acceptance gaps.
+- Still pending: 3.2 external producer executor integration. Current accepted Python/Rust producers are in-process ParserRegistry profiles; do not mark external subprocess producer dispatch complete until an accepted matrix profile and runtime tests exercise that path.
