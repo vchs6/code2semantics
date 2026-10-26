@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from pathlib import Path
 from typing import Any
 
@@ -104,6 +105,173 @@ def execute_query(query: dict[str, Any], repository: Repository, asset_root: str
         "out_of_catalog": [],
         "termination": "no_progress" if gaps else "satisfied",
     }
+    error = next(response_validator.iter_errors(response), None)
+    if error:
+        raise QueryContractError(f"response {list(error.absolute_path)}: {error.message}")
+    return response
+
+
+def _unavailable_source(root: str, detail: str) -> dict[str, Any]:
+    digest = hashlib.sha256((root + "\\0" + detail).encode("utf-8")).hexdigest()
+    return {
+        "source_id": "src-unavailable-" + digest[:20],
+        "root": str(Path(root).resolve()),
+        "content_state": "sha256:" + digest,
+        "status": "unavailable",
+        "dirty": True,
+        "has_untracked": True,
+        "excludes": [],
+    }
+
+
+def execute_query_with_construction(
+    query: dict[str, Any],
+    repository: Repository,
+    asset_root: str | Path | None = None,
+) -> dict[str, Any]:
+    """Read current facts, construct gaps, append without replacement, re-read, and project."""
+    assets = Path(asset_root) if asset_root else Path(__file__).resolve().parents[2] / "assets"
+    query_validator, response_validator = _validators(assets)
+    error = next(query_validator.iter_errors(query), None)
+    if error:
+        raise QueryContractError(f"query {list(error.absolute_path)}: {error.message}")
+
+    current_sources: list[dict[str, Any]] = []
+    for root in query["scope"]["directories"]:
+        try:
+            current_sources.append(inspect_source(root))
+        except (OSError, ValueError) as error:
+            current_sources.append(_unavailable_source(root, str(error)))
+    if not current_sources:
+        current_sources.append(_unavailable_source(".", "query scope contains no source roots"))
+
+    current_ids = {source["source_id"] for source in current_sources if source["status"] == "available"}
+    stored = repository.read(query)
+    stored = {**stored, "facts": [fact for fact in stored["facts"] if fact["node"]["source_id"] in current_ids]}
+    if any(source["status"] != "available" for source in current_sources):
+        response = execute_query(query, repository, assets, stored_result=stored, source_override=current_sources)
+        context = {
+            "source_ids": [source["source_id"] for source in current_sources],
+            "conditions": [],
+            "environment": {},
+            "language_semantics": [],
+        }
+        coverage = {
+            "domain": "requested current project scope",
+            "checked": list(query["scope"]["directories"]),
+            "excluded": list(query["scope"]["excludes"]),
+            "completeness": "unknown",
+            "method": "source access check",
+        }
+        response["gaps"] = [{
+            "fact_type": selection["fact_type"],
+            "fields": list(selection["fields"]),
+            "target": query["target"],
+            "reason": "source_unavailable",
+            "detail": "One or more requested source roots are unavailable; no alternate source was selected.",
+            "context": context,
+            "coverage": coverage,
+        } for selection in query["selections"]]
+        response["termination"] = "unavailable"
+        error = next(response_validator.iter_errors(response), None)
+        if error:
+            raise QueryContractError(f"response {list(error.absolute_path)}: {error.message}")
+        return response
+
+    last_constructor_gaps: list[dict[str, Any]] = []
+    max_rounds = max(1, query["budget"]["max_rounds"])
+    for round_index in range(max_rounds):
+        stored = repository.read(query)
+        stored = {**stored, "facts": [fact for fact in stored["facts"] if fact["node"]["source_id"] in current_ids]}
+        before_coverage = {
+            (fact["fact_type"], field)
+            for fact in stored["facts"] for field in fact.get("fields", {})
+        }
+        response = execute_query(query, repository, assets, stored_result=stored, source_override=current_sources)
+        if not response["gaps"]:
+            return response
+
+        construct_request = {
+            "kind": "construct_request",
+            "query": query,
+            "existing_valid_facts": {
+                "contract_version": stored["contract_version"],
+                "catalog_id": stored["catalog_id"],
+                "sources": current_sources,
+                "facts": stored["facts"],
+                "navigation": stored["navigation"],
+                "direct_nodes": stored["direct_nodes"],
+                "conflicts": stored["conflicts"],
+            },
+            "unmet": response["gaps"],
+            "current_source_context": {
+                "sources": current_sources,
+                "changes": [],
+                "necessary_ancestors": [],
+                "obligations": [],
+            },
+        }
+        try:
+            constructed = execute_constructor_request(construct_request, assets)
+        except (OSError, ValueError) as error:
+            last_constructor_gaps = [{
+                **gap,
+                "reason": "construction_failed",
+                "detail": f"Constructor failed: {error}",
+            } for gap in response["gaps"]]
+            break
+
+        last_constructor_gaps = constructed["gaps"]
+        if any(gap["reason"] == "source_modified" for gap in last_constructor_gaps):
+            break
+
+        batch = constructed["batch"]
+        digest = hashlib.sha256(
+            json.dumps(batch, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        ).hexdigest()
+        repository.write(batch, "query-construct-" + digest)
+
+        refreshed = repository.read(query)
+        refreshed = {**refreshed, "facts": [fact for fact in refreshed["facts"] if fact["node"]["source_id"] in current_ids]}
+        after_coverage = {
+            (fact["fact_type"], field)
+            for fact in refreshed["facts"] for field in fact.get("fields", {})
+        }
+        response = execute_query(query, repository, assets, stored_result=refreshed, source_override=current_sources)
+        if not response["gaps"]:
+            return response
+        if not (after_coverage - before_coverage):
+            break
+        if round_index == max_rounds - 1:
+            response["termination"] = "budget_exhausted"
+
+    stored = repository.read(query)
+    stored = {**stored, "facts": [fact for fact in stored["facts"] if fact["node"]["source_id"] in current_ids]}
+    response = execute_query(query, repository, assets, stored_result=stored, source_override=current_sources)
+    if last_constructor_gaps:
+        replaced_fields = {
+            (gap["fact_type"], field)
+            for gap in last_constructor_gaps for field in gap["fields"]
+        }
+        merged_gaps = []
+        for gap in response["gaps"]:
+            remaining = [field for field in gap["fields"] if (gap["fact_type"], field) not in replaced_fields]
+            if remaining:
+                merged_gaps.append({**gap, "fields": remaining})
+        existing_keys = {
+            (gap["fact_type"], tuple(gap["fields"]), gap["reason"], gap["detail"])
+            for gap in merged_gaps
+        }
+        for gap in last_constructor_gaps:
+            key = (gap["fact_type"], tuple(gap["fields"]), gap["reason"], gap["detail"])
+            if key not in existing_keys:
+                merged_gaps.append(gap)
+                existing_keys.add(key)
+        response["gaps"] = merged_gaps
+    if not response["gaps"]:
+        response["termination"] = "satisfied"
+    elif response["termination"] != "budget_exhausted":
+        response["termination"] = "no_progress"
     error = next(response_validator.iter_errors(response), None)
     if error:
         raise QueryContractError(f"response {list(error.absolute_path)}: {error.message}")
