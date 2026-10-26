@@ -21,6 +21,10 @@
         "information-needs.schema.json",
         "Python AST source inventory",
         "Rust declaration inventory"
+      ],
+      "languages": [
+        "Python",
+        "Rust"
       ]
     },
     {
@@ -42,6 +46,10 @@
         "fact-catalog.json F2.names",
         "Python ast module",
         "Rust source declaration parser contract"
+      ],
+      "languages": [
+        "Python",
+        "Rust"
       ]
     },
     {
@@ -63,6 +71,10 @@
         "fact-catalog.json F2.boundary",
         "add-info-parser/specs/info-parser/spec.md",
         "Python/Rust parser implementation limits"
+      ],
+      "languages": [
+        "Python",
+        "Rust"
       ]
     },
     {
@@ -84,6 +96,10 @@
         "fact-catalog.json F2.locators",
         "common.schema.json evidence definition",
         "pipeline.schema.json observation definition"
+      ],
+      "languages": [
+        "Python",
+        "Rust"
       ]
     }
   ]
