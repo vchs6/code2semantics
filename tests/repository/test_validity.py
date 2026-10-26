@@ -91,9 +91,19 @@ def test_relation_and_conflict_invalidation_filters_projection_only(batch, db_pa
 
     repository = Repository(db_path)
     repository.write(batch, "validity-relations")
-    relation = repository.connection.execute(
-        "SELECT relation_key, payload FROM relations WHERE navigation = 1 LIMIT 1"
-    ).fetchone()
+    query = make_query()
+    target_node = query["target"]["node"]
+    relation = next(
+        (
+            (key, payload)
+            for key, payload in repository.connection.execute(
+                "SELECT relation_key, payload FROM relations WHERE navigation = 1"
+            )
+            if json.loads(payload).get("source") == target_node
+        ),
+        None,
+    )
+    assert relation is not None
     conflict_id = batch["conflicts"][0]["conflict_id"]
     relation_rows_before = repository.connection.execute("SELECT COUNT(*) FROM relations").fetchone()[0]
     conflict_rows_before = repository.connection.execute("SELECT COUNT(*) FROM conflicts").fetchone()[0]
@@ -102,11 +112,7 @@ def test_relation_and_conflict_invalidation_filters_projection_only(batch, db_pa
     repository.invalidate_conflict(conflict_id, "conflict resolution superseded")
     result = repository.read(make_query())
 
-    assert all(json.loads(payload)["edge_id"] != json.loads(relation[1])["edge_id"] for (payload,) in repository.connection.execute(
-        "SELECT payload FROM relations WHERE navigation = 1"
-    ) if repository._validity_event_states().get(("relation", repository.connection.execute(
-        "SELECT relation_key FROM relations WHERE payload = ?", (payload,)
-    ).fetchone()[0]), "current") == "current")
+    assert all(edge["edge_id"] != json.loads(relation[1])["edge_id"] for edge in result["navigation"])
     assert conflict_id not in {item["conflict_id"] for item in result["conflicts"]}
     assert repository.connection.execute("SELECT COUNT(*) FROM relations").fetchone()[0] == relation_rows_before
     assert repository.connection.execute("SELECT COUNT(*) FROM conflicts").fetchone()[0] == conflict_rows_before
