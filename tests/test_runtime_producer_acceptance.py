@@ -98,10 +98,18 @@ def test_cli_query_invokes_cargo_once_and_returns_distinct_membership_and_depend
 def test_cli_query_uses_python_manifest_profile_without_subprocess_and_persists_incrementally(tmp_path, monkeypatch, capsys):
     project = tmp_path / "python-runtime-project"
     project.mkdir()
-    (project / "app.py").write_text("def main():\\n    return 0\\n", encoding="utf-8")
+    (project / "app.py").write_text(
+        """def main():
+    return 0
+""",
+        encoding="utf-8",
+    )
     (project / "pyproject.toml").write_text(
-        '[project]\\nname = "runtime-python-app"\\nversion = "1.0.0"\\n'
-        'dependencies = ["requests>=2"]\\n',
+        """[project]
+name = "runtime-python-app"
+version = "1.0.0"
+dependencies = ["requests>=2"]
+""",
         encoding="utf-8",
     )
     assets = tmp_path / "assets"
