@@ -84,7 +84,7 @@ def test_copied_skill_scans_python_and_rust_then_queries_without_repo_paths(tmp_
 def test_skill_metadata_and_layout_follow_agent_skills_constraints():
     skill_file = SKILL_ROOT / "SKILL.md"
     text = skill_file.read_text(encoding="utf-8")
-    assert text.startswith("---\\n")
+    assert text.startswith("---")
     _, frontmatter, body = text.split("---", 2)
     fields = {}
     for line in frontmatter.strip().splitlines():
