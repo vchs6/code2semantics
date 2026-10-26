@@ -115,3 +115,19 @@ def test_scanner_records_scope_and_file_direct_node_completeness(tmp_path, codec
     assert scope_inventory["children"] == [batch["facts"][0]["node"]]
     assert file_inventory["target"]["node"] == batch["facts"][0]["node"]
     assert len(file_inventory["children"]) >= 3
+
+def test_partial_scan_preserves_valid_files_when_another_file_is_unparseable(tmp_path, codec):
+    from semantic_facts.source_scanner import build_fact_batch_with_gaps
+
+    project = tmp_path / "partial-scan-project"
+    project.mkdir()
+    (project / "valid.py").write_text("class Valid:\n    pass\n", encoding="utf-8")
+    (project / "broken.py").write_text("def broken(:\n    pass\n", encoding="utf-8")
+
+    result = build_fact_batch_with_gaps(project, codec)
+    assert len(result["batch"]["facts"]) == 1
+    assert "valid.py" in result["batch"]["facts"][0]["fields"]["locators"]["value"]["text"]
+    assert len(result["gaps"]) == 1
+    assert result["gaps"][0]["path"] == "broken.py"
+    assert result["gaps"][0]["reason"] == "unparseable"
+    assert result["batch"]["direct_nodes"][0]["assertion"]["coverage"]["completeness"] == "partial"
