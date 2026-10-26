@@ -68,6 +68,99 @@ class Repository:
         self.connection.execute("PRAGMA foreign_keys = ON")
         self._initialized = False
 
+    def _validity_event_states(self) -> dict[tuple[str, str], str]:
+        self._ensure_schema()
+        states: dict[tuple[str, str], str] = {}
+        for kind, key, state in self.connection.execute(
+            "SELECT target_kind, target_key, state FROM validity_events ORDER BY event_id"
+        ):
+            states[(kind, key)] = state
+        return states
+
+    def record_validity_event(
+        self,
+        target_kind: str,
+        target_key: str,
+        state: str,
+        reason: str | None = None,
+    ) -> int:
+        """Append an explicit validity event; never delete the target record."""
+        tables = {
+            "fact": ("facts", "fact_key"),
+            "field": ("attributes", "attribute_key"),
+            "relation": ("relations", "relation_key"),
+            "evidence": ("evidence", "evidence_key"),
+            "premise": ("premises", "premise_key"),
+            "conflict": ("conflicts", "conflict_key"),
+            "inventory": ("inventories", "inventory_key"),
+        }
+        allowed_states = {"current", "modified", "deleted", "premise_invalid", "unknown"}
+        if target_kind not in tables:
+            raise ValueError(f"unsupported validity target kind: {target_kind}")
+        if state not in allowed_states:
+            raise ValueError(f"unsupported validity state: {state}")
+        if not target_key:
+            raise ValueError("target_key must not be empty")
+        if state != "current" and not reason:
+            raise ValueError("a non-current validity state requires a reason")
+        self._ensure_schema()
+        table, key_column = tables[target_kind]
+        exists = self.connection.execute(
+            f"SELECT 1 FROM {table} WHERE {key_column} = ?", (target_key,)
+        ).fetchone()
+        if not exists:
+            raise ValueError(f"{target_kind} target does not exist: {target_key}")
+        with self.connection:
+            cursor = self.connection.execute(
+                "INSERT INTO validity_events(target_kind, target_key, state, reason) VALUES (?, ?, ?, ?)",
+                (target_kind, target_key, state, reason),
+            )
+        return int(cursor.lastrowid)
+
+    def invalidate_fact(self, fact_id: str, reason: str, state: str = "modified") -> int:
+        self._ensure_schema()
+        row = self.connection.execute("SELECT fact_key FROM facts WHERE fact_id = ?", (fact_id,)).fetchone()
+        if not row:
+            raise ValueError(f"fact does not exist: {fact_id}")
+        return self.record_validity_event("fact", row[0], state, reason)
+
+    def invalidate_field(self, fact_id: str, field_name: str, reason: str, state: str = "modified") -> int:
+        self._ensure_schema()
+        row = self.connection.execute(
+            "SELECT a.attribute_key FROM attributes a JOIN facts f ON f.fact_key = a.fact_key "
+            "WHERE f.fact_id = ? AND a.field_name = ?",
+            (fact_id, field_name),
+        ).fetchone()
+        if not row:
+            raise ValueError(f"field does not exist: {fact_id}.{field_name}")
+        return self.record_validity_event("field", row[0], state, reason)
+
+    def invalidate_relation(self, relation_key: str, reason: str, state: str = "modified") -> int:
+        return self.record_validity_event("relation", relation_key, state, reason)
+
+    def invalidate_evidence(self, source_id: str, evidence_id: str, reason: str, state: str = "modified") -> int:
+        self._ensure_schema()
+        evidence_key = None
+        for key, payload in self.connection.execute("SELECT evidence_key, payload FROM evidence"):
+            item = json.loads(payload)
+            if item.get("source_id") == source_id and item.get("evidence_id") == evidence_id:
+                evidence_key = key
+                break
+        if evidence_key is None:
+            raise ValueError(f"evidence does not exist: {source_id}.{evidence_id}")
+        return self.record_validity_event("evidence", evidence_key, state, reason)
+
+    def invalidate_conflict(self, conflict_id: str, reason: str, state: str = "modified") -> int:
+        self._ensure_schema()
+        conflict_key = None
+        for key, payload in self.connection.execute("SELECT conflict_key, payload FROM conflicts"):
+            if json.loads(payload).get("conflict_id") == conflict_id:
+                conflict_key = key
+                break
+        if conflict_key is None:
+            raise ValueError(f"conflict does not exist: {conflict_id}")
+        return self.record_validity_event("conflict", conflict_key, state, reason)
+
     def export_current(self) -> dict[str, Any]:
         """Export only current source-head facts; historical rows remain stored locally."""
         self._ensure_schema()
