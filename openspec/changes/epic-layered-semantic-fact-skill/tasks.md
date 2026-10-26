@@ -98,3 +98,12 @@
 - Marked 7.2 complete for self-contained Skill packaging and copied-install Python/Rust scan/query validation; official skills-ref validation was not run and is not claimed.
 - Latest completed full CI after concurrency and graph work: https://github.com/vchs6/code2semantics/actions/runs/40298151751. Repository 54 passed; matrix 15; parser 9; scanner 7; runtime acceptance 5; packaging 2; executor 3; producer dispatch 3; combined planning/constructor/induction/query 52 passed; strict OpenSpec passed. Product delivery gate remains BLOCKED.
 - Still pending in the dependency plan: 6.3 full repository acceptance (including a separate RED-first transfer run and remaining import/local mutation policy), 7.1 full S1–S12 query acceptance, and 8.1–8.5 root integration. These remain unchecked; the implementation is not declared globally complete.
+
+
+## Repository transfer safety and focused gates (2026-10-26)
+
+- Added an explicit regression for an empty-but-valid SQLite file used as a restore source. RED: https://github.com/vchs6/code2semantics/actions/runs/40298339861. It exposed that a schema check guarded by `if tables` allowed an empty database to replace the target repository.
+- Fixed restore to reject any backup lacking the full repository schema before copying. The restore target's fact/source rows remain unchanged on rejection.
+- CI GREEN: https://github.com/vchs6/code2semantics/actions/runs/40298437864 — repository 55 passed; focused transaction 6; transfer 6; repository acceptance 3; matrix 15; parser 9; scanner 7; source acceptance 5; packaging 2; executor 3; producer dispatch 3; combined planning/constructor/induction/query 52; strict OpenSpec passed.
+- The workflow now runs dedicated transaction, transfer and repository acceptance suites in addition to the complete repository suite. This improves gate granularity but does not substitute for the pending root S1–S12 acceptance.
+- Root task 6.3 remains pending until the remaining repository acceptance and import/local-mutation policy are complete; root 7.1 and 8.1–8.5 also remain pending.
