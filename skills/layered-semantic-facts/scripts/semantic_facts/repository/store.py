@@ -59,7 +59,7 @@ class Repository:
                     raise ValueError("backup failed SQLite integrity check")
                 tables = {row[0] for row in backup.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
                 expected = {"sources", "entities", "facts", "attributes", "relations", "submissions", "source_heads"}
-                if tables and not expected.issubset(tables):
+                if not expected.issubset(tables):
                     raise ValueError("backup does not contain the repository schema")
                 backup.backup(self.connection)
         except sqlite3.DatabaseError as error:
