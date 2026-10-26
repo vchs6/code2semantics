@@ -769,7 +769,7 @@ class Repository:
                     if old_item is not None and _canonical(old_item) != _canonical(item):
                         raise WriteConflict(None, f"evidence identity conflict: {item['evidence_id']}")
                     by_id.setdefault(item["evidence_id"], item)
-                merged.setdefault("basis", {})["evidence"] = [by_id[key] for key in sorted(by_id)]
+                merged.setdefault("basis", {})["evidence"] = list(by_id.values())
                 merged_payload = _json(merged)
                 version_key = hashlib.sha256(_canonical((row.key, merged_payload)).encode("utf-8")).hexdigest()
                 self.connection.execute(
