@@ -106,6 +106,83 @@
             },
             "minItems": 1,
             "uniqueItems": true
+          },
+          "output_kinds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "candidate_producer_families": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "platforms": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "linux",
+                "darwin",
+                "windows"
+              ]
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "environments": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "in-process",
+                "subprocess"
+              ]
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "scenario_ids": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "S1",
+                "S2",
+                "S3",
+                "S4",
+                "S5",
+                "S6",
+                "S7",
+                "S8",
+                "S9",
+                "S10",
+                "S11",
+                "S12"
+              ]
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "limitations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "acceptance_status": {
+            "enum": [
+              "accepted_initial_slice",
+              "research_required"
+            ]
           }
         },
         "required": [
@@ -120,7 +197,14 @@
           "production_mode",
           "acceptance_fixture",
           "research_basis",
-          "languages"
+          "languages",
+          "output_kinds",
+          "candidate_producer_families",
+          "platforms",
+          "environments",
+          "scenario_ids",
+          "limitations",
+          "acceptance_status"
         ],
         "additionalProperties": false
       },
