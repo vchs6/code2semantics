@@ -102,6 +102,30 @@ class Repository:
             CREATE TABLE IF NOT EXISTS source_heads (
                 root TEXT PRIMARY KEY, source_id TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS evidence (
+                evidence_key TEXT PRIMARY KEY, payload TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS evidence_links (
+                link_key TEXT PRIMARY KEY, owner_key TEXT NOT NULL,
+                evidence_key TEXT NOT NULL, pointer TEXT NOT NULL,
+                relation TEXT NOT NULL, ordinal INTEGER NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS premises (
+                premise_key TEXT PRIMARY KEY, owner_key TEXT NOT NULL,
+                target_kind TEXT NOT NULL, target_key TEXT NOT NULL,
+                payload TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS inventories (
+                inventory_key TEXT PRIMARY KEY, payload TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS conflicts (
+                conflict_key TEXT PRIMARY KEY, payload TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS conflict_links (
+                link_key TEXT PRIMARY KEY, conflict_key TEXT NOT NULL,
+                target_kind TEXT NOT NULL, target_key TEXT NOT NULL,
+                payload TEXT NOT NULL
+            );
             """
         )
         # Bootstrap current pointers for older databases; never remove historical facts.
@@ -236,6 +260,79 @@ class Repository:
             ).fetchone()
             if not existing or tuple(existing) != values:
                 raise WriteConflict(None, f"relation conflict: {row.key}")
+
+        for row in record.evidence:
+            values = (row.key, row.payload)
+            self.connection.execute(
+                "INSERT OR IGNORE INTO evidence(evidence_key, payload) VALUES (?, ?)", values
+            )
+            existing = self.connection.execute(
+                "SELECT evidence_key, payload FROM evidence WHERE evidence_key = ?", (row.key,)
+            ).fetchone()
+            if not existing or tuple(existing) != values:
+                raise WriteConflict(None, f"evidence conflict: {row.key}")
+
+        for row in record.evidence_links:
+            link_key = _canonical((row.owner_key, row.evidence_key, row.pointer, row.relation))
+            values = (link_key, row.owner_key, row.evidence_key, row.pointer, row.relation, row.ordinal)
+            self.connection.execute(
+                "INSERT OR IGNORE INTO evidence_links(link_key, owner_key, evidence_key, pointer, relation, ordinal) "
+                "VALUES (?, ?, ?, ?, ?, ?)", values
+            )
+            existing = self.connection.execute(
+                "SELECT link_key, owner_key, evidence_key, pointer, relation, ordinal "
+                "FROM evidence_links WHERE link_key = ?", (link_key,)
+            ).fetchone()
+            if not existing or tuple(existing) != values:
+                raise WriteConflict(None, f"evidence link conflict: {link_key}")
+
+        for row in record.premises:
+            values = (row.key, row.owner_key, row.target.kind, row.target.key, row.payload)
+            self.connection.execute(
+                "INSERT OR IGNORE INTO premises(premise_key, owner_key, target_kind, target_key, payload) "
+                "VALUES (?, ?, ?, ?, ?)", values
+            )
+            existing = self.connection.execute(
+                "SELECT premise_key, owner_key, target_kind, target_key, payload FROM premises WHERE premise_key = ?",
+                (row.key,),
+            ).fetchone()
+            if not existing or tuple(existing) != values:
+                raise WriteConflict(None, f"premise conflict: {row.key}")
+
+        for row in record.inventories:
+            values = (row.key, row.payload)
+            self.connection.execute(
+                "INSERT OR IGNORE INTO inventories(inventory_key, payload) VALUES (?, ?)", values
+            )
+            existing = self.connection.execute(
+                "SELECT inventory_key, payload FROM inventories WHERE inventory_key = ?", (row.key,)
+            ).fetchone()
+            if not existing or tuple(existing) != values:
+                raise WriteConflict(None, f"inventory conflict: {row.key}")
+
+        for row in record.conflicts:
+            values = (row.key, row.payload)
+            self.connection.execute(
+                "INSERT OR IGNORE INTO conflicts(conflict_key, payload) VALUES (?, ?)", values
+            )
+            existing = self.connection.execute(
+                "SELECT conflict_key, payload FROM conflicts WHERE conflict_key = ?", (row.key,)
+            ).fetchone()
+            if not existing or tuple(existing) != values:
+                raise WriteConflict(None, f"conflict identity: {row.key}")
+
+        for row in record.conflict_links:
+            values = (row.key, row.conflict_key, row.target.kind, row.target.key, row.payload)
+            self.connection.execute(
+                "INSERT OR IGNORE INTO conflict_links(link_key, conflict_key, target_kind, target_key, payload) "
+                "VALUES (?, ?, ?, ?, ?)", values
+            )
+            existing = self.connection.execute(
+                "SELECT link_key, conflict_key, target_kind, target_key, payload "
+                "FROM conflict_links WHERE link_key = ?", (row.key,)
+            ).fetchone()
+            if not existing or tuple(existing) != values:
+                raise WriteConflict(None, f"conflict link: {row.key}")
 
     def read(self, query: dict[str, Any]) -> dict[str, Any]:
         self._validate_query(query)
