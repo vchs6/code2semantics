@@ -114,4 +114,4 @@ def test_scanner_records_scope_and_file_direct_node_completeness(tmp_path, codec
     assert scope_inventory["assertion"]["coverage"]["completeness"] == "complete"
     assert scope_inventory["children"] == [batch["facts"][0]["node"]]
     assert file_inventory["target"]["node"] == batch["facts"][0]["node"]
-    assert any(child["node_id"]."Engine" in child["node_id"] for child in file_inventory["children"])
+    assert any("Engine" in child["node_id"] for child in file_inventory["children"])
