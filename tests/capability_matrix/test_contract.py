@@ -36,10 +36,24 @@ def valid_entry(**overrides: object) -> dict:
     return entry
 
 
-def test_empty_matrix_fixture_matches_public_schema() -> None:
-    document = load_fixture()
-    assert document == {"contract_version": "1.0.0", "entries": []}
+def test_cold_start_empty_matrix_matches_public_schema() -> None:
+    document = {"contract_version": "1.0.0", "entries": []}
     validator().validate(document)
+
+
+def test_current_matrix_contains_only_accepted_python_and_rust_parser_profiles() -> None:
+    document = load_fixture()
+    validator().validate(document)
+    assert {entry["tool_id"] for entry in document["entries"]} == {
+        "python.ast-source", "rust.syntax-source"
+    }
+    for entry in document["entries"]:
+        assert entry["enabled"] is True
+        assert entry["acceptance"]["actor"] == "parser_development"
+        assert entry["acceptance"]["evidence"]
+        assert set(entry["information_need_ids"]) == {
+            "syntax.f2.identity", "syntax.f2.names", "syntax.f2.boundary", "syntax.f2.locators"
+        }
 
 
 def test_schema_rejects_invalid_entries() -> None:
