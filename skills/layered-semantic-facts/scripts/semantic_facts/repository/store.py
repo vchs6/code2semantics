@@ -685,9 +685,11 @@ class Repository:
                 )
             ]
         navigation = []
-        for payload, is_navigation in self.connection.execute(
-            "SELECT payload, navigation FROM relations WHERE navigation = 1"
+        for relation_key, payload in self.connection.execute(
+            "SELECT relation_key, payload FROM relations WHERE navigation = 1"
         ):
+            if not active("relation", relation_key):
+                continue
             edge = json.loads(payload)
             source_ref = edge.get("source", {})
             if source_ref.get("source_id") not in current_source_ids:
@@ -697,7 +699,9 @@ class Repository:
             navigation.append(edge)
 
         direct_nodes = []
-        for (payload,) in self.connection.execute("SELECT payload FROM inventories"):
+        for inventory_key, payload in self.connection.execute("SELECT inventory_key, payload FROM inventories"):
+            if not active("inventory", inventory_key):
+                continue
             inventory = json.loads(payload)
             inventory_target = inventory.get("target", {})
             node_ref = inventory_target.get("node", {}) if inventory_target.get("kind") == "node" else {}
@@ -709,7 +713,9 @@ class Repository:
             direct_nodes.append(inventory)
 
         conflicts = []
-        for (payload,) in self.connection.execute("SELECT payload FROM conflicts"):
+        for conflict_key, payload in self.connection.execute("SELECT conflict_key, payload FROM conflicts"):
+            if not active("conflict", conflict_key):
+                continue
             conflict = json.loads(payload)
             conflict_sources = set(conflict.get("context", {}).get("source_ids", []))
             if conflict_sources.intersection(current_source_ids):
