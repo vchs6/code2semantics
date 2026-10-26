@@ -33,7 +33,7 @@ The scanner uses Python's AST parser and does not execute project code. Its outp
 
 ## Evidence and retention
 
-Each emitted field carries source evidence and a content digest. Invalid Python input produces an explicit error rather than guessed facts. Existing fact rows are not replaced by a later write; a conflicting fact identity is rejected. Do not delete stored semantic facts to simulate a restore test. Restore tests must use a separate temporary database.
+Each emitted field carries source evidence and a content digest. Invalid Python input produces an explicit error rather than guessed facts. Existing fact rows are not replaced by a later write. A changed Python source snapshot receives a new source identity and is appended as a new fact set; current-scope queries select the latest snapshot for that exact root, while older fact rows remain stored. Conflicting fact identities are rejected. Do not delete stored semantic facts to simulate a restore test. Restore tests must use a separate temporary database.
 
 ## Validation
 
