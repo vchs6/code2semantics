@@ -54,3 +54,17 @@
 - 本次结果：repository 35 passed；capability matrix 14 passed；严格 OpenSpec 通过；公共设计契约输出仍为 `runtime_verified=false`。
 
 边界：这落实了当前 SQLite 写入路径的防覆盖/保留约束，不等于已实现所有历史版本、失效传播、局部更新或端到端语义生命周期；这些仍需按任务契约继续实现和验证。
+
+
+## 2026-10-26 治理与产品交付门禁修正
+
+用户要求：先修正 AI 治理和质量门禁缺陷；后续直接提交 main，不创建分支。
+
+- `AGENTS.md` 新增第 12 节“产品交付与质量门禁”：区分组件测试、契约校验与真实产品行为验收；明确真实输入、运行入口、可观察输出、集成断言和复现命令为完成证据。
+- `openspec/config.yaml` 的 tasks 规则新增要求：产品完成状态必须有真实运行入口、真实输入场景、可观察输出和集成验收证据。
+- 新增 `scripts/quality_gates/check_product_delivery.py`，以 fail-closed 方式检查 Skill 运行入口、跨组件验收测试、真实源码场景 fixture 和运行验收记录。
+- `.github/workflows/verify-semantic-facts.yml` 在组件测试与契约检查后执行该门禁。
+- 最新验证：https://github.com/vchs6/code2semantics/actions/runs/40256001405 。现有 35 个 repository 测试、14 个 matrix 测试、设计契约检查和严格 OpenSpec 均通过；产品交付门禁按预期失败，明确指出缺少 `skills/layered-semantic-facts/SKILL.md`、`tests/test_acceptance.py`、`tests/fixtures/scenarios`、`skills/layered-semantic-facts/references/acceptance-results.md`。
+- 该 CI 失败是有意的 fail-closed 结果，表明项目当前不能宣称产品端到端验收完成。门禁通过后仍须执行真实源码集成测试，不能只依靠文件存在性。
+
+以上均直接提交 main。下一步应先按现有 OpenSpec 流程补齐真实运行入口和集成产物，再运行门禁；不得通过降低门禁要求恢复绿色。
