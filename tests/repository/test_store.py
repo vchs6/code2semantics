@@ -93,6 +93,9 @@ def test_navigation_deduplicates_edges_and_preserves_cycles_multi_parent_and_ext
 
     value = copy.deepcopy(batch)
     original = value["navigation"][0]
+    original["assertion"]["context"]["conditions"] = [
+        {"expression": "feature_enabled", "scope": "build", "state": "true"}
+    ]
     duplicate = copy.deepcopy(original)
     duplicate["edge_id"] = "member-a-duplicate"
     parent_edge = copy.deepcopy(original)
@@ -101,6 +104,9 @@ def test_navigation_deduplicates_edges_and_preserves_cycles_multi_parent_and_ext
     cycle_edge = copy.deepcopy(original)
     cycle_edge["edge_id"] = "cycle-a"
     cycle_edge["source"], cycle_edge["target"] = original["target"], original["source"]
+    cycle_edge["assertion"]["context"]["conditions"] = [
+        {"expression": "feature_enabled", "scope": "build", "state": "false"}
+    ]
     external_edge = copy.deepcopy(original)
     external_edge["edge_id"] = "external-a"
     external_edge["target"] = {
@@ -125,6 +131,17 @@ def test_navigation_deduplicates_edges_and_preserves_cycles_multi_parent_and_ext
     assert len(signatures) == 4
     assert len(set(map(repr, signatures))) == 4
     assert any(edge["source"]["node_id"] == "parent-b" and edge["target"]["node_id"] == "child-a" for edge in result["navigation"])
-    assert any(edge["source"]["node_id"] == "child-a" and edge["target"]["node_id"] == "unit-a" for edge in result["navigation"])
+    assert any(
+        edge["source"]["node_id"] == "child-a"
+        and edge["target"]["node_id"] == "unit-a"
+        and edge["assertion"]["context"]["conditions"][0]["state"] == "false"
+        for edge in result["navigation"]
+    )
+    assert any(
+        edge["source"]["node_id"] == "unit-a"
+        and edge["target"]["node_id"] == "child-a"
+        and edge["assertion"]["context"]["conditions"][0]["state"] == "true"
+        for edge in result["navigation"]
+    )
     assert any(edge["target"].get("kind") == "external" for edge in result["navigation"])
     repository.close()
