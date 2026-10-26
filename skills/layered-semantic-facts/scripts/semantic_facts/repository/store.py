@@ -140,22 +140,40 @@ class Repository:
             )
         return int(cursor.lastrowid)
 
-    def invalidate_fact(self, fact_id: str, reason: str, state: str = "modified") -> int:
+    def _resolve_current_fact_key(self, fact_id: str, source_id: str | None = None) -> str:
+        """Resolve a fact only from current source heads; reject ambiguous cross-project IDs."""
         self._ensure_schema()
-        row = self.connection.execute("SELECT fact_key FROM facts WHERE fact_id = ?", (fact_id,)).fetchone()
-        if not row:
-            raise ValueError(f"fact does not exist: {fact_id}")
-        return self.record_validity_event("fact", row[0], state, reason)
+        sql = (
+            "SELECT f.fact_key, f.source_id FROM facts f "
+            "JOIN source_heads h ON h.source_id = f.source_id WHERE f.fact_id = ?"
+        )
+        params: list[Any] = [fact_id]
+        if source_id is not None:
+            sql += " AND f.source_id = ?"
+            params.append(source_id)
+        rows = self.connection.execute(sql, params).fetchall()
+        if not rows:
+            raise ValueError(f"current fact does not exist: {fact_id}")
+        if len(rows) > 1:
+            raise ValueError(f"fact identity is ambiguous across current sources: {fact_id}; pass source_id")
+        return rows[0][0]
 
-    def invalidate_field(self, fact_id: str, field_name: str, reason: str, state: str = "modified") -> int:
-        self._ensure_schema()
+    def invalidate_fact(
+        self, fact_id: str, reason: str, state: str = "modified", *, source_id: str | None = None
+    ) -> int:
+        fact_key = self._resolve_current_fact_key(fact_id, source_id)
+        return self.record_validity_event("fact", fact_key, state, reason)
+
+    def invalidate_field(
+        self, fact_id: str, field_name: str, reason: str, state: str = "modified", *, source_id: str | None = None
+    ) -> int:
+        fact_key = self._resolve_current_fact_key(fact_id, source_id)
         row = self.connection.execute(
-            "SELECT a.attribute_key FROM attributes a JOIN facts f ON f.fact_key = a.fact_key "
-            "WHERE f.fact_id = ? AND a.field_name = ?",
-            (fact_id, field_name),
+            "SELECT attribute_key FROM attributes WHERE fact_key = ? AND field_name = ?",
+            (fact_key, field_name),
         ).fetchone()
         if not row:
-            raise ValueError(f"field does not exist: {fact_id}.{field_name}")
+            raise ValueError(f"current field does not exist: {fact_id}.{field_name}")
         return self.record_validity_event("field", row[0], state, reason)
 
     def invalidate_relation(self, relation_key: str, reason: str, state: str = "modified") -> int:
