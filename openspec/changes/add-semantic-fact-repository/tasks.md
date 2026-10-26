@@ -46,9 +46,9 @@
 ## 6. �ֿ��������
 
 - [x] 6.1 ��д��ģ���������ڲ��ԣ�FactBatch д�롢�ؿ���ȡ���ֲ�ά������Ч�ԡ����޹�ϵ��ȡ����������ͱ��ݻָ�����ѯ�����ɲ���ֱ���ṩ��
-- [ ] 6.2 ���� `python -m pytest tests/repository/test_acceptance.py -q` RED������¶ǰ��ȱ�ݣ��ص���Ӧ���Ȳ��������޸���
+- [x] 6.2 ���� `python -m pytest tests/repository/test_acceptance.py -q` RED������¶ǰ��ȱ�ݣ��ص���Ӧ���Ȳ��������޸���
 - [x] 6.3 ���� `python -m pytest tests/repository -q` ���ڶ������ض���֤����¼ʵ������˳��롢����������������ӳ�䵽 `implementation-validation.md`��
-- [ ] 6.4 �ύ���������ļ�����ȷ����ѯ/����������������������𣬲��Զ�������鵵��
+- [x] 6.4 �ύ���������ļ�����ȷ����ѯ/����������������������𣬲��Զ�������鵵��
 
 ## Workflow follow-up
 
@@ -115,3 +115,12 @@
 - Fix: `Repository.restore` now validates the required columns for every normalized repository table (sources, entities, facts, attributes, attribute_versions, validity_events, relations, submissions, source_heads, evidence, evidence_links, premises, inventories, conflicts, conflict_links) before copying the backup into the live connection.
 - GREEN: https://github.com/vchs6/code2semantics/actions/runs/40299139228 — repository 57 passed; focused transaction 6; transfer 8; repository acceptance 3; matrix 15; parser 9; scanner 7; runtime acceptance 6; packaging 2; executor 3; producer dispatch 3; combined planning/constructor/induction/query 52 passed; strict OpenSpec passed.
 - The empty SQLite and malformed same-table-name backup tests both assert existing fact/source rows remain unchanged on rejection. Product delivery gate remains blocked for full-system acceptance.
+
+
+## Repository acceptance closure (2026-10-26)
+
+- RED: https://github.com/vchs6/code2semantics/actions/runs/40310626084 failed on `test_local_invalidation_targets_current_source_head_without_deleting_history`: same `fact_id` existed in historical and current source snapshots, and `invalidate_field` selected the historical attribute.
+- GREEN: `Repository._resolve_current_fact_key` now resolves only current source-head rows; if a fact ID is ambiguous across current project roots, the caller must provide `source_id`. `invalidate_fact` and `invalidate_field` both use this rule. No fact rows are deleted.
+- Added repository acceptance coverage for two projects with colliding file-level fact IDs: unscoped mutation is rejected; scoped mutation affects only the selected current source.
+- GREEN CI: https://github.com/vchs6/code2semantics/actions/runs/40310872678 — repository 59 passed; transactions 6; transfer 8; repository acceptance 5; matrix 15; parser 9; scanner 7; runtime acceptance 9; packaging 2; executor 3; producer dispatch 3; combined information-needs/constructor/binding/induction/query 52 passed; strict OpenSpec passed.
+- This closes the repository component's current mutation/transfer acceptance obligations. It does not close query S1–S12 or root full-system acceptance; the product delivery gate remains BLOCKED.
