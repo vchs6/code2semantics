@@ -24,6 +24,8 @@ def test_scans_real_python_source_into_valid_fact_batch(tmp_path, codec):
     batch = build_fact_batch(project, codec)
 
     assert len(batch["sources"]) == 1
+    assert batch["sources"][0]["dirty"] is True
+    assert batch["sources"][0]["has_untracked"] is True
     assert len(batch["facts"]) == 1
     fact = batch["facts"][0]
     assert fact["fact_type"] == "F2"
