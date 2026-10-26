@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 from semantic_facts.info_parser import parse_python_request, parse_rust_request
@@ -114,3 +115,69 @@ def test_registry_registers_python_and_rust_parsers():
     assert registry.supported_tools() == ("python.ast-source", "rust.syntax-source")
     result = registry.parse(request("pub enum State { Ready, Busy }", tool_id="rust.syntax-source"))
     assert any(item["payload"]["text"] == "enum State" for item in result["observations"])
+
+def test_cargo_metadata_parser_emits_workspace_and_dependency_observations_separately():
+    from semantic_facts.info_parser import parse_cargo_metadata_request
+
+    native = {
+        "version": 1,
+        "workspace_root": "/fixture/workspace",
+        "workspace_members": ["path+file:///fixture/workspace/app#app@0.1.0"],
+        "packages": [{
+            "name": "app",
+            "version": "0.1.0",
+            "id": "path+file:///fixture/workspace/app#app@0.1.0",
+            "manifest_path": "/fixture/workspace/app/Cargo.toml",
+            "targets": [{"name": "app", "kind": ["bin"], "crate_types": ["bin"], "src_path": "/fixture/workspace/app/src/main.rs"}],
+            "dependencies": [{
+                "name": "serde",
+                "req": "^1",
+                "kind": None,
+                "optional": False,
+                "uses_default_features": True,
+                "features": [],
+                "target": None,
+                "rename": None,
+                "registry": None,
+                "path": None,
+            }],
+        }],
+    }
+    value = request(json.dumps(native), tool_id="rust.cargo-metadata")
+    value["invocation_profile"]["command"] = ["cargo", "metadata", "--no-deps", "--format-version", "1"]
+    result = parse_cargo_metadata_request(value)
+
+    assert result["gaps"] == []
+    need_ids = {item["information_need_id"] for item in result["observations"]}
+    assert "source.f4.kind" in need_ids
+    assert "source.f6.kind" in need_ids
+    assert any("workspace member" in item["payload"]["text"] for item in result["observations"])
+    assert any("dependency" in item["payload"]["text"] for item in result["observations"])
+    assert all(item["evidence"][0]["kind"] == "manifest" for item in result["observations"])
+    assert all(item["evidence"][0]["content_digest"].startswith("sha256:") for item in result["observations"])
+
+
+def test_cargo_metadata_parser_returns_gap_for_malformed_or_unsupported_output():
+    from semantic_facts.info_parser import parse_cargo_metadata_request
+
+    malformed = parse_cargo_metadata_request(request("{bad json", tool_id="rust.cargo-metadata"))
+    assert malformed["observations"] == []
+    assert malformed["gaps"][0]["reason"] == "unparseable"
+
+    unsupported = parse_cargo_metadata_request(request('{"version":99,"packages":[]}', tool_id="rust.cargo-metadata"))
+    assert unsupported["observations"] == []
+    assert unsupported["gaps"][0]["reason"] in {"unparseable", "unsupported_profile"}
+
+
+def test_compileall_parser_preserves_diagnostic_evidence_without_inferring_semantics():
+    from semantic_facts.info_parser import parse_compileall_request
+
+    native = "*** Error compiling '/fixture/project/broken.py'...\\n  File \"/fixture/project/broken.py\", line 1\\n    def broken(:\\n                 ^\\nSyntaxError: invalid syntax\\n"
+    value = request(native, tool_id="python.compileall")
+    result = parse_compileall_request(value)
+
+    assert result["gaps"] == []
+    assert result["observations"]
+    assert any("SyntaxError" in item["payload"]["text"] for item in result["observations"])
+    assert all(item["evidence"][0]["kind"] == "observation" for item in result["observations"])
+    assert all("no runtime behavior inferred" in item["context"]["language_semantics"][0] for item in result["observations"])
