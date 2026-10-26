@@ -7,7 +7,7 @@ from pathlib import Path
 import subprocess
 from typing import Any, Mapping, Sequence
 
-from .induction import _validate, _validators, validate_induction_result
+from .induction import _validate, _validators, build_induction_requests, validate_induction_result
 from .source_scanner import inspect_source
 
 
@@ -200,3 +200,35 @@ def invoke_induction_provider(
         "detail": "",
         "induction_result": induction_result,
     }
+
+def run_induction_requests(
+    observations: list[dict[str, Any]],
+    existing_valid_facts: dict[str, Any],
+    unmet: list[dict[str, Any]],
+    provider_id: str,
+    registry: InductionProviderRegistry,
+    asset_root: str | Path | None = None,
+    *,
+    cwd: str | Path | None = None,
+) -> dict[str, Any]:
+    """Group eligible unmet fields and invoke the configured provider once per group.
+
+    This orchestration returns per-group validated results for the constructor to
+    merge into its candidate FactBatch. It never writes to the repository.
+    """
+    plan = build_induction_requests(observations, existing_valid_facts, unmet, asset_root)
+    results: list[dict[str, Any]] = []
+    gaps = list(plan["gaps"])
+    for request in plan["requests"]:
+        execution = invoke_induction_provider(
+            provider_id, request, registry, asset_root, cwd=cwd
+        )
+        results.append({
+            "request_id": request["request_id"],
+            "provider_id": execution["provider_id"],
+            "execution_status": execution["execution_status"],
+            "detail": execution["detail"],
+            "induction_result": execution["induction_result"],
+        })
+        gaps.extend(execution["induction_result"]["gaps"])
+    return {"requests": plan["requests"], "results": results, "gaps": gaps}
