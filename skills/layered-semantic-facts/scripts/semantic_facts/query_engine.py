@@ -9,6 +9,8 @@ from jsonschema import Draft202012Validator
 from referencing import Registry, Resource
 
 from .repository.store import Repository
+from .source_scanner import inspect_source
+from .constructor import execute_constructor_request
 
 
 class QueryContractError(ValueError):
@@ -26,7 +28,7 @@ def _validators(asset_root: Path) -> tuple[Draft202012Validator, Draft202012Vali
     )
 
 
-def execute_query(query: dict[str, Any], repository: Repository, asset_root: str | Path | None = None) -> dict[str, Any]:
+def execute_query(query: dict[str, Any], repository: Repository, asset_root: str | Path | None = None, *, stored_result: dict[str, Any] | None = None, source_override: list[dict[str, Any]] | None = None) -> dict[str, Any]:
     """Read stored facts and project a minimal contract-shaped response.
 
     This initial deterministic path supports repository-backed field coverage.
@@ -39,8 +41,10 @@ def execute_query(query: dict[str, Any], repository: Repository, asset_root: str
     if error:
         raise QueryContractError(f"query {list(error.absolute_path)}: {error.message}")
 
-    stored = repository.read(query)
-    sources = stored["sources"]
+    stored = stored_result if stored_result is not None else repository.read(query)
+    sources = source_override if source_override is not None else stored["sources"]
+    if source_override is not None:
+        stored = {**stored, "sources": source_override}
     if not sources:
         raise QueryContractError("no stored source record is available for the requested scope")
 
