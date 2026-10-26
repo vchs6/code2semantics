@@ -26,6 +26,14 @@ jobs:
         env:
           PYTHONPATH: skills/layered-semantic-facts/scripts
         run: python -m pytest tests/test_info_parser.py -q -ra -p no:cacheprovider
+      - name: Source scanner component tests
+        env:
+          PYTHONPATH: skills/layered-semantic-facts/scripts
+        run: python -m pytest tests/test_source_scanner.py -q -ra -p no:cacheprovider
+      - name: Runtime acceptance tests
+        env:
+          PYTHONPATH: skills/layered-semantic-facts/scripts
+        run: python -m pytest tests/test_acceptance.py -q -ra -p no:cacheprovider
       - name: Contract validation
         run: python openspec/changes/epic-layered-semantic-fact-skill/validation/validate_contracts.py
       - name: Product delivery gate
