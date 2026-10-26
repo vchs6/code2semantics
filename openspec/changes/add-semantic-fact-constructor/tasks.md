@@ -19,7 +19,7 @@ Implementation is TDD: write a failing behavior test (RED), implement the smalle
 ## 3. Tool executor boundary and parser integration
 
 - [x] 3.1 Define an injected executor protocol with bounded timeout, argv-only invocation, captured stdout/stderr/exit code and explicit invocation profile; test that no shell string execution is used.
-- [ ] 3.2 Implement a registry-driven execution loop that selects only enabled matching matrix entries, invokes the registered executor, passes output to `ParserRegistry`, and converts unsupported profiles/failures into explicit gaps.
+- [x] 3.2 Implement a registry-driven execution loop that selects only enabled matching matrix entries, invokes the registered executor, passes output to `ParserRegistry`, and converts unsupported profiles/failures into explicit gaps.
 - [x] 3.3 Add Python and Rust source fixtures for module/symbol inventories and malformed input; verify deterministic evidence locators and content digests.
 - [x] 3.4 Ensure one failed producer does not discard independent valid observations; reject malformed parser results before construction.
 
@@ -62,3 +62,10 @@ Implementation is TDD: write a failing behavior test (RED), implement the smalle
 - Tests: `tests/test_source_scanner.py` partial-scan test; `tests/test_constructor.py` mixed-validity constructor test; `tests/test_constructor_binding.py` source/subject/state/locator binding tests.
 - CI run `https://github.com/vchs6/code2semantics/actions/runs/40275399143`: repository 45, matrix 15, parser 9, scanner 7, source acceptance 4, packaging 2, executor 3, combined information-needs/plan/constructor/binding/induction/query 47 passed; strict OpenSpec passed. Product delivery gate remains blocked by full-system acceptance gaps.
 - Still pending: 3.2 external producer executor integration. Current accepted Python/Rust producers are in-process ParserRegistry profiles; do not mark external subprocess producer dispatch complete until an accepted matrix profile and runtime tests exercise that path.
+## Producer dispatch completion evidence (2026-10-26)
+
+- `semantic_facts/producer_dispatch.py` now dispatches accepted enabled matrix profiles. In-process entries go through `ParserRegistry`; subprocess entries require the injected allowlisted `SubprocessToolExecutor`, then stdout is passed through `ParserRegistry` and the result is schema-validated. Disabled/unaccepted profiles, missing executors, timeout/nonzero exit and parser errors become explicit gaps.
+- `source_scanner.build_fact_batch_with_gaps` uses matrix-selected entries and the dispatcher; one producer failure does not discard independent valid file observations. Partial source inventories are explicitly marked partial.
+- Tests: `tests/test_producer_dispatch.py` covers successful subprocess→parser conversion, subprocess failure gaps, and disabled producer rejection. `tests/test_source_scanner.py` and `tests/test_constructor.py` cover independent file failure preservation. `tests/test_constructor_binding.py` covers source/subject/content/locator binding.
+- CI `https://github.com/vchs6/code2semantics/actions/runs/40276135137`: repository 45, matrix 15, parser 9, scanner 7, source acceptance 4, packaging 2, bounded executor 3, producer dispatch 3, combined planning/constructor/binding/induction/query 51 passed; strict OpenSpec passed. The product delivery gate remains blocked for full S1–S12 system acceptance.
+- Boundary: subprocess dispatch is implemented and tested as an injected, allowlisted path. The first-phase checked-in Python/Rust matrix continues to use in-process parsers; no external tool is marked enabled without parser-development acceptance.
