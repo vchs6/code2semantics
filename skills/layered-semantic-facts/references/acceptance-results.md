@@ -72,3 +72,14 @@ CI run: https://github.com/vchs6/code2semantics/actions/runs/40269286038
 Latest CI: https://github.com/vchs6/code2semantics/actions/runs/40269644416
 
 The query test suite now proves that a node-target request requires a current scope inventory containing that file plus a current per-file direct-declaration inventory. The constructor appends both inventories, the query loop counts the scope-to-file prerequisite as progress, and the final response returns only the requested node inventory. All component suites and strict OpenSpec passed; the full product gate remains blocked for the remaining general semantic requirements.
+
+## Constructor/query dependency-order update (2026-10-26)
+
+Latest complete component CI: https://github.com/vchs6/code2semantics/actions/runs/40276135137
+
+- Repository: 45 passed; capability matrix: 15 passed; parser: 9 passed; scanner: 7 passed; runtime source acceptance: 4 passed; packaging: 2 passed; bounded executor: 3 passed; producer dispatch: 3 passed; combined information-needs/constructor/binding/induction/query: 51 passed.
+- Strict OpenSpec validation passed.
+- Constructor dispatch now selects only enabled/accepted matrix entries, supports in-process registry parsers and an injected allowlisted subprocess executor, validates parsed output, and converts failures to explicit gaps. A failed file producer no longer discards independent valid source facts; project inventory becomes partial.
+- Constructor request-binding rejects mismatched source, subject, content state and out-of-scope evidence locators. Same-source immutable fact identities reject conflicting field rewrites; new source snapshots append separate rows.
+- Query tests cover multiple disjoint roots, nested roots, same-named nodes with distinct identities, unavailable sources, out-of-scope node references rejected before repository reads, mixed supported/out-of-catalog fields, and projection of external references/conflict evidence.
+- Product delivery gate intentionally remains BLOCKED. Multi-parent/dependency-cycle semantics, full dependency-aware invalidation, configured cognitive induction provider, full higher-layer semantic construction, and all S1–S12 acceptance remain incomplete.
