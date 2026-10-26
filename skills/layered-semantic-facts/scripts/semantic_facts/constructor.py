@@ -142,12 +142,10 @@ def execute_constructor_request(
             ):
                 matrix = CapabilityMatrix(assets / "capability-matrix.json")
                 parser_registry = ParserRegistry(assets)
-                executed_profiles: set[str] = set()
+                executed_profiles: set[tuple[str, str, tuple[str, ...], tuple[str, ...]]] = set()
                 for item in plan_result["plan"]:
                     for profile in item.get("producer_profiles", []):
                         tool_id = profile["tool_id"]
-                        if tool_id in executed_profiles:
-                            continue
                         if tool_id == "rust.cargo-metadata" and profile["environment"] == "subprocess":
                             manifest = root / "Cargo.toml"
                             if not manifest.is_file():
@@ -188,7 +186,15 @@ def execute_constructor_request(
                         else:
                             continue
 
-                        executed_profiles.add(tool_id)
+                        task_key = (
+                            tool_id,
+                            profile["environment"],
+                            tuple(profile["invocation"]),
+                            tuple(command_args),
+                        )
+                        if task_key in executed_profiles:
+                            continue
+                        executed_profiles.add(task_key)
                         entry = next(entry for entry in matrix.load()["entries"] if entry["tool_id"] == tool_id)
                         parse_request = {
                             "kind": "parse_request",
