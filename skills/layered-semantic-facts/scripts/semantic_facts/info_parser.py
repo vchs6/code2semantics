@@ -163,7 +163,7 @@ def parse_rust_request(request: dict[str, Any], asset_root: str | Path | None = 
     coverage = profile["coverage"]
 
     # Remove comments and string contents for delimiter-balance diagnostics only.
-    scrubbed = re.sub(r'//[^\\n]*|/\\*.*?\\*/|"(?:\\\\.|[^"\\\\])*"', " ", text, flags=re.S)
+    scrubbed = re.sub(r'//[^\n]*|/\*.*?\*/|"(?:\\.|[^"\\])*"', " ", text, flags=re.S)
     stack: list[tuple[str, int]] = []
     pairs = {")": "(", "]": "[", "}": "{"}
     for offset, char in enumerate(scrubbed):
@@ -171,11 +171,11 @@ def parse_rust_request(request: dict[str, Any], asset_root: str | Path | None = 
             stack.append((char, offset))
         elif char in ")]}":
             if not stack or stack[-1][0] != pairs[char]:
-                line = scrubbed.count("\\n", 0, offset) + 1
+                line = scrubbed.count("\n", 0, offset) + 1
                 return _gap_result(profile, "unparseable", f"Rust delimiter mismatch at line {line}", result_validator)
             stack.pop()
     if stack:
-        line = scrubbed.count("\\n", 0, stack[-1][1]) + 1
+        line = scrubbed.count("\n", 0, stack[-1][1]) + 1
         return _gap_result(profile, "unparseable", f"Rust unclosed delimiter at line {line}", result_validator)
 
     observations: list[dict[str, Any]] = []
@@ -202,15 +202,15 @@ def parse_rust_request(request: dict[str, Any], asset_root: str | Path | None = 
 
     add("module", Path(source_path).stem, 1, f"module {Path(source_path).stem}")
     patterns = [
-        ("function", re.compile(r"^\\s*(?:(?:pub(?:\\([^)]*\\))?|async|unsafe|const|extern(?:\\s+\"[^\"]+\")?)\\s+)*fn\\s+([A-Za-z_][A-Za-z0-9_]*)"), "fn"),
-        ("struct", re.compile(r"^\\s*(?:pub(?:\\([^)]*\\))?\\s+)?struct\\s+([A-Za-z_][A-Za-z0-9_]*)"), "struct"),
-        ("enum", re.compile(r"^\\s*(?:pub(?:\\([^)]*\\))?\\s+)?enum\\s+([A-Za-z_][A-Za-z0-9_]*)"), "enum"),
-        ("trait", re.compile(r"^\\s*(?:pub(?:\\([^)]*\\))?\\s+)?trait\\s+([A-Za-z_][A-Za-z0-9_]*)"), "trait"),
-        ("type", re.compile(r"^\\s*(?:pub(?:\\([^)]*\\))?\\s+)?type\\s+([A-Za-z_][A-Za-z0-9_]*)"), "type"),
-        ("module", re.compile(r"^\\s*(?:pub(?:\\([^)]*\\))?\\s+)?mod\\s+([A-Za-z_][A-Za-z0-9_]*)"), "mod"),
-        ("import", re.compile(r"^\\s*(?:pub(?:\\([^)]*\\))?\\s+)?use\\s+(.+?);\\s*$"), "use"),
-        ("impl", re.compile(r"^\\s*impl(?:<[^>]+>)?\\s+(.+?)\\s*\\{?\\s*$"), "impl"),
-        ("constant", re.compile(r"^\\s*(?:pub(?:\\([^)]*\\))?\\s+)?(?:const|static)\\s+([A-Za-z_][A-Za-z0-9_]*)"), "const/static"),
+        ("function", re.compile(r"^\s*(?:(?:pub(?:\([^)]*\))?|async|unsafe|const|extern(?:\s+\"[^\"]+\")?)\s+)*fn\s+([A-Za-z_][A-Za-z0-9_]*)"), "fn"),
+        ("struct", re.compile(r"^\s*(?:pub(?:\([^)]*\))?\s+)?struct\s+([A-Za-z_][A-Za-z0-9_]*)"), "struct"),
+        ("enum", re.compile(r"^\s*(?:pub(?:\([^)]*\))?\s+)?enum\s+([A-Za-z_][A-Za-z0-9_]*)"), "enum"),
+        ("trait", re.compile(r"^\s*(?:pub(?:\([^)]*\))?\s+)?trait\s+([A-Za-z_][A-Za-z0-9_]*)"), "trait"),
+        ("type", re.compile(r"^\s*(?:pub(?:\([^)]*\))?\s+)?type\s+([A-Za-z_][A-Za-z0-9_]*)"), "type"),
+        ("module", re.compile(r"^\s*(?:pub(?:\([^)]*\))?\s+)?mod\s+([A-Za-z_][A-Za-z0-9_]*)"), "mod"),
+        ("import", re.compile(r"^\s*(?:pub(?:\([^)]*\))?\s+)?use\s+(.+?);\s*$"), "use"),
+        ("impl", re.compile(r"^\s*impl(?:<[^>]+>)?\s+(.+?)\s*\{?\s*$"), "impl"),
+        ("constant", re.compile(r"^\s*(?:pub(?:\([^)]*\))?\s+)?(?:const|static)\s+([A-Za-z_][A-Za-z0-9_]*)"), "const/static"),
     ]
     for line_no, line in enumerate(text.splitlines(), start=1):
         stripped = line.strip()
