@@ -3,6 +3,7 @@ from pathlib import Path
 
 from semantic_facts.cli import main
 from semantic_facts.repository.store import Repository
+from semantic_facts.query_engine import execute_query
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -46,10 +47,17 @@ def test_real_source_scan_store_reopen_and_query(tmp_path, capsys):
     repository = Repository(database)
     repository.close()
     reopened = Repository(database)
-    result = reopened.read(query)
-    assert result["facts"]
-    assert any("class RepositoryReader" in fact["fields"]["names"]["value"]["text"] for fact in result["facts"])
-    assert all(fact["fields"]["names"]["basis"]["evidence"] for fact in result["facts"])
+    result = execute_query(query, reopened, ROOT / "skills" / "layered-semantic-facts" / "assets")
+    assert result["termination"] == "satisfied"
+    assert result["results"]
+    assert any("class RepositoryReader" in fact["fields"]["names"]["value"]["text"] for fact in result["results"])
+    assert all(fact["fields"]["names"]["basis"]["evidence"] for fact in result["results"])
+
+    query_with_missing_field = dict(query)
+    query_with_missing_field["selections"] = [{"fact_type": "F2", "fields": ["purpose"]}]
+    incomplete = execute_query(query_with_missing_field, reopened, ROOT / "skills" / "layered-semantic-facts" / "assets")
+    assert incomplete["termination"] == "no_progress"
+    assert incomplete["gaps"][0]["fields"] == ["purpose"]
     counts_before = reopened.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
     reopened.close()
 
