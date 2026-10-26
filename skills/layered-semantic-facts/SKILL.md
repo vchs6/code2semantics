@@ -13,7 +13,7 @@ Install the dependencies from `scripts/requirements.txt`, then set `PYTHONPATH=s
 Scan Python and Rust source into a FactBatch and persist it:
 
 ```bash
-python -m semantic_facts.cli scan-python --root /path/to/project --db /path/to/facts.db --output /tmp/fact-batch.json
+python -m semantic_facts.cli scan-source --root /path/to/project --db /path/to/facts.db --output /tmp/fact-batch.json
 ```
 
 Run a query using a JSON file that follows the public Query contract:
