@@ -115,3 +115,13 @@ class SubprocessToolExecutor:
                 stderr=stderr,
                 timed_out=True,
             )
+
+def build_default_tool_executor() -> SubprocessToolExecutor:
+    """Build the host-owned allowlist for production subprocess producers.
+
+    Commands are fixed by application code; query payloads and capability-matrix
+    metadata can never provide or override executable argv prefixes.
+    """
+    return SubprocessToolExecutor({
+        "rust.cargo-metadata": ("cargo", "metadata", "--no-deps", "--format-version", "1"),
+    }, max_timeout_seconds=30.0)
