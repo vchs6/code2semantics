@@ -13,6 +13,7 @@ from semantic_facts.induction_provider import (
     ProviderConfigurationError,
     invoke_induction_provider,
     run_induction_requests,
+    load_induction_provider_from_environment,
 )
 
 
@@ -249,3 +250,28 @@ def test_provider_orchestration_groups_requests_and_keeps_empty_proposal_unmet(t
     assert result["results"][0]["execution_status"] == "completed"
     assert result["results"][0]["induction_result"]["batch"]["facts"] == []
     assert any(item["reason"] == "insufficient_evidence" for item in result["gaps"])
+
+def test_environment_provider_configuration_is_host_owned_and_optional(monkeypatch):
+    monkeypatch.delenv("SEMANTIC_FACTS_INDUCTION_PROVIDER_ID", raising=False)
+    monkeypatch.delenv("SEMANTIC_FACTS_INDUCTION_PROVIDER_ARGV_JSON", raising=False)
+    registry, provider_id = load_induction_provider_from_environment()
+    assert registry is None and provider_id is None
+
+    monkeypatch.setenv("SEMANTIC_FACTS_INDUCTION_PROVIDER_ID", "host-provider")
+    monkeypatch.setenv("SEMANTIC_FACTS_INDUCTION_PROVIDER_ARGV_JSON", json.dumps([sys.executable, "-c", "pass"]))
+    monkeypatch.setenv("SEMANTIC_FACTS_INDUCTION_PROVIDER_TIMEOUT_SECONDS", "2")
+    registry, provider_id = load_induction_provider_from_environment()
+    assert provider_id == "host-provider"
+    assert registry is not None
+    assert registry.get(provider_id).argv == (sys.executable, "-c", "pass")
+
+
+def test_partial_or_invalid_environment_provider_configuration_is_rejected(monkeypatch):
+    monkeypatch.setenv("SEMANTIC_FACTS_INDUCTION_PROVIDER_ID", "host-provider")
+    monkeypatch.delenv("SEMANTIC_FACTS_INDUCTION_PROVIDER_ARGV_JSON", raising=False)
+    with pytest.raises(ProviderConfigurationError, match="both"):
+        load_induction_provider_from_environment()
+
+    monkeypatch.setenv("SEMANTIC_FACTS_INDUCTION_PROVIDER_ARGV_JSON", "not-json")
+    with pytest.raises(ProviderConfigurationError, match="JSON"):
+        load_induction_provider_from_environment()
