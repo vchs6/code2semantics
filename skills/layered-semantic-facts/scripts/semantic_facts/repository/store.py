@@ -809,7 +809,8 @@ class Repository:
                 continue
             if target and inventory_target.get("kind") == "node" and node_ref != target:
                 continue
-            direct_nodes.append(inventory)
+            if assertion_is_current(inventory.get("assertion", {}), inventory_key):
+                direct_nodes.append(inventory)
 
         conflicts = []
         for conflict_key, payload in self.connection.execute("SELECT conflict_key, payload FROM conflicts"):
