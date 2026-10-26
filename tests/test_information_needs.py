@@ -115,8 +115,9 @@ def test_plan_is_deterministic_and_covers_supported_f2_fields():
 def test_catalogue_omission_is_an_explicit_gap_not_added_at_runtime(tmp_path):
     import shutil
 
-    for filename in ("information-needs.schema.json", "information-needs.json", "fact-catalog.json", "pipeline.schema.json", "common.schema.json", "contract-format.schema.json", "capability-matrix.json"):
-        shutil.copy(ASSETS / filename, tmp_path / filename)
+    for source in ASSETS.iterdir():
+        if source.is_file() and (source.name.endswith(".schema.json") or source.name in {"information-needs.json", "fact-catalog.json", "capability-matrix.json"}):
+            shutil.copy(source, tmp_path / source.name)
     path = tmp_path / "information-needs.json"
     catalogue = json.loads(path.read_text(encoding="utf-8"))
     catalogue["needs"] = [
