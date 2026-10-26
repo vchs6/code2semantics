@@ -106,3 +106,13 @@ Within the returned FactBatch, compatible observations for the same fact field m
 The repository owns persistence semantics: stable identity, atomic incremental writes, idempotent submission keys, evidence/field additions, and conflict handling against existing rows. The constructor must not implement a second persistent identity index or skip writes based on an assumption that a prior request already stored the fact. Repository contract validation must remain strict.
 
 Acceptance separates three concerns: (1) same request/source/profile executes a producer once; (2) one FactBatch has no unresolved duplicate identity; (3) repeated/subsequent Repository.write calls prove idempotency and incremental evidence/field storage. Passing one does not imply the others.
+
+## Clarified boundary: minimum producer set vs repository incremental persistence
+
+For each request, the constructor computes unmet information needs after considering current valid facts, then selects the smallest suitable combination of enabled producers whose declared coverage advances those needs. Selection is coverage-driven, not one producer per fact field. When a later producer returns information already obtained for the same requested field and source state, the duplicate contribution may be discarded. Additional fields or independently useful evidence must not be discarded as duplicates merely because the subject/entity already exists.
+
+The constructor does not inspect or maintain a persistent entity/fact identity index. It returns a contract-valid FactBatch for the request. Request-local execution reuse is an optimization; cross-request persistence and idempotency belong exclusively to Repository.
+
+Repository identity semantics are granular. An existing subject/node does not imply that all facts/fields/relations/evidence for it exist. Identical stored records are not inserted again; missing fields, relations or evidence may be appended under the repository's immutable-row and partial-update rules. Same identity with incompatible payload remains a write conflict, not an overwrite and not a reason to discard unrelated new records.
+
+Accordingly, tests must separately cover minimum producer selection, duplicate observations within a request, one valid FactBatch per request, repeated repository writes, and incremental addition of previously absent fields/evidence to an existing subject. Do not introduce constructor-side persistent deduplication to simulate repository behavior.
