@@ -7,7 +7,7 @@ from pathlib import Path
 import subprocess
 from typing import Any, Mapping, Sequence
 
-from .induction import validate_induction_result
+from .induction import _validate, _validators, validate_induction_result
 
 
 class ProviderConfigurationError(ValueError):
@@ -70,6 +70,9 @@ def invoke_induction_provider(
     candidate facts are returned only after the public induction validator
     binds them to this request, its source states, and observed evidence.
     """
+    assets = Path(asset_root) if asset_root else Path(__file__).resolve().parents[2] / "assets"
+    request_validator, _, _ = _validators(assets)
+    _validate(request_validator, request, "InductionRequest")
     registration = registry.get(provider_id)
     timeout = registration.timeout_seconds if timeout_seconds is None else timeout_seconds
     if timeout <= 0 or timeout > registration.timeout_seconds:
