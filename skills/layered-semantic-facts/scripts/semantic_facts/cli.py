@@ -12,6 +12,7 @@ from .repository.store import Repository
 from .source_scanner import build_fact_batch
 from .query_engine import execute_query
 from .constructor_plan import plan_constructor_request
+from .constructor import execute_constructor_request
 
 
 def _assets() -> Path:
@@ -34,10 +35,18 @@ def main(argv: list[str] | None = None) -> int:
     plan = commands.add_parser("plan", help="map a public ConstructRequest to fixed information needs")
     plan.add_argument("--request-file", required=True, type=Path)
 
+    construct = commands.add_parser("construct", help="execute the supported deterministic constructor")
+    construct.add_argument("--request-file", required=True, type=Path)
+
     args = parser.parse_args(argv)
     if args.command == "plan":
         request_document = json.loads(args.request_file.read_text(encoding="utf-8"))
         result = plan_constructor_request(request_document, _assets())
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0
+    if args.command == "construct":
+        request_document = json.loads(args.request_file.read_text(encoding="utf-8"))
+        result = execute_constructor_request(request_document, _assets())
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
 
