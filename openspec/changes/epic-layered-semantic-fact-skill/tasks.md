@@ -80,3 +80,11 @@
 - Test-first evidence: initial CI run https://github.com/vchs6/code2semantics/actions/runs/40297171108 failed because the API was missing; after implementation, a second run exposed a disconnected multi-parent test fixture. The fixture was corrected to represent a reachable graph, not to relax the assertion.
 - Latest completed CI for this increment: https://github.com/vchs6/code2semantics/actions/runs/40297475469. Repository 53 passed; matrix 15; parser 9; scanner 7; source acceptance 4; packaging 2; bounded executor 3; producer dispatch 3; combined information-needs/constructor/induction/query 51 passed; strict OpenSpec passed.
 - Root tasks 8.1–8.5 remain pending. The fail-closed product gate still blocks because the full S1–S12 integration and tool → parser → constructor/induction → FactBatch → repository → complete response acceptance has not been demonstrated. No overall completion claim is made.
+
+
+## Query graph-boundary acceptance increment (2026-10-26)
+
+- Added a query-orchestration test using a schema-valid FactBatch with multi-parent navigation, a dependency cycle, and an external terminal reference. It asserts bounded graph traversal terminates and final query response contains only requested identity/name fields, not graph-edge assertions or out-of-scope external contents.
+- The query subtask 3.4 test set now covers multi-project same-name identities, nested/disjoint roots, external references, conflict evidence, out-of-catalog fields, plus the new multi-parent/cycle scenario.
+- CI: https://github.com/vchs6/code2semantics/actions/runs/40297691458 — repository 53 passed; matrix 15; parser 9; scanner 7; source acceptance 4; packaging 2; executor 3; producer dispatch 3; combined planning/constructor/induction/query suite 52 passed; strict OpenSpec passed.
+- Root task 8.1 remains pending because these tests are distributed across component suites and do not yet establish all S1–S12 scenarios in the single root acceptance harness. The full runtime tool/induction path remains unverified; product delivery gate correctly remains blocked.
