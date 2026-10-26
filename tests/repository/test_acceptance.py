@@ -121,3 +121,40 @@ def test_repository_acceptance_invalidation_revalidation_and_export_import_round
     assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == before_fact_rows
     imported.close()
     repository.close()
+
+
+def test_repository_acceptance_graph_and_invalidation_survive_backup_without_deleting_facts(
+    batch, db_path, tmp_path
+):
+    """Cover graph navigation, append-only invalidation, and restored state together."""
+    from semantic_facts.repository.store import Repository
+
+    start = {"source_id": "src-a", "subject_id": "project-a", "node_id": "unit-a"}
+    repository = Repository(db_path)
+    repository.write(batch, "integrated-graph-validity")
+
+    original_counts = {
+        table: repository.connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+        for table in ("sources", "facts", "attributes", "relations", "evidence", "premises", "inventories")
+    }
+    traversal = repository.traverse_navigation(start, max_depth=3, max_edges=10)
+    assert any(edge["edge_id"] == "member-a" for edge in traversal["edges"])
+    assert traversal["truncated"] is False
+
+    repository.invalidate_field("fact-a", "strategy", "acceptance evidence changed")
+    assert "fact-a" not in {fact["fact_id"] for fact in repository.read(_query())["facts"]}
+    assert repository.connection.execute("SELECT COUNT(*) FROM validity_events").fetchone()[0] >= 1
+    for table, count in original_counts.items():
+        assert repository.connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0] == count
+
+    backup_path = tmp_path / "repository-graph-backup.db"
+    repository.backup(backup_path)
+    repository.close()
+
+    restored = Repository(tmp_path / "restored-graph.db")
+    restored.restore(backup_path)
+    assert "fact-a" not in {fact["fact_id"] for fact in restored.read(_query())["facts"]}
+    assert any(edge["edge_id"] == "member-a" for edge in restored.traverse_navigation(start)["edges"])
+    for table, count in original_counts.items():
+        assert restored.connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0] == count
+    restored.close()
