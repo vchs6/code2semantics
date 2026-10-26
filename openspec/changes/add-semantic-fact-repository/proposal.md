@@ -30,3 +30,14 @@
 - ������ʵ��Լ���������ӵ�У����᰸�����������ֶΡ����ı乫�� Schema��Ҳ�����Ƶڶ���Э�顣
 - `design.md` �� `tasks.md` �Ǳ��᰸�޶����������������������ɲ���֤ǰ��������������������Ϊʵ�����ݡ�
 
+## Clarification: semantic entity enrichment is the repository write model
+
+The repository SHALL treat each submitted FactBatch as contributions to semantic entities and their facts, fields, relations and evidence—not as a replacement snapshot for an entity. The producer identity is not part of persistence identity and MUST NOT decide whether information is stored.
+
+- If the semantic entity already exists but a valid fact/field/relation is new, persist the missing record while retaining existing records.
+- If a field assertion already exists and the new submission adds a distinct valid evidence item/link supporting the same assertion, persist the new evidence/link without duplicating existing rows.
+- If the same immutable identity is submitted with identical content, treat it idempotently and do not duplicate it.
+- If the same immutable identity is submitted with incompatible content, reject it or represent the conflict according to the repository contract; never silently overwrite it.
+- The constructor is responsible for request-driven information acquisition and a contract-valid FactBatch. It does not implement cross-request persistence deduplication or skip a whole entity because it already exists.
+
+Acceptance must prove incremental enrichment of an existing entity, evidence addition, identical replay idempotency, immutable-identity conflict rejection, and preservation of unrelated facts. Apply this proposal before implementing these behaviors; the spec/design/tasks define the detailed tests.
