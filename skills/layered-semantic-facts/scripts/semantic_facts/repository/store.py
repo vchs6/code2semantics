@@ -68,6 +68,100 @@ class Repository:
         self.connection.execute("PRAGMA foreign_keys = ON")
         self._initialized = False
 
+    def export_current(self) -> dict[str, Any]:
+        """Export only current source-head facts; historical rows remain stored locally."""
+        self._ensure_schema()
+        heads = {
+            source_id: root
+            for root, source_id in self.connection.execute("SELECT root, source_id FROM source_heads")
+        }
+        if not heads:
+            raise ValueError("repository has no current source snapshot to export")
+
+        current_sources = [
+            json.loads(payload)
+            for source_id, payload in self.connection.execute(
+                "SELECT source_id, payload FROM sources"
+            )
+            if source_id in heads
+        ]
+        current_states = {source["source_id"]: source["content_state"] for source in current_sources}
+
+        def is_current(assertion: dict[str, Any]) -> bool:
+            validity = assertion.get("validity", {})
+            if validity.get("state") != "current":
+                return False
+            validity_sources = validity.get("sources", [])
+            if not validity_sources or any(
+                item.get("source_id") not in current_states
+                or item.get("content_state") != current_states[item.get("source_id")]
+                for item in validity_sources
+            ):
+                return False
+            return all(
+                item.get("source_id") in current_states
+                and item.get("content_state") == current_states[item.get("source_id")]
+                for item in assertion.get("basis", {}).get("evidence", [])
+            )
+
+        facts: list[dict[str, Any]] = []
+        for fact_key, source_id, payload in self.connection.execute(
+            "SELECT fact_key, source_id, payload FROM facts"
+        ):
+            if source_id not in current_states:
+                continue
+            fact = json.loads(payload)
+            fields: dict[str, Any] = {}
+            for name, field_payload in self.connection.execute(
+                "SELECT field_name, payload FROM attributes WHERE fact_key = ?", (fact_key,)
+            ):
+                assertion = json.loads(field_payload)
+                if is_current(assertion):
+                    fields[name] = assertion
+            if fields:
+                fact["fields"] = fields
+                facts.append(fact)
+
+        navigation = []
+        for payload, is_navigation in self.connection.execute(
+            "SELECT payload, navigation FROM relations WHERE navigation = 1"
+        ):
+            edge = json.loads(payload)
+            if edge.get("source", {}).get("source_id") in current_states:
+                navigation.append(edge)
+
+        direct_nodes = []
+        for (payload,) in self.connection.execute("SELECT payload FROM inventories"):
+            inventory = json.loads(payload)
+            assertion = inventory.get("assertion", {})
+            source_ids = set(assertion.get("context", {}).get("source_ids", []))
+            if source_ids.intersection(current_states) and is_current(assertion):
+                direct_nodes.append(inventory)
+
+        conflicts = []
+        for (payload,) in self.connection.execute("SELECT payload FROM conflicts"):
+            conflict = json.loads(payload)
+            source_ids = set(conflict.get("context", {}).get("source_ids", []))
+            if source_ids.intersection(current_states):
+                conflicts.append(conflict)
+
+        batch = {
+            "contract_version": "1.0.0",
+            "catalog_id": "semantic-facts-20261025",
+            "sources": sorted(current_sources, key=lambda item: (item["root"], item["source_id"])),
+            "facts": sorted(facts, key=lambda item: (item["fact_type"], item["fact_id"])),
+            "navigation": sorted(navigation, key=_canonical),
+            "direct_nodes": sorted(direct_nodes, key=_canonical),
+            "conflicts": sorted(conflicts, key=lambda item: item["conflict_id"]),
+        }
+        self.codec.validate_batch(batch)
+        return batch
+
+    def import_current(self, batch: dict[str, Any], submission_key: str) -> CommitReceipt:
+        """Append a validated current FactBatch; never clear or replace existing rows."""
+        self.codec.validate_batch(batch)
+        return self.write(batch, submission_key)
+
     def _ensure_schema(self) -> None:
         if self._initialized:
             return
