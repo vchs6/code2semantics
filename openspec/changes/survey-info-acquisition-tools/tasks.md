@@ -108,3 +108,11 @@ Report tokens per successful need group and per query, not only a single aggrega
 - [ ] 9.2 Map candidate node/edge types to fixed information need IDs and public relation semantics; list unsupported fields including data flow, lifecycle/state, error handling, guarded control flow, algorithm invariants/termination/complexity and bounded negative knowledge.
 - [ ] 9.3 Verify per-language precision and limitations, source locator fidelity, current content-state binding, scope/completeness, observed-versus-inferred labels and unknown behavior before counting coverage.
 - [ ] 9.4 Keep CodeGraph Explorer as a structural evidence candidate unless direct-tool comparison and mixed-language acceptance demonstrate a validated increment; unresolved semantic needs remain available for later Skill/AI induction or explicit gaps.
+
+## 10. Persist and reuse assessment evidence (2026-10-27)
+
+- [x] 10.1 Archive the observed CodeGraph Explorer real Dashu/Click build/query/caching results in durable Markdown and JSON, with exact candidate and project revisions, CI run links and research-only acceptance status; see `research/evaluations/codegraph-explorer.md` and `codegraph-explorer.results.json`.
+- [x] 10.2 Archive the observed ordinary candidate tool probe results with environment and test-scope limitations in `research/evaluations/candidate-tools.md` and `candidate-tools.results.json`.
+- [x] 10.3 Provide a per-Skill evidence-level index distinguishing executed results from document-only candidates: `research/evaluations/skill-candidate-status.md`.
+- [x] 10.4 Establish `research/evaluations/README.md` as the durable report index and define reuse/invalidations so unchanged historic conditions do not cause needless repeated tests.
+- [ ] 10.5 For every future accepted candidate/tool/Skill assessment, add version-pinned result and original evidence to this archive as part of its acceptance task; do not mark it complete until real execution, result quality and provenance are documented.
