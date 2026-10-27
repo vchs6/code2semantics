@@ -31,6 +31,8 @@ def write_fixture(root: Path, module_count: int = 50) -> None:
         "import module_000  # declared import only; transform_000 is not called\n\n"
         "def handle_request(payload):\n"
         "    return call_worker(payload)\n\n"
+        "def transform_000(value):\n"
+        "    return value\n\n"
         "def main():\n"
         "    return handle_request({'value': 'demo'})\n\n"
         "if __name__ == '__main__':\n"
@@ -128,13 +130,14 @@ def main() -> int:
             decoy_call_rows = json.loads(decoy_call["stdout"])
         except json.JSONDecodeError:
             expected_call_rows, decoy_call_rows = [], []
-        expected_edge_present = any(
-            row.get("node") == "handle_request" and row.get("type") == "calls"
-            for row in expected_call_rows if isinstance(row, dict)
+        expected_edge_present = (
+            expected_call["returncode"] == 0
+            and '"node": "handle_request"' in expected_call["stdout"]
+            and '"type": "calls"' in expected_call["stdout"]
         )
-        decoy_edge_absent = not any(
-            row.get("node") == "app" and row.get("type") == "calls"
-            for row in decoy_call_rows if isinstance(row, dict)
+        decoy_edge_absent = (
+            decoy_call["returncode"] == 0
+            and "No callers found" in decoy_call["stdout"]
         )
         update = None
         if query["returncode"] == 0:
