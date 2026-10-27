@@ -367,3 +367,20 @@ Automatic-install candidate procedure (not yet executed):
 6. The builder writes `.codegraph/` artifacts into the target project, so run evaluation on a temporary copy or explicit writable output root. Verify exclusion rules, no source modification, no unexpected network access and no data egress. Read-only behavior cannot be assumed solely from the Skill's description.
 
 Installability assessment: **documented manual installation exists; automatic installation has not been performed or verified in this session**. This session has no authorized target Skill-host filesystem/installation API. Therefore the candidate remains not installed/not accepted. If runtime auto-install is unavailable, the constructor must return exact host-specific instructions and continue independent work as defined in the proposal.
+
+### 8.11 Decision: CodeGraph Explorer is a structural evidence producer, not a complete language-neutral semantic fact producer
+
+Current evidence does **not** support claiming that CodeGraph Explorer directly produces the complete language-neutral semantic facts required by F1–F18/S1–S12. It emits a structured graph with heuristic/AST-derived nodes and edges; this is a candidate intermediate evidence source that must be mapped to the authoritative fact catalogue and validated.
+
+| Fact/need family | Potential direct contribution | Not established / must not infer |
+|---|---|---|
+| Project/file identity and containment (F1/F2/F4) | File nodes, paths, containment and discovered project structure | Full logical project identity, nested/overlapping project ownership, workspace semantics or authorized scope completeness without additional checks |
+| Imports/dependencies and declared wiring (F6) | Import/file-dependency/wiring relations where implemented | A declared import or dependency is not proof of runtime interaction, required dependency, or complete dependency resolution |
+| Calls/inheritance/implements (F9/F10/F11) | Candidate call/inheritance edges from AST or regex and local resolution | Language-independent semantic binding, dynamic dispatch, cross-language calls, macro/generated-code behavior or exact resolution for every supported language |
+| Data flow/effects/state/lifecycle/errors (F12/F13/F14) | Some syntactic call/reference clues may help targeted follow-up | Complete variable-level def-use, aliasing, state transitions, resource lifetimes, exception propagation/recovery or side-effect semantics |
+| Control flow and algorithm explanation (F15/F16) | Structural candidates from declarations and call graph | Guard semantics, invariants, termination, complexity, algorithm correctness or proof of behavior |
+| Evidence/knowledge/completeness (F17/F18) | Graph records may carry source/file/symbol metadata and confidence labels | Conformance to this project's evidence schema, current source content-state binding, coverage proof, counterevidence, independent evidence and bounded-negative claims without an explicit adapter and validation |
+
+Language-neutral here means the **public semantic fact contract and identity/relation model** are language-independent, not that every language parser has equal precision or that a generic graph edge has the same semantics in every language. CodeGraph Explorer documents uneven extraction paths (tree-sitter for selected languages and regex fallback/heuristics for others); therefore language-specific blind spots must remain explicit.
+
+Decision: retain CodeGraph Explorer as a **low-token structural graph candidate**. Do not use its graph as a ready-to-persist FactBatch, and do not count graph nodes/edges as accepted semantic coverage without per-need mapping, source/content-state validation, relation-specific checks, and mixed-language tests. Prefer it only where direct comparison proves incremental value over existing accepted tools. Remaining semantic needs should go to other accepted producers/Skills and then evidence-constrained AI induction; unresolved needs remain gaps.
