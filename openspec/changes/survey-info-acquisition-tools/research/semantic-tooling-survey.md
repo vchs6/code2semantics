@@ -459,3 +459,23 @@ Interpretation: a 10,006-file synthetic project built in about 4 seconds on the 
 All timing values are single-run wall-clock observations, not statistical benchmarks. CI runner, filesystem cache, Python startup and graph resolution affect the numbers. No real production repository or direct-tool equivalent-quality baseline was measured.
 
 Model token accounting remains 0 for the local builder/query subprocesses because the harness invokes no model/API. This excludes Skill-host instruction/orchestration and later semantic induction. Graph completeness remains structural only: the test does not prove Python-to-Rust semantic linking through the shared proto schema. Therefore this result supports further cost evaluation but does not establish language-neutral semantic-fact coverage or production acceptance.
+
+### 8.16 Relation-quality smoke test against fixture ground truth
+
+Successful run: https://github.com/vchs6/code2semantics/actions/runs/40443319461. The harness now asserts two relation-level behaviors in addition to inventory and performance:
+
+- **Expected call edge present:** Python `handle_request` calls `call_worker`; `--callers call_worker --json` returned a `calls` edge whose source node is `handle_request`.
+- **Import-only decoy does not create a call edge:** the fixture imports `module_000` but does not call its `transform_000` function; `--callers transform_000 --json` returned an empty JSON list. This checks one false-positive boundary, not overall precision.
+- All three fixture sizes passed these assertions: 106, 1,006 and 10,006 files. The graph contains Python and Rust paths, but the expected call edge is within Python; the harness explicitly keeps `python_to_rust_semantic_link_proven=false`.
+
+Latest observed metrics from this run (single CI sample):
+
+| Fixture files | Full build | Graph | Nodes / edges | Query loop | Mean query | One-file update |
+|---:|---:|---:|---:|---:|---:|---:|
+| 106 | 0.1017 s | 147,258 B | 262 / 160 | 10 queries / 0.7129 s | 0.0713 s | 0.1287 s |
+| 1,006 | 0.3189 s | 1,412,941 B | 2,512 / 1,510 | 50 queries / 3.8721 s | 0.0774 s | 0.3330 s |
+| 10,006 | 2.3530 s | 14,237,979 B | 25,012 / 15,010 | 10 queries / 1.4489 s | 0.1449 s | 2.4100 s |
+
+Observed output confirms a cheap local structural graph on this fixture, but the benchmark is still not a comparison against the project's accepted direct tools. It does not validate cross-language FFI/RPC resolution, semantic behavior fields, or complete false-positive/false-negative rates. The import-only check covers one deliberately absent call edge; it must not be generalized into a precision score.
+
+CI harness status: `Evaluate CodeGraph Skill` succeeded at pinned revision `6a95e4f0ae643fad7354ac388ceaa2dc2c2f3f74`. The benchmark runs the builder/query CLI directly, so local graph operations consume no model/API tokens; Skill-host overhead remains unmeasured.
