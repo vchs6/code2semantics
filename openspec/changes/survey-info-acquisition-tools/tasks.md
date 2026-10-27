@@ -75,3 +75,16 @@ The existing survey acceptance covers the initial F2/L3 catalogue only. It is no
 - `understand` is the current priority test candidate because its Skill document describes a structured `knowledge-graph.json`, multiple node/edge types, language adapters including JavaScript/TypeScript, Ruby, Python, Go, Rust and C++, and explicit unknown handling for unsupported parser/deletion cases. These are documented claims, not runtime acceptance.
 - Added a language-neutral Skill survey design and a mixed-language test protocol. The test requires one authorized mixed-language fixture and checks project/source identity, cross-language relation evidence, distinction between declared dependency and demonstrated interaction, and explicit unknowns.
 - Runtime Skill execution is not marked complete: this session can inspect/edit GitHub repository content and CI but has no authorized Skill-host invocation available. Tasks 4.4-4.6 and 5.3-5.4 remain pending for safe execution, security review, and actual mixed-language acceptance. No matrix entries were enabled.
+
+## 6. Token-efficient structured-output Skill evaluation
+
+- [ ] 6.1 Prioritize Skills that use local deterministic tools/scripts to build structured JSON/knowledge graphs and query only scoped graph results; do not make the model read the whole codebase file-by-file when a tool can provide the needed relation.
+- [ ] 6.2 Evaluate CodeGraph Explorer first, then Understand Anything and Graphify. Keep codebase-summary/codebase-analysis as lower-priority controls. This is test order, not pre-approval.
+- [ ] 6.3 Measure tokens by phase where observable: Skill instruction/orchestration, graph construction, optional semantic extraction/review, per-query retrieval, and fallback source reading. Record exact instrumentation or logs; do not accept marketing claims as measured results. Distinguish zero-token local code extraction from token-consuming docs/semantic passes.
+- [ ] 6.4 Compare token cost against need coverage, precision, source locators, unknown handling and mixed-language relation quality. A cheaper candidate with weak/false edges must not be selected solely for low token use.
+- [ ] 6.5 For each candidate, verify the graph can answer representative structured queries without loading the whole graph or repeatedly opening source files. Record graph size, query output size and the source evidence needed to validate the answer.
+- [ ] 6.6 Update the research matrix with measured cost and quality evidence. Runtime integration remains pending until an approved host can execute the candidate against the same mixed-language fixture.
+
+### Token-efficiency acceptance rule
+
+Report tokens per successful need group and per query, not only a single aggregate. Include the one-time graph-build cost and amortize it over a stated number of queries; record when the candidate falls back to source reading or LLM semantic extraction. Compare against a baseline that asks the model to inspect relevant source files directly. Do not claim savings unless both output quality and token measurements are available.
