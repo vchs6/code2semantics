@@ -887,3 +887,58 @@ def test_multiple_rust_workspaces_keep_membership_and_dependencies_scoped(tmp_pa
         assert all(fact["fields"]["kind"]["basis"]["evidence"] for fact in persisted["facts"])
     finally:
         repository.close()
+
+
+def test_overlapping_nested_python_roots_keep_distinct_source_identities(tmp_path, capsys):
+    """A nested root explicitly included in scope remains a distinct source identity."""
+    outer = tmp_path / "outer-project"
+    nested = outer / "nested-project"
+    nested.mkdir(parents=True)
+    (outer / "engine.py").write_text("class Engine:\n    pass\n", encoding="utf-8")
+    (nested / "engine.py").write_text("class Engine:\n    def run(self):\n        return True\n", encoding="utf-8")
+
+    query = {
+        "contract_version": "1.0.0",
+        "catalog_id": "semantic-facts-20261025",
+        "request_id": "overlapping-nested-roots",
+        "scope": {
+            "scope_id": "overlapping-roots-scope",
+            "directories": [str(outer.resolve()), str(nested.resolve())],
+            "excludes": [],
+            "defaulted": False,
+        },
+        "target": {"kind": "scope"},
+        "granularity": "L3",
+        "selections": [{"fact_type": "F2", "fields": ["identity", "names"]}],
+        "budget": {"max_rounds": 3, "max_new_assertions": 40},
+    }
+    database = tmp_path / "overlapping-roots.sqlite"
+    query_path = tmp_path / "overlapping-roots-query.json"
+    query_path.write_text(json.dumps(query, ensure_ascii=False), encoding="utf-8")
+
+    assert main(["query", "--db", str(database), "--query-file", str(query_path)]) == 0
+    response = json.loads(capsys.readouterr().out)
+    assert response["termination"] == "satisfied", json.dumps(response, ensure_ascii=False, indent=2)
+    roots = {source["root"] for source in response["sources"]}
+    assert roots == {str(outer.resolve()), str(nested.resolve())}
+
+    source_roots = {source["source_id"]: source["root"] for source in response["sources"]}
+    engines = [
+        fact for fact in response["results"]
+        if "class Engine" in fact["fields"]["names"]["value"]["text"]
+    ]
+    assert engines
+    assert all(set(fact["fields"]) == {"identity", "names"} for fact in engines)
+    assert all(fact["fields"]["names"]["basis"]["evidence"] for fact in engines)
+    assert len({(fact["node"]["source_id"], fact["node"]["node_id"]) for fact in engines}) == len(engines)
+    assert {source_roots[fact["node"]["source_id"]] for fact in engines} == roots
+    assert any(source_roots[fact["node"]["source_id"]] == str(outer.resolve()) for fact in engines)
+    assert any(source_roots[fact["node"]["source_id"]] == str(nested.resolve()) for fact in engines)
+
+    repository = Repository(database, ROOT / "skills" / "layered-semantic-facts" / "assets")
+    try:
+        persisted = repository.read(query)
+        assert {source["root"] for source in persisted["sources"]} == roots
+        assert all(fact["fields"]["names"]["basis"]["evidence"] for fact in persisted["facts"])
+    finally:
+        repository.close()
