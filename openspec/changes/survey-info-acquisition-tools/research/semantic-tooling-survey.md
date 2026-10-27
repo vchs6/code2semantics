@@ -271,3 +271,28 @@ Python/Rust 是当前解析器与生产链的第一阶段实现范围，不是 S
 - 当前优先实测 `codebase-analysis` 与 `codebase-summary`；`explaining-codebases` 因依赖 `creating-explainers` 暂列条件候选；`improve-codebase-architecture` 仅适用于特定架构职责需求。
 - 当前没有证据证明上述任一候选能完整覆盖 S1–S12，或已验证混合语言项目分析。不能将文档描述计入生产覆盖率。
 - 下一步按任务 4.4/4.5 执行安全可复现的混合语言夹具试验，并更新本表。研究完成本身不安装/授权 Skill，不修改能力矩阵，也不表示运行时构造器已经能调用 Skill。
+
+### 8.6 新增候选：Understand Anything 的独立项目分析 Skill
+
+候选：[Egonex-AI/Understand-Anything — `understand` Skill](https://github.com/Egonex-AI/Understand-Anything/tree/main/understand-anything-plugin/skills/understand)。本轮直接读取其 `SKILL.md`，不是只依据市场摘要。
+
+文档中明确的输入输出与流程：以项目根路径为输入；运行项目自带的扫描/合并脚本，按阶段进行文件分析、架构层识别、知识图谱生成/审查与验证；输出 `.ua/knowledge-graph.json`，包含节点和边类型，并支持排除规则、全量/增量更新及可选图审查。图节点覆盖代码文件、函数/类/模块、配置、文档、服务、数据库表、端点、流水线、schema 与基础设施资源；边包括 contains/imports/implements/calls、数据读写与转换、depends_on、tested_by、配置/部署等。该输出形式比纯自然语言总结更接近可映射为语义实体和关系的中间表示。
+
+语言能力的文档证据比此前候选更具体：SKILL 声明的确定性结构适配器覆盖 JavaScript/JSX、TypeScript/TSX、Ruby、Python、Go、Rust 和 C++；对其它语法即使能够解析，也会保守处理。文档还明确写出 Rust trait impl 身份可能保持 unknown、无确定性结构解析器的语言不能仅凭 LLM/正则猜测确认符号删除。由此可见它有跨语言项目分析的潜在价值，但**这仍是候选文档证据，不是本项目已实测的混合语言能力**。
+
+| 评估项 | 当前文档审查结论 | 待验证事项 |
+|---|---|---|
+| 独立 Skill 属性 | 有明确 `understand` 入口、项目路径参数、独立分析流程及结构化图产物 | 需要在获准宿主实际安装/调用，确认依赖和运行边界 |
+| 语言范围 | 文档列出 JS/TS、Ruby、Python、Go、Rust、C++ 的确定性结构适配器 | 需要检查实际版本的 parser adapter、fixture 与构建流程；不得把所有图边都视为各语言均有同等精度 |
+| 混合语言价值 | 统一知识图谱可容纳多种代码/配置/基础设施节点和关系 | 尚无本项目的同一混合语言夹具执行结果；跨语言调用/FFI/RPC 是否被正确关联尚未证明 |
+| 证据可追溯性 | 设计包含节点来源范围、结构指纹、符号身份校验、验证阶段与 unknown 保留 | 需核实最终每条语义边是否携带可回链的精确源码位置、证据和当前内容状态，能否转换为本项目 Evidence/FactBatch 契约 |
+| 安全与副作用 | 文档要求把 README/manifest 视为不可信项目数据；分析会写入 `.ua/` 产物并可能运行 Node/Python 脚本及内部子代理 | 必须在临时副本/隔离目录执行，核实依赖安装、脚本执行、联网/外发、权限和输出写入行为 |
+| 事实可靠性 | 对部分删除判断采用确定性 parser + declaration-coverage adapter，并对不支持情况保留 unknown | 需验证其 LLM 图边的推断标签、证据强度和冲突处理是否足以支撑本项目语义事实契约 |
+
+初步排序调整：`understand` 提升为**优先实测候选**；`codebase-analysis` 与 `codebase-summary` 保留为轻量对照候选。它的图输出、语言适配范围和 unknown 保留策略更接近本项目需求，但不能因图节点/边数量丰富就判定语义正确或完整。当前仍未安装、未运行、未验收，能力矩阵不因此启用任何条目。
+
+### 8.7 独立 Skill 的真实试验门槛
+
+在获准宿主可用后，优先对 `understand` 运行一个临时混合语言夹具：至少包含两种语言的可执行/库边界、显式跨语言接口（如 FFI 或 RPC/schema）、独立子项目及一条只有声明依赖但没有调用证据的边。保留原始 `knowledge-graph.json` 和中间扫描输出，并对每条候选关系检查节点身份、来源位置、当前内容状态、关系种类与置信/unknown 语义。对照构造器的 F1–F18 需求逐项判定；不符合 FactBatch 契约的图输出只能作为候选证据，不能直接入库。
+
+本轮执行环境只具备仓库读取/写入与 CI 核验入口，未获得安装并运行该 Skill 的已授权宿主会话，因此不能伪称完成动态试验。下一步应在批准的宿主上执行上述可复现试验；若当前会话无法调用该宿主，4.4/4.5 保持 pending，继续完成文档审查与契约设计，但不将阻塞隐藏为通过。
