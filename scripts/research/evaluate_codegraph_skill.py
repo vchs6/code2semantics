@@ -146,9 +146,21 @@ def main() -> int:
                 "def transform_000(value):\n    return value + 1\n", encoding="utf-8"
             )
             update = run(["python", str(builder), "--update", str(root)], root)
+        deletion_update = None
+        deleted_path_absent = None
+        if update is not None and update["returncode"] == 0:
+            deleted_file = root / "python_app" / "module_001.py"
+            if deleted_file.exists():
+                deleted_file.unlink()
+            deletion_update = run(["python", str(builder), "--update", str(root)], root)
+            post_delete_graph = json.loads(graph_path.read_text(encoding="utf-8"))
+            deleted_path_absent = not any(
+                str(node.get("path", "")).endswith("python_app/module_001.py")
+                for node in post_delete_graph.get("nodes", [])
+            )
 
         output = {
-            "status": "passed" if all(required.values()) and query_runs and all(q["returncode"] == 0 for q in query_runs) and expected_edge_present and decoy_edge_absent else "partial",
+            "status": "passed" if all(required.values()) and query_runs and all(q["returncode"] == 0 for q in query_runs) and expected_edge_present and decoy_edge_absent and (deleted_path_absent is True) else "partial",
             "candidate": "CodeGraph Explorer",
             "candidate_revision": "6a95e4f0ae643fad7354ac388ceaa2dc2c2f3f74",
             "fixture": "Python app + Rust library + shared proto schema + generated modules",
@@ -188,6 +200,13 @@ def main() -> int:
                 "stderr_tail": update["stderr"][-1000:],
                 "stdout_tail": update["stdout"][-1200:],
             },
+            "deletion_update": None if deletion_update is None else {
+                "returncode": deletion_update["returncode"],
+                "seconds": deletion_update["seconds"],
+                "deleted_source_path_absent_from_graph": deleted_path_absent,
+                "stdout_tail": deletion_update["stdout"][-1200:],
+                "stderr_tail": deletion_update["stderr"][-1000:],
+            },
             "token_usage": {
                 "candidate_code_graph_build_llm_tokens": 0,
                 "basis": "Direct local Python builder and query CLI only; no model/API calls. This is not a measurement of Skill-host instruction/orchestration tokens."
@@ -203,7 +222,7 @@ def main() -> int:
             "builder_stderr_tail": build["stderr"][-1200:],
         }
         print(json.dumps(output, ensure_ascii=False, indent=2))
-        return 0 if output["status"] == "passed" and (update is None or update["returncode"] == 0) and expected_edge_present and decoy_edge_absent else 2
+        return 0 if output["status"] == "passed" and (update is None or update["returncode"] == 0) and expected_edge_present and decoy_edge_absent and deleted_path_absent is True else 2
 
 
 if __name__ == "__main__":
