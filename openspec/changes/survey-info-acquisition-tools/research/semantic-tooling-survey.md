@@ -490,3 +490,29 @@ Successful CI run: https://github.com/vchs6/code2semantics/actions/runs/40443411
 - On the 10,006-file fixture, full build was 2.5012 s; the edit update was 2.4100 s in this run; the deletion update was about 1.49 s. The update cost includes full reference resolution and graph metrics, not just per-file parsing.
 
 These are useful cache lifecycle and local relation checks, but the false-positive check is limited to one deliberately absent call and the positive call is intra-language Python. Cross-language Python→Rust relation resolution, actual RPC/FFI behavior, broad precision/recall, source-line evidence validity and direct-tool baseline remain untested. Candidate output is still not accepted as a semantic FactBatch.
+
+### 8.18 Real open-source Rust and Python repository evaluation (2026-10-27)
+
+Successful CI: https://github.com/vchs6/code2semantics/actions/runs/40443798396. This is a **real project** evaluation, not generated Python/Rust fixture data. The workflow fetched and checked out immutable revisions of [cmpute/dashu](https://github.com/cmpute/dashu) (`a0fc5358a3335e9fce155c5ddf8ae7ca83f24a33`) and [pallets/click](https://github.com/pallets/click) (`2247b35ea1c47c727d7a06e51fa280e12a863ff6`) alongside pinned CodeGraph Explorer (`6a95e4f0ae643fad7354ac388ceaa2dc2c2f3f74`). The graph was generated with its local script in isolated CI checkouts; application project code, Cargo builds and Python project test suites were not executed.
+
+| Metric | Rust Dashu | Python Click |
+|---|---:|---:|
+| Repository files (excluding .git) | 564, including 393 Rust and 20 Python | 178, including 91 Python |
+| Full graph build wall time | **3.4667 s** | **1.5793 s** |
+| Graph artifact size | 43,946,741 bytes | 21,004,684 bytes |
+| Graph nodes | 7,771 | 2,924 |
+| Graph edges | 155,397 (148,147 calls; 7,250 contains) | 73,733 (70,868 calls; 2,783 contains; 82 inherits) |
+| Edge tag INFERRED | **145,714** (~93.8%) | **70,147** (~95.1%) |
+| Edge tag RESOLVED / EXTRACTED | 2,457 / 7,226 | 721 / 2,865 |
+| Callers queries | 10, all successful, structured JSON | 10, all successful, structured JSON |
+| Mean callers-query wall time | 0.3832 s | 0.2195 s |
+| One-file edit then incremental update | 3.0438 s | 1.2194 s |
+| Dangling graph edges | 0 | 0 |
+
+**Important quality observation:** the real repositories produce very dense candidate call graphs dominated by `INFERRED` edges, unlike the sparse synthetic fixture. This does not prove the inferred edges are false, but it is a major evidence/precision risk: graph edge counts must not be credited as verified call-fact coverage. The next direct-tool comparison must sample inferred edges and verify the source/target and language-specific resolution. Large graph output should be consumed through bounded queries rather than whole-file model context.
+
+**Important freshness observation:** Dashu's edit attempt in the first real run reported `0 file(s) (re)parsed` despite the benchmark appending a comment before `--update`, while Click reported `1 file(s) (re)parsed`. The Dashu test did not yet prove whether the comment change was recognized because the edit was made in a very short time window and the candidate caches per-file modification times. This must be investigated with an explicit same-mtime semantic-content mutation test; source content digest must be authoritative for current semantic-fact validity.
+
+The local builder/query subprocesses made no model calls, but this is not a measurement of the eventual Skill-host orchestration token cost. Only the two isolated project builds and sampled query/incremental command execution succeeded; F1–F18 language-neutral semantic fact coverage, cross-language calls, conditional behavior, negative knowledge and FactBatch acceptance remain pending.
+
+The benchmark source and CI runner are in `scripts/research/evaluate_codegraph_real_projects.py` and `.github/workflows/evaluate-codegraph-real-projects.yml`; the CI artifact `codegraph-real-project-results` contains JSON result files. No capability-matrix entries were enabled.
