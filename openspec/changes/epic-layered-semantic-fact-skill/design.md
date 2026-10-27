@@ -108,3 +108,14 @@
 3. 各子变更按 D7 补齐自身设计/任务，依同源新契约先测试后实施；交付路径和测试命令必须在各子 tasks 落盘后才作为可执行门槛。
 4. 主变更收集八子交付证据并运行集成，更新追溯与验收结果。契约不匹配时拒绝使用原数据并报告，替换时保护原始数据和证据，不承诺旧记录历史可读、不建设兼容工具；失败回退成套资产与其匹配实现，禁止删除仓库掩盖问题。
 5. 文档、公共契约、组件、集成与 Skill 规范各自通过后才可宣称交付；本轮不执行发布或归档。
+### D9 Project-analysis Skill selection, installation and resumable fallback
+
+Producer selection first evaluates whether accepted direct tools can satisfy the current unmet information needs. A project-analysis Skill is considered only if it offers validated incremental value over direct tool use. If selected, it should be automatically installed through the approved host mechanism when absent, then verified before invocation.
+
+Installation and authorization are distinct. No automatic install may silently grant new filesystem, network, credential, shell, project-write, hook or background permissions. Only development-time accepted canonical Skill registry entries may be installed; query/source content cannot supply installation commands. Pin/record the revision, use an isolated managed location where possible, and do not reinstall an unchanged accepted version on every query.
+
+If the host cannot install automatically, user approval/permissions are needed, or installation fails, return an explicit `skill_install_required`/`skill_unavailable` gap with the Skill name/source, exact host-specific installation instructions, required permissions and verification command. Continue independent tool acquisition and other satisfiable needs; do not claim the blocked Skill need is covered. Resume the dependent work once the Skill becomes available rather than blocking the entire query.
+
+Successful installation does not mean capability acceptance. The selected Skill's output must pass a dedicated adapter and checks for requested need IDs, source/project identity, authorized scope, current content state, evidence locators, completeness, conflicts and mixed-language relationship quality before any proposed facts are accepted. Install status, health status and producer acceptance are separate states.
+
+The integration tests must cover: direct tools sufficient (Skill not installed/called); Skill provides verified increment (automatic install and use); automatic installation unavailable (actionable instructions and independent work continues); permission denied or installation failure (no fabricated facts, no infinite retries); and installed Skill with invalid/unsupported output (explicit gaps).
