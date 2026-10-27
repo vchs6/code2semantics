@@ -440,3 +440,22 @@ Interpretation: for these synthetic fixtures, full graph construction scales acc
 Token accounting: graph build and query invoked the local script directly and made no model/API calls, so candidate code-analysis model-token use is zero by construction. Skill-host instruction tokens and downstream reasoning tokens were not measured. Repeated queries also do not yet compare total cost with direct tools at equivalent semantic quality.
 
 Cross-language semantics remain unproven: both Python and Rust files appear in the graph, but the fixture does not establish a Python→Rust call through the proto contract. These results support further evaluation of graph build cost only; they do not justify treating the graph as language-neutral semantic facts or enabling the Skill in production.
+
+### 8.15 Extended scale: 10,006-file synthetic mixed-language fixture
+
+Successful CI run: https://github.com/vchs6/code2semantics/actions/runs/40443086780. This run executes the same pinned candidate and harness at three fixture sizes, with repeated query loops and a one-file incremental update.
+
+| Metric | 106 files | 1,006 files | 10,006 files |
+|---|---:|---:|---:|
+| Full graph build | 0.1512 s | 0.5017 s | 3.9842 s |
+| Graph size | 147,258 B | 1,412,941 B | 14,237,979 B (~14.2 MB) |
+| Nodes / edges | 260 / 158 | 2,510 / 1,508 | 25,010 / 15,008 |
+| Query repetitions | 10 | 50 | 10 |
+| Query total / mean | 1.0284 s / 0.1028 s | 5.7135 s / 0.1143 s | 2.2401 s / 0.2240 s |
+| Incremental update after one Python file edit | 0.1287 s | 0.3330 s | 2.4100 s |
+
+Interpretation: a 10,006-file synthetic project built in about 4 seconds on the hosted runner, yielding a ~14.2 MB graph. This makes full local graph construction plausible for a broad project scan, but not free: at this scale each query process took about 0.22 seconds on average, and a one-file update still took about 2.4 seconds because global graph resolution/metrics are recomputed. The current `--update` path re-parses one changed file but does not mean total update cost is proportional only to that file.
+
+All timing values are single-run wall-clock observations, not statistical benchmarks. CI runner, filesystem cache, Python startup and graph resolution affect the numbers. No real production repository or direct-tool equivalent-quality baseline was measured.
+
+Model token accounting remains 0 for the local builder/query subprocesses because the harness invokes no model/API. This excludes Skill-host instruction/orchestration and later semantic induction. Graph completeness remains structural only: the test does not prove Python-to-Rust semantic linking through the shared proto schema. Therefore this result supports further cost evaluation but does not establish language-neutral semantic-fact coverage or production acceptance.
