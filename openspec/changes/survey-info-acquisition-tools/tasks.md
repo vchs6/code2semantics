@@ -102,3 +102,9 @@ Report tokens per successful need group and per query, not only a single aggrega
 - [ ] 8.2 Record required permissions, filesystem mutations, network/data egress, project-code execution, hooks/background behavior, upgrade/uninstall effects and rollback method.
 - [ ] 8.3 Prefer candidates that support reproducible, isolated, verifiable installation; distinguish host installation capability from Skill analysis quality and token cost.
 - [ ] 8.4 Specify the fallback when automatic installation is unsupported: exact user-facing install steps and permission requirements, a structured unavailable gap, and continued execution of independent accepted-tool tasks. Do not mark Skill-dependent needs as satisfied.
+## 9. Semantic-fact readiness classification for graph Skills
+
+- [ ] 9.1 For each graph-producing Skill, classify its output as structural evidence, candidate relation, or validated semantic fact; do not treat graph JSON or language-neutral node labels as proof of F1-F18 coverage.
+- [ ] 9.2 Map candidate node/edge types to fixed information need IDs and public relation semantics; list unsupported fields including data flow, lifecycle/state, error handling, guarded control flow, algorithm invariants/termination/complexity and bounded negative knowledge.
+- [ ] 9.3 Verify per-language precision and limitations, source locator fidelity, current content-state binding, scope/completeness, observed-versus-inferred labels and unknown behavior before counting coverage.
+- [ ] 9.4 Keep CodeGraph Explorer as a structural evidence candidate unless direct-tool comparison and mixed-language acceptance demonstrate a validated increment; unresolved semantic needs remain available for later Skill/AI induction or explicit gaps.
