@@ -296,3 +296,32 @@ Python/Rust 是当前解析器与生产链的第一阶段实现范围，不是 S
 在获准宿主可用后，优先对 `understand` 运行一个临时混合语言夹具：至少包含两种语言的可执行/库边界、显式跨语言接口（如 FFI 或 RPC/schema）、独立子项目及一条只有声明依赖但没有调用证据的边。保留原始 `knowledge-graph.json` 和中间扫描输出，并对每条候选关系检查节点身份、来源位置、当前内容状态、关系种类与置信/unknown 语义。对照构造器的 F1–F18 需求逐项判定；不符合 FactBatch 契约的图输出只能作为候选证据，不能直接入库。
 
 本轮执行环境只具备仓库读取/写入与 CI 核验入口，未获得安装并运行该 Skill 的已授权宿主会话，因此不能伪称完成动态试验。下一步应在批准的宿主上执行上述可复现试验；若当前会话无法调用该宿主，4.4/4.5 保持 pending，继续完成文档审查与契约设计，但不将阻塞隐藏为通过。
+
+### 8.8 Token-efficient structured-output candidates (2026-10-27)
+
+User priority: prefer project-analysis Skills that execute tools/scripts and return structured, queryable data, minimizing model token use. This changes the experiment order; it does not waive semantic accuracy, evidence, security or mixed-language acceptance.
+
+| Priority | Candidate | Directly inspected behavior/documentation | Token-cost interpretation | Main caveat to test |
+|---|---|---|---|---|
+| 1 | [CodeGraph Explorer](https://github.com/GoldDHacker/codegraph-explorer-skill) | Skill says a local Python script builds `.codegraph/graph.json`; subsequent questions use bounded commands such as `--callers`, `--find-path`, `--impact`, `--file-deps`, `--subgraph` and `--wiring`. It explicitly instructs the model not to parse source with LLM tokens. | Strongest first candidate for low-token, tool-driven code analysis. The zero-token claim is documented, not yet measured in our host. | Language support is uneven: inspected text documents tree-sitter for JS/TS/Java and selected extended grammars, while several languages including Rust/Go/C++/Ruby/PHP/Swift/Kotlin remain regex-based in the noted version. Need mixed-language precision tests and per-language edge-quality review. |
+| 2 | [Understand Anything](https://github.com/Egonex-AI/Understand-Anything/tree/main/understand-anything-plugin/skills/understand) | Multi-phase local project scan creates `.ua/knowledge-graph.json`, with typed nodes/edges, incremental support, deterministic validation and optional LLM graph review. | Structured reusable output is promising, but the LLM review option and multi-phase analysis may incur token cost; separate and measure each phase. | Need establish actual token accounting, mixed-language edge correctness, evidence locators/content state, and conversion from graph records to FactBatch. |
+| 3 | [Graphify](https://github.com/Graphify-Labs/graphify) and [Graphify Skill](https://github.com/darce07/graphify-claude-skill) | Local tree-sitter AST extraction produces `graph.json`; queries include graph query/path/explain. Documentation says code-only extraction can skip semantic LLM extraction, while docs/media may invoke an LLM pass. | Potentially very low token cost for code-only projects if semantic passes are disabled/skipped; token usage varies by corpus and invocation mode. | Verify actual invocation's code-only fast path, supported grammars, relation precision and whether query/explain invokes a model. Measure actual run rather than relying on the stated 0 LLM credits. |
+| 4 | [codebase-summary](https://github.com/smyrick/skills/tree/main/skills/codebase-summary) and [codebase-analysis](https://github.com/JakubMikolajek/codex-skills-collection/tree/main/skills/codebase-analysis) | Repository exploration/checklist and evidence-led architecture prose. | Useful baselines, but likely more model-context use when repeated questions require re-reading prose/source. Must measure rather than assume. | No equally explicit local graph-query contract in the inspected Skill document; verify if structured outputs and evidence are stable enough for reuse. |
+
+#### Token measurement protocol
+
+Public documents make claims about zero-token extraction, but this session has not run any candidate Skill in an approved host and cannot claim measured savings. For each candidate, collect the following during the same mixed-language fixture:
+
+1. **One-time build cost:** model input/output tokens used by Skill instructions, orchestration, optional LLM semantic extraction and graph review; report local deterministic CPU work separately from model tokens.
+2. **Per-query cost:** input/output tokens for a representative relation query (e.g. cross-language interface, callers, dependency path) and any graph records/source snippets loaded.
+3. **Amortized cost:** total build + N queries, reported for N=1, 10 and 50, compared with a baseline that reads the relevant source files directly.
+4. **Quality:** correct nodes/edges, false positives, missed edges, source-locator accuracy, current source-state binding, unknown handling and authorization boundary. Token savings count only when the quality bar is met.
+5. **Fallback overhead:** whether the agent must reopen source files or invoke an LLM because the graph is incomplete; include this in token totals rather than hiding it.
+
+Never load an entire graph JSON into model context if the Skill provides bounded query commands. Prefer query output size and relevant subgraph size. A structured graph is a reusable intermediate artifact, not automatically a trustworthy semantic fact batch.
+
+#### Current status
+
+- Candidate documents were inspected directly; this is source-document evidence only.
+- CodeGraph Explorer is the first candidate to test due to script-first graph construction, scoped query commands and an explicit zero-token code-analysis design. Understand Anything and Graphify are next because they also produce structured graphs and document multi-language support.
+- No candidate was installed or executed in this session. No token savings are yet measured. Mixed-language runtime testing, security review and FactBatch evidence mapping remain pending; no capability-matrix entries were enabled.
