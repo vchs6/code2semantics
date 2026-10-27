@@ -48,9 +48,9 @@ The existing survey acceptance covers the initial F2/L3 catalogue only. It is no
 
 ## 4. 独立项目分析类 Skill 调研（新增范围，宿主不在调研范围）
 
-- [ ] 4.1 以当前有效的 `skills/layered-semantic-facts/assets/information-needs.json` 为唯一需求输入，定义“独立项目分析类 Skill”的纳入/排除标准；不调研通用 AI 代理、模型、代理宿主或运行平台。AI 兜底使用所选 Skill 的既定宿主，该宿主仅作为调用前提记录。
-- [ ] 4.2 从 Skill 目录、公开仓库和官方文档发现候选，逐个记录名称、来源、版本/提交、许可/可用性、真实调用入口、输入输出协议、支持语言、分析范围、依赖工具及运行前提。只将具有独立项目分析任务和可验证输出的 Skill 纳入候选；排除普通 prompt、纯措辞包装及无独立增量的薄封装。
-- [ ] 4.3 建立逐项需求覆盖矩阵：需求 ID/事实字段 → Skill 能力 → 直接输入材料/工具依赖 → 输出事实类型 → 源码定位/证据质量 → 覆盖完整性 → 限制与未知。明确区分 Skill 自身产出的分析与其调用底层工具的产出，防止重复计算覆盖。
+- [x] 4.1 以当前有效的 `skills/layered-semantic-facts/assets/information-needs.json` 为唯一需求输入，定义“独立项目分析类 Skill”的纳入/排除标准；不调研通用 AI 代理、模型、代理宿主或运行平台。AI 兜底使用所选 Skill 的既定宿主，该宿主仅作为调用前提记录。
+- [x] 4.2 从 Skill 目录、公开仓库和官方文档发现候选，逐个记录名称、来源、版本/提交、许可/可用性、真实调用入口、输入输出协议、支持语言、分析范围、依赖工具及运行前提。只将具有独立项目分析任务和可验证输出的 Skill 纳入候选；排除普通 prompt、纯措辞包装及无独立增量的薄封装。
+- [x] 4.3 建立逐项需求覆盖矩阵：需求 ID/事实字段 → Skill 能力 → 直接输入材料/工具依赖 → 输出事实类型 → 源码定位/证据质量 → 覆盖完整性 → 限制与未知。明确区分 Skill 自身产出的分析与其调用底层工具的产出，防止重复计算覆盖。
 - [ ] 4.4 对可在获准环境安全执行的候选进行真实试验，优先使用临时 Python/Rust 夹具或可授权项目；记录版本、调用入口、输入、输出、退出/失败结果、证据定位和可复现步骤。未实际运行的能力标为“未验证”，不得由 README 或营销描述推断为已完成。
 - [ ] 4.5 评估来源访问权限、范围约束、网络/凭据要求、是否执行项目代码、外部数据发送、超时/输出限制和失败模式；不得为了调研自动执行未知项目脚本或授予超出项目授权范围的访问权限。
 - [ ] 4.6 将候选 Skill 与已有工具生产者并列比较，标明它具体补足哪些工具缺口、哪些能力仍需 AI 推导、哪些内容即使经 Skill 分析仍不能证实。AI 兜底宿主不做独立市场调研，也不作为第二套候选评分对象。
@@ -61,10 +61,17 @@ The existing survey acceptance covers the initial F2/L3 catalogue only. It is no
 本组仅研究独立项目分析类 Skill 的候选能力与证据。调研完成不等于 Skill 已安装、已授权、已注册或可在生产构造器中调用；后续须另行设计并验收 Skill 适配/调度接口。AI 代理兜底直接使用该 Skill 的宿主，不在本调研中比较或选择宿主。
 ## 5. 语言无关与混合语言 Skill 验收约束
 
-- [ ] 5.1 将 Python/Rust 明确记录为当前实现阶段范围，而非 Skill 调研的语言准入条件或最终产品边界；候选发现必须允许语言无关及多语言项目分析 Skill。
-- [ ] 5.2 为每个候选分别记录：声明支持的语言、实际验证过的语言、跨语言能力、构建/包管理生态、跨语言关系可见性、未支持的语言与盲区。文档声明与实测结果分栏记录。
+- [x] 5.1 将 Python/Rust 明确记录为当前实现阶段范围，而非 Skill 调研的语言准入条件或最终产品边界；候选发现必须允许语言无关及多语言项目分析 Skill。
+- [x] 5.2 为每个候选分别记录：声明支持的语言、实际验证过的语言、跨语言能力、构建/包管理生态、跨语言关系可见性、未支持的语言与盲区。文档声明与实测结果分栏记录。
 - [ ] 5.3 设计混合语言评测项目，至少包含两种语言的真实源码与构建/接口关系，并验证 Skill 是否能把不同语言中的实体映射到同一项目模型、区分声明依赖与真实交互、保留各自源码证据。单语言测试通过不得作为跨语言验收。
 - [ ] 5.4 对只支持部分语言的候选保留其有效的局部覆盖，但明确跨语言缺口并评估与其它生产者组合的可能性；不因支持语言有限而自动排除，也不将局部覆盖提升为完整混合项目能力。
-- [ ] 5.5 同步更新研究报告的覆盖矩阵与结论，明确区分当前 Python/Rust 实现范围、候选 Skill 的语言能力、混合语言真实验收结果及最终产品的语言无关目标。
+- [x] 5.5 同步更新研究报告的覆盖矩阵与结论，明确区分当前 Python/Rust 实现范围、候选 Skill 的语言能力、混合语言真实验收结果及最终产品的语言无关目标。
 
 本组任务是第4组独立项目分析类 Skill 调研的验收补充；不改变 AI 代理宿主不属于调研对象的约束。
+## Skill survey application evidence (2026-10-27)
+
+- Proposal scope was constrained to independent project-analysis Skills. General AI agent hosts, model services and host comparisons are excluded; fallback uses the selected Skill's existing host.
+- Read public Skill source documents directly for `codebase-analysis`, `codebase-summary`, `explaining-codebases`, `improve-codebase-architecture`, and `understand` (Understand Anything). Candidate-level scope, likely need mapping, dependencies and limitations are recorded in `research/semantic-tooling-survey.md` §8.
+- `understand` is the current priority test candidate because its Skill document describes a structured `knowledge-graph.json`, multiple node/edge types, language adapters including JavaScript/TypeScript, Ruby, Python, Go, Rust and C++, and explicit unknown handling for unsupported parser/deletion cases. These are documented claims, not runtime acceptance.
+- Added a language-neutral Skill survey design and a mixed-language test protocol. The test requires one authorized mixed-language fixture and checks project/source identity, cross-language relation evidence, distinction between declared dependency and demonstrated interaction, and explicit unknowns.
+- Runtime Skill execution is not marked complete: this session can inspect/edit GitHub repository content and CI but has no authorized Skill-host invocation available. Tasks 4.4-4.6 and 5.3-5.4 remain pending for safe execution, security review, and actual mixed-language acceptance. No matrix entries were enabled.
