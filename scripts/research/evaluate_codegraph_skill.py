@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """Measure CodeGraph Explorer on a disposable mixed-language fixture.
 
-This is a research harness only: it never writes into the checked-out repository,
-never installs optional dependencies, and treats the candidate graph as untrusted
-structural evidence rather than accepted semantic facts.
+The fixture is synthetic and generated in a temporary directory. The candidate
+builder is pinned by the workflow; its graph is untrusted structural evidence.
 """
 from __future__ import annotations
 
@@ -16,14 +15,18 @@ import tempfile
 import time
 
 
-def write_fixture(root: Path) -> None:
-    (root / "python_app").mkdir(parents=True)
-    (root / "rust_worker" / "src").mkdir(parents=True)
-    (root / "python_app" / "pyproject.toml").write_text(
+def write_fixture(root: Path, module_count: int = 50) -> None:
+    py = root / "python_app"
+    rust = root / "rust_worker" / "src"
+    shared = root / "shared"
+    py.mkdir(parents=True)
+    rust.mkdir(parents=True)
+    shared.mkdir(parents=True)
+    (py / "pyproject.toml").write_text(
         '[project]\nname = "python-app"\nversion = "0.1.0"\n',
         encoding="utf-8",
     )
-    (root / "python_app" / "app.py").write_text(
+    (py / "app.py").write_text(
         "from client import call_worker\n\n"
         "def handle_request(payload):\n"
         "    return call_worker(payload)\n\n"
@@ -33,23 +36,28 @@ def write_fixture(root: Path) -> None:
         "    main()\n",
         encoding="utf-8",
     )
-    (root / "python_app" / "client.py").write_text(
+    (py / "client.py").write_text(
         "def call_worker(payload):\n"
         "    return payload\n",
         encoding="utf-8",
     )
+    for i in range(module_count):
+        (py / f"module_{i:03}.py").write_text(
+            f"def transform_{i}(value):\n    return value\n",
+            encoding="utf-8",
+        )
     (root / "rust_worker" / "Cargo.toml").write_text(
         '[package]\nname = "rust-worker"\nversion = "0.1.0"\nedition = "2021"\n',
         encoding="utf-8",
     )
-    (root / "rust_worker" / "src" / "lib.rs").write_text(
-        "pub fn worker(payload: &str) -> String {\n"
-        "    payload.to_owned()\n"
-        "}\n",
-        encoding="utf-8",
-    )
-    (root / "shared" ).mkdir()
-    (root / "shared" / "worker.proto").write_text(
+    declarations = [f"pub mod module_{i:03};" for i in range(module_count)]
+    (rust / "lib.rs").write_text("\n".join(declarations) + "\n", encoding="utf-8")
+    for i in range(module_count):
+        (rust / f"module_{i:03}.rs").write_text(
+            f"pub fn transform_{i}(value: &str) -> String {{ value.to_owned() }}\n",
+            encoding="utf-8",
+        )
+    (shared / "worker.proto").write_text(
         'syntax = "proto3";\n'
         'package demo;\n'
         'service Worker { rpc Handle (Request) returns (Reply); }\n'
@@ -59,9 +67,24 @@ def write_fixture(root: Path) -> None:
     )
 
 
+def run(command: list[str], cwd: Path, timeout: int = 180) -> dict:
+    started = time.perf_counter()
+    proc = subprocess.run(
+        command, cwd=cwd, text=True, capture_output=True, timeout=timeout,
+        check=False, env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+    )
+    return {
+        "returncode": proc.returncode,
+        "seconds": round(time.perf_counter() - started, 4),
+        "stdout": proc.stdout,
+        "stderr": proc.stderr,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--builder", type=Path, required=True)
+    parser.add_argument("--modules-per-language", type=int, default=50)
     args = parser.parse_args()
     builder = args.builder.resolve()
     if not builder.is_file():
@@ -70,32 +93,20 @@ def main() -> int:
     with tempfile.TemporaryDirectory(prefix="codegraph-eval-") as td:
         root = Path(td) / "mixed-project"
         root.mkdir()
-        write_fixture(root)
-        started = time.perf_counter()
-        build = subprocess.run(
-            ["python", str(builder), str(root)],
-            cwd=root,
-            text=True,
-            capture_output=True,
-            timeout=180,
-            check=False,
-            env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
-        )
-        build_seconds = time.perf_counter() - started
+        write_fixture(root, args.modules_per_language)
+        fixture_files = sum(1 for p in root.rglob("*") if p.is_file())
+        build = run(["python", str(builder), str(root)], root)
         graph_path = root / ".codegraph" / "graph.json"
-        if build.returncode != 0 or not graph_path.is_file():
+        if build["returncode"] != 0 or not graph_path.is_file():
             print(json.dumps({
-                "status": "build_failed",
-                "returncode": build.returncode,
-                "stderr_tail": build.stderr[-4000:],
-                "stdout_tail": build.stdout[-4000:],
-                "build_seconds": round(build_seconds, 4),
+                "status": "build_failed", "candidate_revision": "6a95e4f0ae643fad7354ac388ceaa2dc2c2f3f74",
+                "fixture_files": fixture_files, "build": {k: v for k, v in build.items() if k != "stdout"},
+                "stdout_tail": build["stdout"][-3000:],
             }, ensure_ascii=False, indent=2))
             return 1
 
         graph = json.loads(graph_path.read_text(encoding="utf-8"))
-        nodes = graph.get("nodes", [])
-        edges = graph.get("edges", [])
+        nodes, edges = graph.get("nodes", []), graph.get("edges", [])
         paths = {str(n.get("path", "")) for n in nodes}
         types = {str(n.get("type", "")) for n in nodes}
         edge_types = {str(e.get("type", "")) for e in edges}
@@ -103,14 +114,25 @@ def main() -> int:
             "python_app/app.py": any(p.endswith("python_app/app.py") for p in paths),
             "python_app/client.py": any(p.endswith("python_app/client.py") for p in paths),
             "rust_worker/src/lib.rs": any(p.endswith("rust_worker/src/lib.rs") for p in paths),
+            "rust_worker/src/module_000.rs": any(p.endswith("rust_worker/src/module_000.rs") for p in paths),
         }
+
+        query = run(["python", str(builder), str(root), "--callers", "handle_request", "--json"], root)
+        update = None
+        if query["returncode"] == 0:
+            (py_file := root / "python_app" / "module_000.py").write_text(
+                "def transform_000(value):\n    return value + 1\n", encoding="utf-8"
+            )
+            update = run(["python", str(builder), "--update", str(root)], root)
+
         output = {
-            "status": "passed" if all(required.values()) else "partial",
+            "status": "passed" if all(required.values()) and query["returncode"] == 0 else "partial",
             "candidate": "CodeGraph Explorer",
             "candidate_revision": "6a95e4f0ae643fad7354ac388ceaa2dc2c2f3f74",
-            "fixture": "Python app + Rust library + shared proto schema",
-            "build_returncode": build.returncode,
-            "build_seconds": round(build_seconds, 4),
+            "fixture": "Python app + Rust library + shared proto schema + generated modules",
+            "modules_per_language": args.modules_per_language,
+            "fixture_file_count": fixture_files,
+            "full_build_seconds": build["seconds"],
             "graph_bytes": graph_path.stat().st_size,
             "total_nodes_reported": graph.get("total_nodes"),
             "actual_node_count": len(nodes),
@@ -119,22 +141,36 @@ def main() -> int:
             "node_types": sorted(types),
             "edge_types": sorted(edge_types),
             "required_source_paths_present": required,
-            "python_to_rust_semantic_link_proven": False,
+            "query": {
+                "command": "--callers handle_request --json",
+                "returncode": query["returncode"],
+                "seconds": query["seconds"],
+                "output_bytes": len(query["stdout"].encode("utf-8")),
+                "stderr_tail": query["stderr"][-1000:],
+                "stdout_tail": query["stdout"][-1200:],
+            },
+            "incremental_update": None if update is None else {
+                "returncode": update["returncode"],
+                "seconds": update["seconds"],
+                "stderr_tail": update["stderr"][-1000:],
+                "stdout_tail": update["stdout"][-1200:],
+            },
             "token_usage": {
                 "candidate_code_graph_build_llm_tokens": 0,
-                "basis": "The harness invokes the local Python builder directly and makes no model/API calls; this is not a measurement of tokens spent by a Skill host."
+                "basis": "Direct local Python builder and query CLI only; no model/API calls. This is not a measurement of Skill-host instruction/orchestration tokens."
             },
+            "python_to_rust_semantic_link_proven": False,
             "limitations": [
-                "This harness measures a local full graph build and structural inventory only.",
-                "It does not prove cross-language call resolution from Python to Rust.",
-                "The proto file is included to test project discovery, not to claim RPC wiring is understood.",
+                "Synthetic CI benchmark, not a production repository benchmark.",
+                "Graph build includes all fixture files; no partial-build capability was assumed.",
+                "Cross-language calls through the shared proto schema are not asserted as resolved.",
                 "The graph is untrusted candidate evidence, not a validated semantic FactBatch."
             ],
-            "builder_stdout_tail": build.stdout[-1500:],
-            "builder_stderr_tail": build.stderr[-1500:],
+            "builder_stdout_tail": build["stdout"][-1200:],
+            "builder_stderr_tail": build["stderr"][-1200:],
         }
         print(json.dumps(output, ensure_ascii=False, indent=2))
-        return 0 if all(required.values()) else 2
+        return 0 if output["status"] == "passed" and (update is None or update["returncode"] == 0) else 2
 
 
 if __name__ == "__main__":
