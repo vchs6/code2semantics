@@ -221,3 +221,11 @@ Per-profile enablement evidence: checked-in matrix enables only `rust.cargo-meta
 - [ ] 8.5 If the host lacks an install API, permission is required, or installation fails, return a structured gap with Skill identity, canonical source, exact host-specific install steps, required permission and verification command. Notify the user and continue independent accepted-tool work; resume the blocked Skill-dependent portion when available.
 - [ ] 8.6 Test that installation failure does not produce facts or coverage claims, does not cause an unbounded retry loop, and does not block unrelated producer paths. Record install status separately from parser/Skill capability acceptance.
 - [ ] 8.7 Add end-to-end tests for selected Skill → structured output → evidence/scope validation → normalized candidate facts. Installation success alone must not enable a producer or bypass mixed-language acceptance.
+## 10. Demand-driven graph build and reuse cost gate
+
+- [ ] 10.1 Add tests proving a narrow request satisfied by accepted direct tools does not install or invoke a graph-producing Skill.
+- [ ] 10.2 Benchmark full graph build, incremental update and scoped query on the same mixed-language fixture; record wall time, graph size, model tokens per phase and source fallback reads.
+- [ ] 10.3 Compare one-shot and repeated-request total cost at N=1/10/50, including graph build amortization, updates, queries and validation. Use equivalent-quality direct-tool baseline.
+- [ ] 10.4 Verify graph reuse requires matching authorized scope, source content state/fingerprint, Skill revision and extraction profile; test stale graph, source mutation, file addition/deletion and unsupported-language cases.
+- [ ] 10.5 If the Skill cannot build a bounded subgraph, document that full graph construction is required and let the selector skip it when expected benefit does not justify cost. Do not claim partial-build support unless implemented and tested by the Skill.
+- [ ] 10.6 Ensure graph build timeout/failure/staleness does not block independent tools and never turns an incomplete graph into satisfied coverage; preserve explicit gaps and continue the remaining query pipeline.
