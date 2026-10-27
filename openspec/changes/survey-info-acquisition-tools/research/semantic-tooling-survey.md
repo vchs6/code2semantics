@@ -400,3 +400,23 @@ Proposed evaluation cases:
 Runtime selection implication: first estimate the remaining need set and compare it with accepted direct-tool coverage. Invoke a graph Skill only when its expected incremental coverage/quality or amortized total cost justifies the build. A graph build may be reused for subsequent compatible requests, but its reuse key must include authorized scope, source content state, candidate version and extraction profile. If the full build is too expensive for the current request, continue with direct tools and leave uncovered needs for later stages rather than forcing a full scan.
 
 Cost acceptance must report first-build latency, incremental-update latency, query latency, graph bytes/nodes/edges, model tokens used by build/review/query, source fallback reads, and quality on the same fixture. This is currently a required measurement, not an observed benchmark; no timing claim is made in this report.
+
+### 8.13 First isolated CodeGraph benchmark result (2026-10-27)
+
+CI run: https://github.com/vchs6/code2semantics/actions/runs/40442745658. The candidate was fetched at pinned commit `6a95e4f0ae643fad7354ac388ceaa2dc2c2f3f74`; the harness generated a temporary synthetic mixed-language project and executed only the local builder/query CLI, without installing optional packages or calling any model API.
+
+| Metric | Observed result | Interpretation |
+|---|---:|---|
+| Fixture size | 106 files | Python app/modules, Rust library/modules, pyproject/Cargo manifests and a shared proto schema |
+| Full graph build | 0.133 s wall-clock | Fast on this small synthetic fixture; not a production-repository benchmark |
+| Graph artifact | 147,258 bytes | 260 nodes and 158 edges; node types file/function/import/symbol/entrypoint; edge types calls/contains |
+| Targeted `--callers handle_request --json` query | 0.0934 s; 119 output bytes | Scoped output is small; result showed a caller edge from `main` to `handle_request` |
+| Incremental update after modifying one Python file | 0.112 s wall-clock; builder reported 1 file reparsed, 104 served from cache, 0 removed | Incremental extraction works on this fixture; process startup dominates measured wall time |
+| Local builder/query model-token use | 0 model/API tokens by construction | The harness directly invoked Python; this is not the Skill-host prompt/orchestration token count |
+| Cross-language Python→Rust link | Not proven | Graph includes both language source paths, but does not demonstrate a semantic link across the shared schema |
+
+Result: the concern that a small graph build necessarily takes a long time is not supported by this smoke test; 106 fixture files built in about 0.13 seconds on the GitHub-hosted runner. This cannot be extrapolated linearly to large real repositories or equal semantic completeness. The result only shows that local structural graph construction and scoped queries can be inexpensive on a modest fixture.
+
+Workflow note: the first smoke run had a path-escaping issue only in artifact upload; the benchmark itself passed. The workflow path was corrected and the subsequent run uploaded the result successfully.
+
+Still pending: test a representative larger repository; run N=1/10/50 repeated queries; compare against direct accepted tools at equivalent quality; validate real cross-language relations, false positives/negatives, current-source evidence and security/write behavior. No candidate is enabled or accepted for production by this benchmark.
