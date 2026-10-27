@@ -172,6 +172,9 @@ def main() -> int:
     # A cache keyed only on mtime may incorrectly keep the old graph.
     if target_file:
         original = target_file.read_bytes()
+        # Reconcile the cache after restoring the previous test edit. Without
+        # this, a preceding mtime change could accidentally trigger reparse.
+        settle = run([sys.executable, str(builder), "--update", str(root)], root, timeout=240)
         stat_before = target_file.stat()
         marker = "__codegraph_same_mtime_source_change_probe"
         declaration = (
@@ -189,6 +192,7 @@ def main() -> int:
             target_file.write_bytes(original)
         result["unchanged_mtime_content_change"] = {
             "file": str(target_file.relative_to(root)),
+            "cache_settle_returncode": settle["returncode"],
             "returncode": same_mtime["returncode"],
             "seconds": same_mtime["seconds"],
             "new_declaration_detected": marker_found,
