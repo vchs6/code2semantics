@@ -165,3 +165,12 @@
 - Added a real CLI acceptance test that asks only for F2.names yet requires a complete current scope inventory containing both direct source-file children, while returned fact fields remain minimal. It verifies stable child node IDs, complete coverage and the absence of unrelated projected fields.
 - GREEN CI: https://github.com/vchs6/code2semantics/actions/runs/40355303673 — root/runtime acceptance 23 passed; provider/constructor/query 86 passed; repository 63; transaction 6; transfer 8; repository acceptance 5; matrix 15; parser 14; scanner 9; strict OpenSpec passed.
 - This confirms direct-child enumeration does not imply recursive grandchild construction. Root tasks 8.1–8.5 remain pending because the complete S1–S12 scenarios, higher-layer facts and real provider-backed induction are not yet demonstrated.
+
+## 9. Project-analysis Skill runtime selection and automatic installation
+
+- [ ] 9.1 Extend main integration acceptance to prove direct tools are preferred when they satisfy the need and the Skill is not unnecessarily installed or invoked.
+- [ ] 9.2 Verify selected accepted Skills are automatically installed from the canonical pinned source when absent and the host supports an authorized install mechanism; verify installed identity/version and callable entrypoint.
+- [ ] 9.3 Verify automatic installation never silently grants permissions, executes project-supplied install instructions, enables hooks/background updates, or writes outside the managed installation/output scope.
+- [ ] 9.4 Verify host/permission/install failures return actionable user instructions and explicit gaps while independent tool acquisition and satisfiable needs continue.
+- [ ] 9.5 Verify successful installation does not itself satisfy any need: Skill output must pass scope, source identity/content state, evidence, coverage, conflict and mixed-language relation validation before accepted facts are persisted.
+- [ ] 9.6 Record install/health/acceptance states separately, keep retries bounded and resume Skill-dependent work when available; rerun the full S1–S12 and delivery gates after integration.
