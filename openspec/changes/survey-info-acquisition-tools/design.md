@@ -103,3 +103,11 @@ Selection gate:
 4. Only then decide whether to integrate the Skill as a runtime producer. Research alone never enables the capability matrix.
 
 Low-token structured output remains a priority, but only after the increment gate. A Skill that uses the same tools and returns the same graph does not become a preferred producer merely because its graph is easier to read. Conversely, a Skill that adaptively combines tools or supplies validated semantic edges may justify integration even when some token overhead remains.
+
+## Installation readiness is part of candidate evaluation
+
+For each candidate Skill, research must identify the canonical source, license, version/revision strategy, supported host installation mechanism, dependency/build requirements, verification command, permissions requested, filesystem writes, network/data egress, upgrade/uninstall behavior and failure recovery. Prefer candidates that can be installed reproducibly and verified automatically without broad privileges.
+
+The constructor should automatically install an accepted selected Skill when it is missing and the host supports an authorized installation path. If not possible, it must provide the user with exact installation instructions and continue unrelated work. This runtime behavior belongs to the constructor/host adapter, not to the research script.
+
+Do not equate installability with acceptance: after installation, a Skill still needs a callable-entrypoint check, output-contract adapter, source/evidence/scope validation and mixed-language quality acceptance. Installation must not silently grant permissions or enable hooks/background behavior.
