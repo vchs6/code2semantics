@@ -1,0 +1,172 @@
+{
+  "schema_version": "1.0",
+  "snapshot_date": "2026-10-27",
+  "candidate": {
+    "name": "CodeGraph Explorer",
+    "kind": "project-analysis-skill-local-builder",
+    "repository": "https://github.com/GoldDHacker/codegraph-explorer-skill",
+    "revision": "6a95e4f0ae643fad7354ac388ceaa2dc2c2f3f74",
+    "builder": "scripts/codegraph_builder.py",
+    "invocation": "python scripts/codegraph_builder.py <project-root>",
+    "model_api_calls_in_harness": 0
+  },
+  "environment": {
+    "source": "GitHub Actions ubuntu-latest, Python 3.12",
+    "runtime_isolation": "Disposable checkouts in GitHub runner temp directory",
+    "host_skill_invocation_tested": false,
+    "extra_tree_sitter_dependencies_installed": false
+  },
+  "evidence_runs": [
+    {
+      "kind": "synthetic-scaled",
+      "url": "https://github.com/vchs6/code2semantics/actions/runs/40443411991",
+      "status": "success"
+    },
+    {
+      "kind": "real-project",
+      "url": "https://github.com/vchs6/code2semantics/actions/runs/40443798396",
+      "status": "success"
+    },
+    {
+      "kind": "mtime-collision-probe",
+      "url": "https://github.com/vchs6/code2semantics/actions/runs/40444104829",
+      "status": "success-diagnostic-staleness-reproduced"
+    }
+  ],
+  "real_projects": [
+    {
+      "name": "cmpute/dashu",
+      "repository": "https://github.com/cmpute/dashu",
+      "revision": "a0fc5358a3335e9fce155c5ddf8ae7ca83f24a33",
+      "files_in_checkout": 564,
+      "language_files": {
+        "rust": 393,
+        "python": 20
+      },
+      "candidate_discovered_files": 521,
+      "full_build_wall_seconds": 3.4667,
+      "graph_bytes": 43946741,
+      "nodes": 7771,
+      "edges": 155397,
+      "edge_types": {
+        "contains": 7250,
+        "calls": 148147
+      },
+      "tags": {
+        "EXTRACTED": 7226,
+        "INFERRED": 145714,
+        "RESOLVED": 2457
+      },
+      "source_locator_present": 7250,
+      "dangling_edges": 0,
+      "query": {
+        "repetitions": 10,
+        "mean_wall_seconds": 0.3832,
+        "structured_json_list": true,
+        "output_bytes": 305,
+        "target": "check_pow_isize"
+      },
+      "incremental_edit_wall_seconds": 3.0438,
+      "first_edit_reported_reparsed_files": 0,
+      "same_mtime_content_mutation": {
+        "new_declaration_detected": false,
+        "reparsed_files": 0,
+        "cache_staleness_observed": true
+      }
+    },
+    {
+      "name": "pallets/click",
+      "repository": "https://github.com/pallets/click",
+      "revision": "2247b35ea1c47c727d7a06e51fa280e12a863ff6",
+      "files_in_checkout": 178,
+      "language_files": {
+        "python": 91
+      },
+      "candidate_discovered_files": 141,
+      "full_build_wall_seconds": 1.5793,
+      "graph_bytes": 21004684,
+      "nodes": 2924,
+      "edges": 73733,
+      "edge_types": {
+        "contains": 2783,
+        "calls": 70868,
+        "inherits": 82
+      },
+      "tags": {
+        "EXTRACTED": 2865,
+        "INFERRED": 70147,
+        "RESOLVED": 721
+      },
+      "source_locator_present": 2783,
+      "dangling_edges": 0,
+      "query": {
+        "repetitions": 10,
+        "mean_wall_seconds": 0.2195,
+        "structured_json_list": true,
+        "output_bytes": 420,
+        "target": "log"
+      },
+      "incremental_edit_wall_seconds": 1.2194,
+      "first_edit_reported_reparsed_files": 1,
+      "same_mtime_content_mutation": {
+        "new_declaration_detected": false,
+        "reparsed_files": 0,
+        "cache_staleness_observed": true
+      }
+    }
+  ],
+  "synthetic_scaled": [
+    {
+      "files": 106,
+      "full_build_wall_seconds": 0.0996,
+      "graph_bytes": 147414,
+      "nodes": 262,
+      "edges": 160,
+      "positive_call_edge": true,
+      "import_only_negative_edge": true,
+      "deleted_file_removed_from_graph": true
+    },
+    {
+      "files": 1006,
+      "full_build_wall_seconds": 0.2901,
+      "graph_bytes": 1413098,
+      "nodes": 2512,
+      "edges": 1510,
+      "positive_call_edge": true,
+      "import_only_negative_edge": true,
+      "deleted_file_removed_from_graph": true
+    },
+    {
+      "files": 10006,
+      "full_build_wall_seconds": 2.5012,
+      "graph_bytes": 14238137,
+      "nodes": 25012,
+      "edges": 15010,
+      "positive_call_edge": true,
+      "import_only_negative_edge": true,
+      "deleted_file_removed_from_graph": true
+    }
+  ],
+  "quality_findings": {
+    "large_inferred_edge_fraction": true,
+    "incremental_cache_mtime_stale_on_real_projects": true,
+    "source_content_hash_freshness_proven": false,
+    "full_f1_f18_semantics_proven": false,
+    "direct_tool_equivalent_quality_baseline_complete": false,
+    "host_orchestration_token_cost_measured": false,
+    "cross_language_semantic_link_verified": false
+  },
+  "status": "research-only; not approved for production capability registration",
+  "reuse": {
+    "historical_data_reusable": true,
+    "current_source_freshness_requires_verification": true,
+    "retest_triggers": [
+      "candidate revision changes",
+      "evaluation repository revision changes",
+      "source freshness policy changes",
+      "information needs or output adapter changes",
+      "language/semantic edge requirements change"
+    ],
+    "note": "No need to rerun unchanged historical benchmark merely to reread recorded findings."
+  }
+}
