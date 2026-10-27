@@ -1,36 +1,65 @@
-# Design: Python + Rust information-acquisition tool survey
+# Design: Information-acquisition producers and independent project-analysis Skills
 
-## Scope
+## Scope and authority
 
-This change extends the prior Rust-focused survey to the first-phase Python + Rust source-inventory catalogue delivered by `add-semantic-fact-constructor`. It is a development-time research and acceptance artifact; it does not execute tools at runtime or enable capability-matrix entries by itself.
+This change researches producers against the fixed development-time catalogue at `skills/layered-semantic-facts/assets/information-needs.json`. The catalogue is the information-demand authority; the existing parser/tool matrix and the languages currently implemented by the product must not constrain discovery of independent project-analysis Skills.
 
-## Candidate producers
+The current product implementation has a first-phase Python/Rust syntax-inventory scope. This is not the Skill survey's admission rule or the final product's language boundary. The final goal includes mixed-language projects, their independent project boundaries, build ecosystems, cross-language interfaces/interactions, and source-qualified evidence.
 
-### Python
-- Python standard-library `ast`: deterministic syntax tree over supplied Python source text; no external process required for parsing.
-- `python -m compileall`: syntax/bytecode compilation signal only; must be run with explicit root and excluded generated paths; does not prove runtime behavior.
-- `pyproject.toml`, `setup.cfg`, `requirements*.txt`, package metadata: manifest/configuration evidence; not part of the initial F2-only catalogue unless a later OpenSpec change expands needs.
+This change is a development-time research and acceptance artifact. It does not run at query time, install/authorize a Skill, update production facts, or enable capability-matrix entries.
 
-### Rust
-- Deterministic declaration parser in `semantic_facts.info_parser`: parses source text already acquired by the caller; declaration inventory plus delimiter diagnostics only.
-- `cargo metadata --no-deps --format-version 1`: candidate for workspace/member/target/dependency needs, but those needs are not in the initial F2 catalogue.
-- `cargo check` / `rustc`: compiler/type-check signals, only when installed and when a project explicitly opts into tool execution; not required for the current syntax-only need.
-- `rust-analyzer`: candidate for semantic symbols/references/call hierarchy; availability and version must be probed, never assumed.
-- `Cargo.toml`, `Cargo.lock`, `rust-toolchain.toml`: manifest/configuration evidence for future needs.
+## Producer categories
 
-## Environment policy
+### A. Deterministic tools and parsers
 
-Tool availability is environment-specific. A producer is eligible only after the exact invocation profile and native output are tested on supported platforms. No research result alone enables a matrix entry. Matrix entries remain disabled or absent until parser-development acceptance evidence exists.
+Continue evaluating tools by concrete need coverage, invocation profile, native output, language/environment, evidence locators, limitations and reproducible probes. Current Python/Rust parser profiles remain limited to their accepted syntax/manifest scope. A tool is not credited with semantic behavior merely because it emits syntax, a manifest, or a graph.
 
-## Acceptance protocol
+### B. Independent project-analysis Skills
 
-For each producer/profile record:
-- tool ID/version and exact argv;
-- supported language/platform/environment;
-- native output fixture and digest;
-- covered need IDs and known limitations;
-- parser result schema validation and evidence traceability;
-- malformed output and missing-tool behavior;
-- test command and CI run.
+Only evaluate a Skill as a candidate when it has an independent project-analysis task, a real invocation entrypoint, and outputs that can be inspected. Candidate discovery may include public Skill directories and repositories without restricting language support to Python/Rust.
 
-The initial built-in Python and Rust parsers are deterministic in-process converters, not external command executors. The current scanner reads files directly; the constructor's matrix-driven external-tool execution remains a separate implementation task.
+For each Skill record:
+- canonical name, repository/source URL, revision/version and license/availability when verifiable;
+- actual invocation entrypoint, input/output protocol, required dependencies and host prerequisites;
+- declared languages separately from languages actually exercised;
+- project-boundary detection, entrypoint/build ecosystem, module responsibility, dependency, interface/call, data/control flow, lifecycle/error, algorithm and evidence capabilities;
+- source locators and whether claims preserve current content state, scope, coverage, direct observation versus inference, conflicts and unknown;
+- security and execution behavior: project code execution, network/data egress, credentials, filesystem writes, allowed scope, timeout/output behavior and failure handling;
+- per-need coverage, unique contribution over underlying tools, dependencies on other Skills, and unsupported cases.
+
+Exclude general-purpose agent hosts/model services, prompt-only role descriptions, formatting-only Skills, and thin wrappers without an independently verifiable analysis contribution. If a candidate orchestrates tools, record both the underlying tool outputs and its additional analysis; do not double-count the same coverage.
+
+### C. AI fallback boundary (not a survey target)
+
+The AI fallback uses the selected project-analysis Skill's existing host. This survey does not compare or select agent hosts, models, or agent platforms. Host availability is recorded only as a prerequisite to an executable Skill test. When tool and Skill results do not satisfy a need, the AI fallback may reason only from the evidence already available and must label inference, assumptions and unresolved gaps; it must not fabricate source evidence or claim unseen runtime behavior.
+
+## Mixed-language evaluation
+
+Single-language tests do not establish mixed-language support. A candidate's mixed-language claim requires one authorized project fixture containing at least two languages and a real cross-language boundary (for example FFI, RPC, generated binding or shared schema), plus separate project/build metadata and a decoy declared dependency that has no demonstrated runtime call.
+
+Check whether the Skill:
+1. recognizes the languages and build ecosystems actually present;
+2. preserves distinct project/source identities across nested or overlapping roots;
+3. connects cross-language endpoints only when evidence supports the relationship;
+4. distinguishes declared dependencies from source-level/observed interaction;
+5. returns traceable evidence per language and per relationship;
+6. keeps unsupported constructs, missing evidence and out-of-scope targets explicitly unknown;
+7. avoids modifying source files or executing project code without explicit authorization.
+
+For each test, retain the candidate revision, invocation details, exact authorized root/exclusions, raw output, intermediate artifacts where available, source locators, errors and a need-by-need evaluation. Mark document-only claims as unverified. If no approved host is available to run a Skill, record the execution blocker and leave runtime acceptance pending.
+
+## Selection and hand-off
+
+The research report may recommend candidates and combinations but does not make runtime selections. The constructor remains responsible for choosing eligible producers against the fixed needs catalogue; parsers own deterministic conversion to the public observation contract; induction validates evidence-bound semantic proposals. A Skill's knowledge graph or prose summary is not a FactBatch until an explicit adapter validates identity, scope, evidence, content state, coverage and conflict semantics.
+
+No research result alone enables a capability-matrix entry. Any runtime Skill adapter/dispatch requires a separate implementation and acceptance task after this survey identifies a candidate with sufficient evidence.
+
+## Current candidate status
+
+- `understand` from Understand Anything: priority test candidate based on documented knowledge-graph output, multi-language structural adapters and explicit unknown handling. Mixed-language runtime behavior is not yet tested in this project.
+- `codebase-analysis`: broad repository walkthrough candidate; machine-readable evidence contract and cross-language edges are not documented.
+- `codebase-summary`: evidence-led architecture summary candidate; its prose/HTML output must be checked for field-level traceability and machine conversion.
+- `explaining-codebases`: conditional candidate because it explicitly depends on another Skill for artifact production.
+- `improve-codebase-architecture`: lower-priority candidate for responsibility/architecture interpretation, not a complete semantic inventory.
+
+These are research candidates only, not installed, authorized, accepted or enabled runtime producers.
