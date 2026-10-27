@@ -325,3 +325,31 @@ Never load an entire graph JSON into model context if the Skill provides bounded
 - Candidate documents were inspected directly; this is source-document evidence only.
 - CodeGraph Explorer is the first candidate to test due to script-first graph construction, scoped query commands and an explicit zero-token code-analysis design. Understand Anything and Graphify are next because they also produce structured graphs and document multi-language support.
 - No candidate was installed or executed in this session. No token savings are yet measured. Mixed-language runtime testing, security review and FactBatch evidence mapping remain pending; no capability-matrix entries were enabled.
+
+### 8.9 Tool-overlap gate: Skill must prove incremental value (2026-10-27)
+
+The earlier candidate ordering by structured output and low token use is now subordinate to a more important first gate: compare the Skill with direct use of the same underlying tools. Tool-driven implementation alone is not sufficient reason to add the Skill as a second runtime producer.
+
+| Candidate | Documented overlap pattern | Increment to prove before integration | Current decision |
+|---|---|---|---|
+| CodeGraph Explorer | Local script creates `.codegraph/graph.json`; query commands expose callers, paths, impact, file dependencies and subgraphs. Likely overlaps with direct symbol/reference/call-graph tools where those are available. | Does it resolve useful cross-file/cross-language edges, identify project wiring, or provide better scoped evidence than invoking available tools directly? Compare false edges, missing edges, source reads and total tokens. | Keep as first experiment candidate only; no integration decision until direct-tool baseline is measured. |
+| Understand Anything | Local scan and multi-phase graph construction with typed nodes/edges and optional graph review. Overlaps with project scanning, symbol extraction, dependency analysis and graph assembly. | Determine whether its additional nodes/edges and review catch real gaps beyond the direct tools; measure token cost of review separately. | Second experiment candidate; no assumed increment. |
+| Graphify | Local AST/tree-sitter graph construction and query/path commands; optional LLM semantic pass for non-code material. | Separate deterministic code graph from semantic/document pass; compare graph relation precision and project-level edges against direct tools. | Third experiment candidate; no assumed increment. |
+| Prose-oriented analysis Skills | Explore files and produce architecture summaries or explanations. | Show verified facts or cross-component relations unavailable from direct tools, with source-level evidence; presentation alone is not increment. | Lower priority unless a specific need is uncovered. |
+
+#### Required experiment shape
+
+Run the same authorized mixed-language fixture in two modes:
+
+1. **Direct mode:** invoke available accepted tools for the fixed need subset and retain each native output.
+2. **Skill mode:** invoke the candidate on the same source snapshot, retain the Skill's raw graph/report and enumerate every underlying tool/script and model-driven step.
+
+Normalize both outputs to comparable candidate nodes/edges/claims without pretending either is already a FactBatch. Measure (a) newly covered needs with valid evidence, (b) precision and missed relations against fixture ground truth, (c) source locator accuracy, (d) unknown/scope behavior, (e) model tokens and wall-clock time including build and queries, and (f) additional source reads required to validate claims. Deduplicate facts that simply repeat underlying tool outputs.
+
+Acceptance decision:
+- If Skill and direct mode provide equivalent validated information and evidence, prefer direct tool reuse and retain the Skill only as documentation/workflow inspiration.
+- If Skill shows a measurable quality/coverage benefit or equivalent-quality total-cost reduction, consider it for runtime integration after security and adapter validation.
+- If the only benefit is nicer presentation, do not count it as semantic coverage.
+- If the Skill result is richer but its new edges cannot be verified or it turns unknown into guessed facts, reject that increment.
+
+Token efficiency is therefore a secondary optimization after measurable increment/quality equivalence, not the first and only selection criterion.
