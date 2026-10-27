@@ -27,7 +27,8 @@ def write_fixture(root: Path, module_count: int = 50) -> None:
         encoding="utf-8",
     )
     (py / "app.py").write_text(
-        "from client import call_worker\n\n"
+        "from client import call_worker\n"
+        "import module_000  # declared import only; transform_000 is not called\n\n"
         "def handle_request(payload):\n"
         "    return call_worker(payload)\n\n"
         "def main():\n"
@@ -120,6 +121,21 @@ def main() -> int:
 
         query_runs = [run(["python", str(builder), str(root), "--callers", "handle_request", "--json"], root) for _ in range(args.query_repeats)]
         query = query_runs[0] if query_runs else {"returncode": 1, "seconds": 0.0, "stdout": "", "stderr": "no query runs"}
+        expected_call = run(["python", str(builder), str(root), "--callers", "call_worker", "--json"], root)
+        decoy_call = run(["python", str(builder), str(root), "--callers", "transform_000", "--json"], root)
+        try:
+            expected_call_rows = json.loads(expected_call["stdout"])
+            decoy_call_rows = json.loads(decoy_call["stdout"])
+        except json.JSONDecodeError:
+            expected_call_rows, decoy_call_rows = [], []
+        expected_edge_present = any(
+            row.get("node") == "handle_request" and row.get("type") == "calls"
+            for row in expected_call_rows if isinstance(row, dict)
+        )
+        decoy_edge_absent = not any(
+            row.get("node") == "app" and row.get("type") == "calls"
+            for row in decoy_call_rows if isinstance(row, dict)
+        )
         update = None
         if query["returncode"] == 0:
             (py_file := root / "python_app" / "module_000.py").write_text(
@@ -128,7 +144,7 @@ def main() -> int:
             update = run(["python", str(builder), "--update", str(root)], root)
 
         output = {
-            "status": "passed" if all(required.values()) and query_runs and all(q["returncode"] == 0 for q in query_runs) else "partial",
+            "status": "passed" if all(required.values()) and query_runs and all(q["returncode"] == 0 for q in query_runs) and expected_edge_present and decoy_edge_absent else "partial",
             "candidate": "CodeGraph Explorer",
             "candidate_revision": "6a95e4f0ae643fad7354ac388ceaa2dc2c2f3f74",
             "fixture": "Python app + Rust library + shared proto schema + generated modules",
@@ -143,6 +159,14 @@ def main() -> int:
             "node_types": sorted(types),
             "edge_types": sorted(edge_types),
             "required_source_paths_present": required,
+            "relation_quality_checks": {
+                "handle_request_calls_call_worker": expected_edge_present,
+                "import_only_does_not_create_call_to_transform_000": decoy_edge_absent,
+                "expected_call_query_returncode": expected_call["returncode"],
+                "decoy_call_query_returncode": decoy_call["returncode"],
+                "expected_call_output": expected_call["stdout"][-1200:],
+                "decoy_call_output": decoy_call["stdout"][-1200:],
+            },
             "query": {
                 "command": "--callers handle_request --json",
                 "repeat_count": len(query_runs),
@@ -175,7 +199,7 @@ def main() -> int:
             "builder_stderr_tail": build["stderr"][-1200:],
         }
         print(json.dumps(output, ensure_ascii=False, indent=2))
-        return 0 if output["status"] == "passed" and (update is None or update["returncode"] == 0) else 2
+        return 0 if output["status"] == "passed" and (update is None or update["returncode"] == 0) and expected_edge_present and decoy_edge_absent else 2
 
 
 if __name__ == "__main__":
