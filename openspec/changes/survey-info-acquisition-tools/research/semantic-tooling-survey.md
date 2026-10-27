@@ -384,3 +384,19 @@ Current evidence does **not** support claiming that CodeGraph Explorer directly 
 Language-neutral here means the **public semantic fact contract and identity/relation model** are language-independent, not that every language parser has equal precision or that a generic graph edge has the same semantics in every language. CodeGraph Explorer documents uneven extraction paths (tree-sitter for selected languages and regex fallback/heuristics for others); therefore language-specific blind spots must remain explicit.
 
 Decision: retain CodeGraph Explorer as a **low-token structural graph candidate**. Do not use its graph as a ready-to-persist FactBatch, and do not count graph nodes/edges as accepted semantic coverage without per-need mapping, source/content-state validation, relation-specific checks, and mixed-language tests. Prefer it only where direct comparison proves incremental value over existing accepted tools. Remaining semantic needs should go to other accepted producers/Skills and then evidence-constrained AI induction; unresolved needs remain gaps.
+
+### 8.12 Cost risk: do not require a full graph build before every request
+
+CodeGraph Explorer's graph-first workflow can amortize cost across repeated queries, but an unconditional full-project build can be wasteful for a one-off or narrow information need. The production policy must therefore be demand-driven and must not require a complete graph as a precondition for every query.
+
+Proposed evaluation cases:
+
+- **Narrow/one-shot need:** compare direct accepted tool calls with building the entire graph. If direct tools satisfy the need, do not build the graph or install the Skill.
+- **Broad/repeated need:** measure one-time full graph construction, incremental update cost, graph size, per-query cost and quality over 1/10/50 queries. Reuse the graph only while its source fingerprint and scope match.
+- **Partial graph path:** test whether the candidate can build only the relevant files/subgraph or whether its query commands require a full repository graph. Record limitations instead of assuming incremental or partial construction exists.
+- **Changed source:** verify whether incremental mode detects content changes reliably, updates affected nodes/edges, and invalidates stale evidence. Do not use mtime-only or stale graph state as proof of current content unless the implementation validates it.
+- **Mixed-language project:** measure graph construction and relation precision per language and across language boundaries. A fast incomplete graph is not a successful producer.
+
+Runtime selection implication: first estimate the remaining need set and compare it with accepted direct-tool coverage. Invoke a graph Skill only when its expected incremental coverage/quality or amortized total cost justifies the build. A graph build may be reused for subsequent compatible requests, but its reuse key must include authorized scope, source content state, candidate version and extraction profile. If the full build is too expensive for the current request, continue with direct tools and leave uncovered needs for later stages rather than forcing a full scan.
+
+Cost acceptance must report first-build latency, incremental-update latency, query latency, graph bytes/nodes/edges, model tokens used by build/review/query, source fallback reads, and quality on the same fixture. This is currently a required measurement, not an observed benchmark; no timing claim is made in this report.
