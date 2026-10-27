@@ -5,8 +5,8 @@
 | 候选 | 类型 | 本地持久化报告 | 机器可读快照 | 已验证阶段 |
 |---|---|---|---|---|
 | CodeGraph Explorer | 独立项目分析 Skill 的确定性脚本 | [codegraph-explorer.md](codegraph-explorer.md) | [codegraph-explorer.results.json](codegraph-explorer.results.json) | 真实 Rust Dashu、Python Click，建图/结构化查询/来源缓存反例 |
-| Python / Cargo / rustc / rust-analyzer / universal-ctags / ast-grep / tree-sitter CLI | 普通分析工具及环境候选 | [candidate-tools.md](candidate-tools.md) | 尚无统一持久化原始 JSON | CI 环境探测及有限临时夹具 |
-| Understand Anything、Graphify 等其他候选 | Skill / 工具 | [../semantic-tooling-survey.md](../semantic-tooling-survey.md) | 暂无 | 文档审核，**未在本项目批准的宿主实测** |
+| Python / Cargo / rustc / rust-analyzer / universal-ctags / ast-grep / tree-sitter CLI | 普通分析工具及环境候选 | [candidate-tools.md](candidate-tools.md) | [candidate-tools.results.json](candidate-tools.results.json)（观测摘要） | CI 环境探测及有限临时夹具 |
+| Understand Anything、Graphify 等其他候选 | Skill / 工具 | [skill-candidate-status.md](skill-candidate-status.md) | 暂无 | 文档审核，**未在本项目批准的宿主实测** |
 
 ## 查阅与复用规则
 
