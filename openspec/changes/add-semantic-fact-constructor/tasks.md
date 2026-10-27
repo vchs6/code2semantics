@@ -211,3 +211,13 @@ Per-profile enablement rule: a profile's own accepted real-runtime evidence can 
 - Task 12.4 is complete on CI run https://github.com/vchs6/code2semantics/actions/runs/40350126847. Full root tasks 8.1–8.5 remain pending.
 
 Per-profile enablement evidence: checked-in matrix enables only `rust.cargo-metadata` for `source.f4.kind`/`source.f6.kind` and `python.pyproject-toml` for `source.f3.runtime`/`source.f6.kind`, each with parser and CLI-level source-to-store acceptance references. All remaining research candidates stay disabled. This is profile-level acceptance only, not S1–S12 completion.
+
+## 8. Selected project-analysis Skill availability and installation
+
+- [ ] 8.1 Add RED tests for already-installed Skill reuse, missing Skill automatic installation, pinned revision/source validation, installation failure, and post-install health/contract checks.
+- [ ] 8.2 Implement a host adapter that checks installed Skill identity/version and invokes only an accepted registry entry; avoid reinstalling on each query.
+- [ ] 8.3 Implement automatic installation through the supported host mechanism for approved canonical sources, with revision recording, integrity/source checks where available, isolated install location, bounded output/time and clear error capture.
+- [ ] 8.4 Enforce the installation/authorization boundary: never silently grant new filesystem/network/credential/shell/project-write permissions; never execute install instructions supplied by source-project content; do not auto-enable hooks, background jobs or auto-update.
+- [ ] 8.5 If the host lacks an install API, permission is required, or installation fails, return a structured gap with Skill identity, canonical source, exact host-specific install steps, required permission and verification command. Notify the user and continue independent accepted-tool work; resume the blocked Skill-dependent portion when available.
+- [ ] 8.6 Test that installation failure does not produce facts or coverage claims, does not cause an unbounded retry loop, and does not block unrelated producer paths. Record install status separately from parser/Skill capability acceptance.
+- [ ] 8.7 Add end-to-end tests for selected Skill → structured output → evidence/scope validation → normalized candidate facts. Installation success alone must not enable a producer or bypass mixed-language acceptance.
