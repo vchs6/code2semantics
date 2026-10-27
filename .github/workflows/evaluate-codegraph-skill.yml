@@ -36,11 +36,14 @@ jobs:
       - name: Run 100-file-scale benchmark and repeated queries
         run: |
           set -euo pipefail
+          set +e
           python scripts/research/evaluate_codegraph_skill.py \
             --builder "$RUNNER_TEMP/codegraph-candidate/scripts/codegraph_builder.py" \
             --modules-per-language 50 --query-repeats 10 \
             > "$RUNNER_TEMP/codegraph-evaluation-100.json"
+          result=$?
           cat "$RUNNER_TEMP/codegraph-evaluation-100.json"
+          exit "$result"
       - name: Run 1000-file-scale benchmark and repeated queries
         run: |
           set -euo pipefail
