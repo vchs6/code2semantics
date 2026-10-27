@@ -88,3 +88,11 @@ The existing survey acceptance covers the initial F2/L3 catalogue only. It is no
 ### Token-efficiency acceptance rule
 
 Report tokens per successful need group and per query, not only a single aggregate. Include the one-time graph-build cost and amortize it over a stated number of queries; record when the candidate falls back to source reading or LLM semantic extraction. Compare against a baseline that asks the model to inspect relevant source files directly. Do not claim savings unless both output quality and token measurements are available.
+## 7. Tool-overlap baseline and incremental Skill value
+
+- [ ] 7.1 For each priority Skill, inspect its executable workflow and enumerate underlying tools/scripts, invocation order, native outputs and any model-driven steps. Do not infer the workflow from the Skill description alone.
+- [ ] 7.2 Build a direct-tool baseline using the same available tool capabilities on the same authorized mixed-language fixture. Capture raw outputs, versions, evidence locators, time and token counts.
+- [ ] 7.3 Compare the Skill result against the baseline after normalizing node/edge identity: count only new validated coverage, improved relation precision/completeness, stronger source evidence, reduced fallback reads, or lower total cost at equivalent quality. Duplicated tool facts are not incremental coverage.
+- [ ] 7.4 Classify each candidate as tool workflow wrapper, adaptive tool orchestrator, semantic analysis augmenter, or presentation-only summarizer. Reject/defer candidates with no measurable increment over direct tool use.
+- [ ] 7.5 For candidates with verified increment, compare token cost, wall-clock latency, mixed-language coverage, security, failure behavior and maintenance burden. Token minimization is optimized only after equivalent-quality/increment requirements pass.
+- [ ] 7.6 Update the candidate ranking and research conclusions. Do not integrate or enable a Skill merely because it returns JSON/graph output or claims zero-token extraction; preserve the direct-tool baseline and measured delta as acceptance evidence.
