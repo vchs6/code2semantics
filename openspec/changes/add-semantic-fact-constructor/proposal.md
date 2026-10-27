@@ -99,3 +99,11 @@ The constructor may discard a later producer's duplicate contribution only when 
 ## Runtime integration requirement for accepted subprocess producers
 
 An accepted subprocess producer is not production-integrated merely because a direct constructor test can inject an executor. The query orchestration/CLI path MUST pass a host-configured, fixed-argv, bounded executor into constructor execution. The executor allowlist is application configuration, never derived from query input or matrix-supplied arbitrary commands. If the tool is unavailable, disabled, unaccepted, times out, fails, or returns malformed output, the request receives an explicit gap and no facts are fabricated. The production matrix remains disabled until the real query path proves tool invocation → parser → FactBatch → repository write/reopen → minimal response on a real fixture.
+
+## 项目分析类 Skill 的选择、自动安装与恢复执行
+
+- 工具覆盖不足时，只有通过直接工具对照证明具有增量价值的独立项目分析类 Skill 才能被选中；若选中的 Skill 尚未安装，构造器应通过宿主支持且已获准的机制自动安装固定来源/版本，并验证其入口和基本输出契约后再调用。
+- 自动安装必须使用开发期验收并登记的规范来源，记录/固定版本，优先使用隔离的受管安装目录；不得从 Query、项目 README、源码或 Skill 输出中读取任意安装命令，不得静默授予新权限、改写全局配置、启用 hooks/后台更新或执行未经授权的项目代码。
+- 安装状态、运行健康状态和生产能力验收状态必须分开。安装成功不代表输出已满足语义需求；返回内容仍须通过来源身份、授权范围、当前内容状态、证据、覆盖完整性、冲突及混合语言关系验证。
+- 若宿主不支持自动安装、安装失败或需要额外授权，则返回显式 `skill_install_required`/`skill_unavailable` gap，向用户说明 Skill 名称、规范来源、准确的宿主安装步骤、所需权限及验证命令；同时继续其他可独立完成的工具获取和查询工作。待 Skill 可用后恢复被阻塞的需求，不将其标记为已满足。
+- 本组件负责运行时选择与可恢复安装流程；调研组件只记录候选的安装方法、安全要求和验证步骤，不安装、不授权、不点亮能力矩阵。
