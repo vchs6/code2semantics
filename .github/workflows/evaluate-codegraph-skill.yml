@@ -49,6 +49,14 @@ jobs:
             --modules-per-language 500 --query-repeats 50 \
             > "$RUNNER_TEMP/codegraph-evaluation-1000.json"
           cat "$RUNNER_TEMP/codegraph-evaluation-1000.json"
+      - name: Run 10000-file-scale benchmark and repeated queries
+        run: |
+          set -euo pipefail
+          python scripts/research/evaluate_codegraph_skill.py \
+            --builder "$RUNNER_TEMP/codegraph-candidate/scripts/codegraph_builder.py" \
+            --modules-per-language 5000 --query-repeats 10 \
+            > "$RUNNER_TEMP/codegraph-evaluation-10000.json"
+          cat "$RUNNER_TEMP/codegraph-evaluation-10000.json"
       - name: Upload benchmark results
         uses: actions/upload-artifact@v4
         with:
