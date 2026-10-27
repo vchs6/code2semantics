@@ -823,20 +823,20 @@ def test_multiple_rust_workspaces_keep_membership_and_dependencies_scoped(tmp_pa
         (root / "crates" / "app" / "src").mkdir(parents=True)
         (root / "crates" / "core" / "src").mkdir(parents=True)
         (root / "Cargo.toml").write_text(
-            '[workspace]\\nmembers = ["crates/app", "crates/core"]\\nresolver = "2"\\n',
+            '[workspace]\nmembers = ["crates/app", "crates/core"]\nresolver = "2"\n',
             encoding="utf-8",
         )
         (root / "crates" / "app" / "Cargo.toml").write_text(
-            f'[package]\\nname = "{app_name}"\\nversion = "0.1.0"\\nedition = "2021"\\n'
-            f'[dependencies]\\n{core_name} = {{ path = "../core" }}\\n',
+            f'[package]\nname = "{app_name}"\nversion = "0.1.0"\nedition = "2021"\n'
+            f'[dependencies]\n{core_name} = {{ path = "../core" }}\n',
             encoding="utf-8",
         )
         (root / "crates" / "core" / "Cargo.toml").write_text(
-            f'[package]\\nname = "{core_name}"\\nversion = "0.1.0"\\nedition = "2021"\\n',
+            f'[package]\nname = "{core_name}"\nversion = "0.1.0"\nedition = "2021"\n',
             encoding="utf-8",
         )
-        (root / "crates" / "app" / "src" / "lib.rs").write_text("pub fn run() {}\\n", encoding="utf-8")
-        (root / "crates" / "core" / "src" / "lib.rs").write_text("pub fn core() {}\\n", encoding="utf-8")
+        (root / "crates" / "app" / "src" / "lib.rs").write_text("pub fn run() {}\n", encoding="utf-8")
+        (root / "crates" / "core" / "src" / "lib.rs").write_text("pub fn core() {}\n", encoding="utf-8")
 
     database = tmp_path / "two-workspaces.sqlite"
     query = {
