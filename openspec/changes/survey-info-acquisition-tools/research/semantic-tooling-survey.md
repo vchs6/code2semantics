@@ -479,3 +479,14 @@ Latest observed metrics from this run (single CI sample):
 Observed output confirms a cheap local structural graph on this fixture, but the benchmark is still not a comparison against the project's accepted direct tools. It does not validate cross-language FFI/RPC resolution, semantic behavior fields, or complete false-positive/false-negative rates. The import-only check covers one deliberately absent call edge; it must not be generalized into a precision score.
 
 CI harness status: `Evaluate CodeGraph Skill` succeeded at pinned revision `6a95e4f0ae643fad7354ac388ceaa2dc2c2f3f74`. The benchmark runs the builder/query CLI directly, so local graph operations consume no model/API tokens; Skill-host overhead remains unmeasured.
+
+### 8.17 Incremental cache correctness: edit and deletion checks
+
+Successful CI run: https://github.com/vchs6/code2semantics/actions/runs/40443411991. The harness now checks a known positive call edge (`handle_request` calls `call_worker`) and a known negative edge (the import-only `module_000` must not create a call to `transform_000`), then edits one file and deletes another before running incremental updates.
+
+- All three scales (106, 1,006, 10,006 files) passed both relation assertions.
+- After editing one Python file, the builder reported one re-parsed file and the rest served from cache; return code was successful.
+- After deleting `python_app/module_001.py`, the builder reported one removed file and the deleted path was absent from the resulting graph at all three scales.
+- On the 10,006-file fixture, full build was 2.5012 s; the edit update was 2.4100 s in this run; the deletion update was about 1.49 s. The update cost includes full reference resolution and graph metrics, not just per-file parsing.
+
+These are useful cache lifecycle and local relation checks, but the false-positive check is limited to one deliberately absent call and the positive call is intra-language Python. Cross-language Python→Rust relation resolution, actual RPC/FFI behavior, broad precision/recall, source-line evidence validity and direct-tool baseline remain untested. Candidate output is still not accepted as a semantic FactBatch.
