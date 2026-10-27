@@ -85,6 +85,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--builder", type=Path, required=True)
     parser.add_argument("--modules-per-language", type=int, default=50)
+    parser.add_argument("--query-repeats", type=int, default=10)
     args = parser.parse_args()
     builder = args.builder.resolve()
     if not builder.is_file():
@@ -117,7 +118,8 @@ def main() -> int:
             "rust_worker/src/module_000.rs": any(p.endswith("rust_worker/src/module_000.rs") for p in paths),
         }
 
-        query = run(["python", str(builder), str(root), "--callers", "handle_request", "--json"], root)
+        query_runs = [run(["python", str(builder), str(root), "--callers", "handle_request", "--json"], root) for _ in range(args.query_repeats)]
+        query = query_runs[0] if query_runs else {"returncode": 1, "seconds": 0.0, "stdout": "", "stderr": "no query runs"}
         update = None
         if query["returncode"] == 0:
             (py_file := root / "python_app" / "module_000.py").write_text(
@@ -126,7 +128,7 @@ def main() -> int:
             update = run(["python", str(builder), "--update", str(root)], root)
 
         output = {
-            "status": "passed" if all(required.values()) and query["returncode"] == 0 else "partial",
+            "status": "passed" if all(required.values()) and query_runs and all(q["returncode"] == 0 for q in query_runs) else "partial",
             "candidate": "CodeGraph Explorer",
             "candidate_revision": "6a95e4f0ae643fad7354ac388ceaa2dc2c2f3f74",
             "fixture": "Python app + Rust library + shared proto schema + generated modules",
@@ -143,9 +145,12 @@ def main() -> int:
             "required_source_paths_present": required,
             "query": {
                 "command": "--callers handle_request --json",
-                "returncode": query["returncode"],
-                "seconds": query["seconds"],
-                "output_bytes": len(query["stdout"].encode("utf-8")),
+                "repeat_count": len(query_runs),
+                "all_returncodes_zero": all(q["returncode"] == 0 for q in query_runs),
+                "seconds_each": [q["seconds"] for q in query_runs],
+                "seconds_total": round(sum(q["seconds"] for q in query_runs), 4),
+                "seconds_mean": round(sum(q["seconds"] for q in query_runs) / max(1, len(query_runs)), 4),
+                "output_bytes_each": [len(q["stdout"].encode("utf-8")) for q in query_runs],
                 "stderr_tail": query["stderr"][-1000:],
                 "stdout_tail": query["stdout"][-1200:],
             },
