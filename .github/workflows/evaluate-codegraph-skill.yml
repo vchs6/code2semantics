@@ -1,0 +1,47 @@
+name: Evaluate CodeGraph Skill
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/evaluate-codegraph-skill.yml"
+      - "scripts/research/evaluate_codegraph_skill.py"
+
+permissions:
+  contents: read
+
+jobs:
+  codegraph-mixed-language-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch pinned CodeGraph candidate
+        env:
+          CANDIDATE_REVISION: "6a95e4f0ae643fad7354ac388ceaa2dc2c2f3f74"
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/codegraph-candidate"
+          git -C "$RUNNER_TEMP/codegraph-candidate" init
+          git -C "$RUNNER_TEMP/codegraph-candidate" remote add origin https://github.com/GoldDHacker/codegraph-explorer-skill.git
+          git -C "$RUNNER_TEMP/codegraph-candidate" fetch --depth 1 origin "$CANDIDATE_REVISION"
+          git -C "$RUNNER_TEMP/codegraph-candidate" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/codegraph-candidate" rev-parse HEAD)" = "$CANDIDATE_REVISION"
+      - name: Run isolated mixed-language graph build benchmark
+        run: |
+          set -euo pipefail
+          python scripts/research/evaluate_codegraph_skill.py \
+            --builder "$RUNNER_TEMP/codegraph-candidate/scripts/codegraph_builder.py" \
+            | tee "$RUNNER_TEMP/codegraph-evaluation.json"
+      - name: Upload benchmark result
+        uses: actions/upload-artifact@v4
+        with:
+          name: codegraph-mixed-language-evaluation
+          path: \${{ runner.temp }}/codegraph-evaluation.json
+          if-no-files-found: error
