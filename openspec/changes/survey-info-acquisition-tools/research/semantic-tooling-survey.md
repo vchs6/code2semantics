@@ -420,3 +420,23 @@ Result: the concern that a small graph build necessarily takes a long time is no
 Workflow note: the first smoke run had a path-escaping issue only in artifact upload; the benchmark itself passed. The workflow path was corrected and the subsequent run uploaded the result successfully.
 
 Still pending: test a representative larger repository; run N=1/10/50 repeated queries; compare against direct accepted tools at equivalent quality; validate real cross-language relations, false positives/negatives, current-source evidence and security/write behavior. No candidate is enabled or accepted for production by this benchmark.
+
+### 8.14 Scaled benchmark: 106 and 1,006 files, repeated queries
+
+Successful run: https://github.com/vchs6/code2semantics/actions/runs/40443027810. Candidate revision remains pinned to `6a95e4f0ae643fad7354ac388ceaa2dc2c2f3f74`. Both fixtures are generated in temporary directories; the benchmark invokes the local Python builder and query CLI directly.
+
+| Metric | 106-file fixture | 1,006-file fixture |
+|---|---:|---:|
+| Full graph build wall time | 0.1166 s | 0.3782 s |
+| Graph size | 147,258 bytes | 1,412,941 bytes |
+| Nodes / edges | 260 / 158 | 2,510 / 1,508 |
+| Repeated `--callers handle_request --json` queries | 10 | 50 |
+| Total query wall time | 0.7911 s | 4.3413 s |
+| Mean query wall time | 0.0791 s | 0.0868 s |
+| Incremental update after changing one Python file | 0.096 s | 0.2556 s |
+
+Interpretation: for these synthetic fixtures, full graph construction scales acceptably from roughly 100 to roughly 1,000 source/config files, and the query command returns small scoped output. Query timing includes a fresh Python process and graph load per invocation, so it is not just in-memory graph traversal time. The build/update/query measurements are wall-clock times from one hosted CI run, not repeated-run distributions or production SLA evidence.
+
+Token accounting: graph build and query invoked the local script directly and made no model/API calls, so candidate code-analysis model-token use is zero by construction. Skill-host instruction tokens and downstream reasoning tokens were not measured. Repeated queries also do not yet compare total cost with direct tools at equivalent semantic quality.
+
+Cross-language semantics remain unproven: both Python and Rust files appear in the graph, but the fixture does not establish a Python→Rust call through the proto contract. These results support further evaluation of graph build cost only; they do not justify treating the graph as language-neutral semantic facts or enabling the Skill in production.
