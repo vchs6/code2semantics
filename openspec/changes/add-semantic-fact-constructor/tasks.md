@@ -212,20 +212,29 @@ Per-profile enablement rule: a profile's own accepted real-runtime evidence can 
 
 Per-profile enablement evidence: checked-in matrix enables only `rust.cargo-metadata` for `source.f4.kind`/`source.f6.kind` and `python.pyproject-toml` for `source.f3.runtime`/`source.f6.kind`, each with parser and CLI-level source-to-store acceptance references. All remaining research candidates stay disabled. This is profile-level acceptance only, not S1–S12 completion.
 
-## 8. Selected project-analysis Skill availability and installation
+## 17. Selected project-analysis Skill availability and installation
 
-- [ ] 8.1 Add RED tests for already-installed Skill reuse, missing Skill automatic installation, pinned revision/source validation, installation failure, and post-install health/contract checks.
-- [ ] 8.2 Implement a host adapter that checks installed Skill identity/version and invokes only an accepted registry entry; avoid reinstalling on each query.
-- [ ] 8.3 Implement automatic installation through the supported host mechanism for approved canonical sources, with revision recording, integrity/source checks where available, isolated install location, bounded output/time and clear error capture.
-- [ ] 8.4 Enforce the installation/authorization boundary: never silently grant new filesystem/network/credential/shell/project-write permissions; never execute install instructions supplied by source-project content; do not auto-enable hooks, background jobs or auto-update.
-- [ ] 8.5 If the host lacks an install API, permission is required, or installation fails, return a structured gap with Skill identity, canonical source, exact host-specific install steps, required permission and verification command. Notify the user and continue independent accepted-tool work; resume the blocked Skill-dependent portion when available.
-- [ ] 8.6 Test that installation failure does not produce facts or coverage claims, does not cause an unbounded retry loop, and does not block unrelated producer paths. Record install status separately from parser/Skill capability acceptance.
-- [ ] 8.7 Add end-to-end tests for selected Skill → structured output → evidence/scope validation → normalized candidate facts. Installation success alone must not enable a producer or bypass mixed-language acceptance.
-## 10. Demand-driven graph build and reuse cost gate
+- [ ] 17.1 Add RED tests for already-installed Skill reuse, missing Skill automatic installation, pinned revision/source validation, installation failure, and post-install health/contract checks.
+- [ ] 17.2 Implement a host adapter that checks installed Skill identity/version and invokes only an accepted registry entry; avoid reinstalling on each query.
+- [ ] 17.3 Implement automatic installation through the supported host mechanism for approved canonical sources, with revision recording, integrity/source checks where available, isolated install location, bounded output/time and clear error capture.
+- [ ] 17.4 Enforce the installation/authorization boundary: never silently grant new filesystem/network/credential/shell/project-write permissions; never execute install instructions supplied by source-project content; do not auto-enable hooks, background jobs or auto-update.
+- [ ] 17.5 If the host lacks an install API, permission is required, or installation fails, return a structured gap with Skill identity, canonical source, exact host-specific install steps, required permission and verification command. Notify the user and continue independent accepted-tool work; resume the blocked Skill-dependent portion when available.
+- [ ] 17.6 Test that installation failure does not produce facts or coverage claims, does not cause an unbounded retry loop, and does not block unrelated producer paths. Record install status separately from parser/Skill capability acceptance.
+- [ ] 17.7 Add end-to-end tests for selected Skill → structured output → evidence/scope validation → normalized candidate facts. Installation success alone must not enable a producer or bypass mixed-language acceptance.
+## 18. Demand-driven graph build and reuse cost gate
 
-- [ ] 10.1 Add tests proving a narrow request satisfied by accepted direct tools does not install or invoke a graph-producing Skill.
-- [ ] 10.2 Benchmark full graph build, incremental update and scoped query on the same mixed-language fixture; record wall time, graph size, model tokens per phase and source fallback reads.
-- [ ] 10.3 Compare one-shot and repeated-request total cost at N=1/10/50, including graph build amortization, updates, queries and validation. Use equivalent-quality direct-tool baseline.
-- [ ] 10.4 Verify graph reuse requires matching authorized scope, source content state/fingerprint, Skill revision and extraction profile; test stale graph, source mutation, file addition/deletion and unsupported-language cases.
-- [ ] 10.5 If the Skill cannot build a bounded subgraph, document that full graph construction is required and let the selector skip it when expected benefit does not justify cost. Do not claim partial-build support unless implemented and tested by the Skill.
-- [ ] 10.6 Ensure graph build timeout/failure/staleness does not block independent tools and never turns an incomplete graph into satisfied coverage; preserve explicit gaps and continue the remaining query pipeline.
+- [ ] 18.1 Add tests proving the selector may prefer accepted direct tools for a narrow request when their equivalent-quality total cost is lower, without unnecessarily installing or invoking a graph-producing Skill.
+- [ ] 18.2 Benchmark full graph build, incremental update and scoped query on the same mixed-language fixture; record wall time, graph size, model tokens per phase and source fallback reads.
+- [ ] 18.3 Compare one-shot and repeated-request total cost at N=1/10/50, including graph build amortization, updates, queries and validation. Use equivalent-quality direct-tool baseline.
+- [ ] 18.4 Verify graph reuse requires matching authorized scope, source content state/fingerprint, Skill revision and extraction profile; test stale graph, source mutation, file addition/deletion and unsupported-language cases.
+- [ ] 18.5 If the Skill cannot build a bounded subgraph, document that full graph construction is required and let the selector skip it when expected benefit does not justify cost. Do not claim partial-build support unless implemented and tested by the Skill.
+- [ ] 18.6 Ensure graph build timeout/failure/staleness does not block independent tools and never turns an incomplete graph into satisfied coverage; preserve explicit gaps and continue the remaining query pipeline.
+## 19. Unified structured-information acquisition selection (2026-10-27)
+
+- [ ] 19.1 RED/GREEN: register accepted ordinary tools and independent project-analysis Skills as peers that supply structured source information, not complete F1–F18 facts; ensure selected native output enters the external normalization adapter.
+- [ ] 19.2 RED/GREEN: on an identical fixed information-needs set, prefer one graph Skill over multiple tools when evidence quality and completeness meet the same bar and amortized total cost is lower; also test a narrow case preferring a direct tool.
+- [ ] 19.3 RED/GREEN: select mixed tool + Skill coverage when neither alone meets all needs; deduplicate equivalent information, retain independent evidence and report conflicts and remaining gaps.
+- [ ] 19.4 RED/GREEN: verify a Skill graph with high-confidence INFERRED edges does not directly become a supported F1–F18 fact; require source evidence, relation validity and observed/inferred state.
+- [ ] 19.5 RED/GREEN: a cached graph with source content changed while mtime is unchanged is rejected or reconstructed using content fingerprints; successful update exit code alone does not prove current source state.
+- [ ] 19.6 Record direct-tool versus Skill comparison on pinned real Dashu and Click revisions using the same information need IDs, output quality criteria, and build/query/reuse/token costs; mark unsupported semantics as gaps.
+- [ ] 19.7 Validate strict OpenSpec, affected component tests, full query→parser→constructor→FactBatch→repository acceptance, and product delivery gate without bypassing outstanding S1–S12 obligations.
