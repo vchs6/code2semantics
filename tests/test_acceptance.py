@@ -810,3 +810,83 @@ def test_root_acceptance_enumerates_all_direct_children_but_projects_only_reques
     }
     assert response["results"]
     assert all(set(fact["fields"]) == {"names"} for fact in response["results"])
+
+
+def test_multiple_rust_workspaces_keep_membership_and_dependencies_scoped(tmp_path, capsys):
+    """Real CLI acceptance: two authorized Cargo workspaces must not cross-contaminate facts."""
+    roots = [tmp_path / "workspace-one", tmp_path / "workspace-two"]
+    names = [
+        ("alpha-app", "alpha-core"),
+        ("beta-app", "beta-core"),
+    ]
+    for root, (app_name, core_name) in zip(roots, names):
+        (root / "crates" / "app" / "src").mkdir(parents=True)
+        (root / "crates" / "core" / "src").mkdir(parents=True)
+        (root / "Cargo.toml").write_text(
+            '[workspace]\\nmembers = ["crates/app", "crates/core"]\\nresolver = "2"\\n',
+            encoding="utf-8",
+        )
+        (root / "crates" / "app" / "Cargo.toml").write_text(
+            f'[package]\\nname = "{app_name}"\\nversion = "0.1.0"\\nedition = "2021"\\n'
+            f'[dependencies]\\n{core_name} = {{ path = "../core" }}\\n',
+            encoding="utf-8",
+        )
+        (root / "crates" / "core" / "Cargo.toml").write_text(
+            f'[package]\\nname = "{core_name}"\\nversion = "0.1.0"\\nedition = "2021"\\n',
+            encoding="utf-8",
+        )
+        (root / "crates" / "app" / "src" / "lib.rs").write_text("pub fn run() {}\\n", encoding="utf-8")
+        (root / "crates" / "core" / "src" / "lib.rs").write_text("pub fn core() {}\\n", encoding="utf-8")
+
+    database = tmp_path / "two-workspaces.sqlite"
+    query = {
+        "contract_version": "1.0.0",
+        "catalog_id": "semantic-facts-20261025",
+        "request_id": "two-workspaces-isolation",
+        "scope": {
+            "scope_id": "two-workspaces-scope",
+            "directories": [str(root.resolve()) for root in roots],
+            "excludes": [],
+            "defaulted": False,
+        },
+        "target": {"kind": "scope"},
+        "granularity": "L2",
+        "selections": [
+            {"fact_type": "F4", "fields": ["kind"]},
+            {"fact_type": "F6", "fields": ["kind"]},
+        ],
+        "budget": {"max_rounds": 3, "max_new_assertions": 40},
+    }
+    query_path = tmp_path / "two-workspaces-query.json"
+    query_path.write_text(json.dumps(query, ensure_ascii=False), encoding="utf-8")
+
+    assert main(["query", "--db", str(database), "--query-file", str(query_path)]) == 0
+    response = json.loads(capsys.readouterr().out)
+    assert response["termination"] == "satisfied", response
+    assert {source["root"] for source in response["sources"]} == {str(root.resolve()) for root in roots}
+
+    values_by_root = {str(root.resolve()): [] for root in roots}
+    for fact in response["results"]:
+        assert set(fact["fields"]) == {"kind"}
+        assert fact["fields"]["kind"]["basis"]["evidence"]
+        source_root = next(
+            source["root"] for source in response["sources"]
+            if source["source_id"] == fact["node"]["source_id"]
+        )
+        values_by_root[source_root].append(fact["fields"]["kind"]["value"].get("text", ""))
+
+    for root, (app_name, core_name) in zip(roots, names):
+        values = values_by_root[str(root.resolve())]
+        assert any(f"workspace member: {app_name}" in value for value in values), values
+        assert any(f"workspace member: {core_name}" in value for value in values), values
+        assert any(f"{app_name} -> {core_name}" in value for value in values), values
+        other_names = set(sum(([a, c] for a, c in names if (a, c) != (app_name, core_name)), []))
+        assert all(not any(other in value for other in other_names) for value in values), values
+
+    repository = Repository(database, ROOT / "skills" / "layered-semantic-facts" / "assets")
+    try:
+        persisted = repository.read(query)
+        assert {source["root"] for source in persisted["sources"]} == {str(root.resolve()) for root in roots}
+        assert all(fact["fields"]["kind"]["basis"]["evidence"] for fact in persisted["facts"])
+    finally:
+        repository.close()
