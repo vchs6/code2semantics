@@ -63,3 +63,23 @@ No research result alone enables a capability-matrix entry. Any runtime Skill ad
 - `improve-codebase-architecture`: lower-priority candidate for responsibility/architecture interpretation, not a complete semantic inventory.
 
 These are research candidates only, not installed, authorized, accepted or enabled runtime producers.
+
+## Token-efficient candidate selection
+
+The survey prioritizes Skills that execute deterministic local tools/scripts to produce structured, queryable artifacts, then ask the model to inspect only small relevant subgraphs/results. Do not prioritize a Skill merely because it generates a rich graph: its build path and query path must be examined separately.
+
+Measure token cost by phase:
+- graph/index construction: model input/output tokens, including any semantic pass;
+- Skill instruction and orchestration overhead;
+- per-question query: tokens needed to retrieve/interpret a scoped result;
+- fallback: additional tokens spent reading source files or reasoning because the graph is incomplete.
+
+Prefer code-analysis paths with zero or near-zero LLM token use where verified, but also evaluate accuracy, cross-language coverage, evidence traceability and missing/unknown behavior. A zero-token regex graph with weak edges must not outrank a more accurate candidate solely on cost. Token claims must be supported by run logs or explicit instrumentation; vendor/project claims alone remain unverified.
+
+Initial priority order for experiments:
+1. **CodeGraph Explorer** (`GoldDHacker/codegraph-explorer-skill`): local Python script builds `.codegraph/graph.json`; its Skill instructions explicitly direct the model to query the graph instead of parsing source with LLM tokens. The inspected document describes small structured queries and zero-token graph construction. Important caveat: much of C/C++/Go/Rust/Ruby/PHP/Swift/Kotlin extraction is regex-based; tree-sitter support is documented for JS/TS/Java and selected extended languages. Cross-language completeness is not established.
+2. **Understand Anything** (`Egonex-AI/Understand-Anything`): structured `.ua/knowledge-graph.json`, typed nodes/edges, broad multi-language adapter claims and explicit unknown handling. The skill can invoke an LLM graph review and includes multi-phase graph generation; actual token cost must be measured and the deterministic/LLM phases separated.
+3. **Graphify** (`Graphify-Labs/graphify` / `darce07/graphify-claude-skill`): structured graph JSON and broad tree-sitter language coverage; code-only extraction is documented as local/LLM-free, while semantic extraction for docs/media can use an LLM. Evaluate only code analysis first, disable optional semantic passes where possible, and measure actual model usage.
+4. **codebase-summary** and **codebase-analysis**: retain as lower-priority comparison candidates because their principal outputs are prose-oriented or their machine-readable evidence contract is less explicit.
+
+These ranks are experiment order only. Do not enable or integrate a candidate until mixed-language fixtures, source evidence, security and token measurements pass.
