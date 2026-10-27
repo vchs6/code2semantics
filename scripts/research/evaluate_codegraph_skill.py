@@ -137,7 +137,8 @@ def main() -> int:
         )
         decoy_edge_absent = (
             decoy_call["returncode"] == 0
-            and "No callers found" in decoy_call["stdout"]
+            and decoy_call_rows == []
+            and decoy_call["stdout"].strip() == "[]"
         )
         update = None
         if query["returncode"] == 0:
