@@ -159,3 +159,13 @@ A project-analysis Skill may return a language-neutral graph, but the constructo
 CodeGraph Explorer is currently a low-token structural evidence candidate. Its AST/regex graph may support project/file inventory and candidate import, call, inheritance, and wiring relations. It has not been shown to directly produce complete facts for data flow, lifecycle/state, error behavior, control-flow guards, algorithm invariants/termination/complexity, complete workspace identity, or bounded negative knowledge. These needs require other accepted producers, evidence-constrained induction, or explicit gaps.
 
 Language-independent refers to the normalized fact contract, not equal accuracy across language extractors. Preserve per-language limitations and do not promote heuristic or unresolved edges to confirmed semantic facts.
+## Demand-driven Skill graph construction and reuse
+
+The constructor must not require a complete project graph before every request. It first computes the current unmet need set and uses accepted direct tools when they already satisfy the request. A graph-producing Skill is eligible only when its validated incremental coverage/quality or amortized total cost justifies graph construction.
+
+- For narrow/one-shot requests, avoid full graph construction when direct tools are sufficient or cheaper at equivalent quality.
+- For broad/repeated requests, a full graph may be built once and reused across compatible requests if the authorized scope, source content state/fingerprint, Skill version and extraction profile still match.
+- Reuse must not rely on stale graph existence alone. On source change, invalidate or incrementally rebuild affected graph data only if the Skill provides a tested content-aware update contract; otherwise perform a bounded rebuild or report stale/unknown evidence.
+- If graph construction is too expensive, fails, or cannot cover the needed languages, continue with direct accepted producers and preserve explicit gaps. Do not block the entire query on an optional Skill graph.
+- The graph is an intermediate cache/evidence index, not the semantic fact repository. Only validated, requested, evidence-bound facts are persisted through the normal pipeline.
+- The selection estimate should consider one-time build cost, expected compatible reuse count, incremental update cost, query cost, source fallback cost and evidence quality. Token cost is part of the estimate, but does not override semantic quality or scope correctness.
