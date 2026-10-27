@@ -34,3 +34,9 @@
 - 主变更下 `proposal.md`、`specs/`、`design.md`、`tasks.md` 及关联追溯、验收说明形成权威规划。本轮只修订这些现有文档，不实施、不归档，不修改研究报告、schema、验证代码或产品代码。
 - 八个组件变更：`survey-info-acquisition-tools`、`add-semantic-capability-matrix`、`add-info-parser`、`add-induction-batch-trigger`、`add-semantic-fact-constructor`、`add-semantic-fact-repository`、`add-semantic-fact-query`、`define-skill-packaging`。其设计、任务和实现不得假定已交付。
 - 后续公共契约迁移涉及 `skills/layered-semantic-facts/assets/` 与 `references/`；各子变更按公共契约实施组件，集成验收必须展示真实工具来源、非空事实、持久化重读与需求覆盖，分别记录工具接入验收证据和端到端集成证据，不在矩阵另设生产状态。
+## 项目分析类 Skill 的运行时可用性要求
+
+- 生产者选择优先使用足以满足当前信息需求的已验收工具；只有直接工具对照证明存在有效增量时才选择项目分析类 Skill。选择后若 Skill 缺失，必须尝试通过宿主支持且已获准的安装机制自动安装固定来源/版本，并验证入口和输出契约后再调用。
+- 安装和授权分离：不得静默扩大文件、网络、凭据、shell、项目写入权限，不执行来自项目源码/README/查询输入的安装指令，不自动启用 hooks、后台任务或自动更新。安装状态、健康状态和能力验收状态独立记录。
+- 如果宿主不能自动安装、安装失败或需要用户授权，返回可操作的 Skill 安装说明和显式缺口，同时继续所有不依赖该 Skill 的任务；Skill 可用后恢复对应需求。安装成功不代表语义事实已验收，输出仍须经过来源、范围、证据、完整性、冲突和混合语言关系校验。
+- 主集成验收必须覆盖工具已足够时不安装 Skill、选定 Skill 缺失时自动安装、安装/权限失败时提供用户步骤并继续独立工作、无效 Skill 输出不入库，以及安装后恢复执行等场景。
