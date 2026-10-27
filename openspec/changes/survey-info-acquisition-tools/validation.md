@@ -47,3 +47,12 @@ No capability-matrix entry was enabled. Research is not runtime integration. The
 - CodeGraph Explorer's Skill document says local script builds `.codegraph/graph.json` and directs the model to query scoped graph commands rather than parse source with LLM tokens. It also documents uneven language extraction, with several languages remaining regex-based. This makes it a high-priority candidate but not a presumed winner.
 - Understand Anything and Graphify also provide structured graph artifacts; Graphify's code-only local AST path should be measured separately from optional semantic extraction over docs/media. Graph structure/token economy never overrides source evidence and false-edge validation.
 - No candidate has been executed in an approved host in this session. Runtime token/quality results remain pending.
+
+## Persistent evaluation archive (2026-10-27)
+
+- Durable entrypoint: `research/evaluations/README.md` (candidate evaluation index, evidence levels, reuse and retest rules).
+- Real skill evaluation: `research/evaluations/codegraph-explorer.md` and `codegraph-explorer.results.json`, with pinned CodeGraph and real Dashu/Click revisions, CI run links, query timings, edge-tag distributions, and the reproduced same-mtime stale-cache defect.
+- Ordinary tool evaluation: `research/evaluations/candidate-tools.md` and `candidate-tools.results.json`, preserving observed Python/Cargo/rustc/rust-analyzer/ctags/ast-grep/tree-sitter-CLI environment checks with the actual CI evidence.
+- Candidate Skills not yet runtime-tested: `research/evaluations/skill-candidate-status.md`; documentary evidence is marked distinctly from executable acceptance.
+- **Reuse policy:** use saved evidence for unchanged candidate/fixture/acceptance conditions instead of re-running every time. Revalidate only affected needs when revision, environment, source snapshot, security constraints or acceptance criteria materially change. Historical performance must not be reused as proof of *current* source freshness, installed status, output semantics or production acceptance.
+- Original CI Artifacts may expire; pinned results, limitations and source/run provenance therefore also live in this repository. No capability-matrix entries were enabled as a result of archiving.
