@@ -1,0 +1,58 @@
+name: Evaluate CodeGraph on real projects
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/evaluate-codegraph-real-projects.yml'
+      - 'scripts/research/evaluate_codegraph_real_projects.py'
+
+permissions:
+  contents: read
+
+jobs:
+  real-repositories:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch pinned candidate and real repositories
+        run: |
+          set -euo pipefail
+          git clone -q https://github.com/GoldDHacker/codegraph-explorer-skill.git "$RUNNER_TEMP/codegraph-candidate"
+          git -C "$RUNNER_TEMP/codegraph-candidate" checkout -q --detach 6a95e4f0ae643fad7354ac388ceaa2dc2c2f3f74
+          test "$(git -C "$RUNNER_TEMP/codegraph-candidate" rev-parse HEAD)" = '6a95e4f0ae643fad7354ac388ceaa2dc2c2f3f74'
+          git clone -q --filter=blob:none --no-checkout https://github.com/cmpute/dashu.git "$RUNNER_TEMP/dashu"
+          git -C "$RUNNER_TEMP/dashu" checkout -q --detach a0fc5358a3335e9fce155c5ddf8ae7ca83f24a33
+          git clone -q --filter=blob:none --no-checkout https://github.com/pallets/click.git "$RUNNER_TEMP/click"
+          git -C "$RUNNER_TEMP/click" checkout -q --detach 2247b35ea1c47c727d7a06e51fa280e12a863ff6
+      - name: Real Rust Dashu evaluation
+        run: |
+          set -euo pipefail
+          python scripts/research/evaluate_codegraph_real_projects.py \
+            --builder "$RUNNER_TEMP/codegraph-candidate/scripts/codegraph_builder.py" \
+            --root "$RUNNER_TEMP/dashu" --name 'cmpute/dashu' \
+            --revision a0fc5358a3335e9fce155c5ddf8ae7ca83f24a33 \
+            --output "$RUNNER_TEMP/codegraph-real-dashu.json"
+      - name: Real Python Click evaluation
+        if: always()
+        run: |
+          set -euo pipefail
+          python scripts/research/evaluate_codegraph_real_projects.py \
+            --builder "$RUNNER_TEMP/codegraph-candidate/scripts/codegraph_builder.py" \
+            --root "$RUNNER_TEMP/click" --name 'pallets/click' \
+            --revision 2247b35ea1c47c727d7a06e51fa280e12a863ff6 \
+            --output "$RUNNER_TEMP/codegraph-real-click.json"
+      - name: Save raw research results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codegraph-real-project-results
+          path: ${{ runner.temp }}/codegraph-real-*.json
+          if-no-files-found: warn
