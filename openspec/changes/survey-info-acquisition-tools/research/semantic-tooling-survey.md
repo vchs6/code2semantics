@@ -516,3 +516,18 @@ Successful CI: https://github.com/vchs6/code2semantics/actions/runs/40443798396.
 The local builder/query subprocesses made no model calls, but this is not a measurement of the eventual Skill-host orchestration token cost. Only the two isolated project builds and sampled query/incremental command execution succeeded; F1–F18 language-neutral semantic fact coverage, cross-language calls, conditional behavior, negative knowledge and FactBatch acceptance remain pending.
 
 The benchmark source and CI runner are in `scripts/research/evaluate_codegraph_real_projects.py` and `.github/workflows/evaluate-codegraph-real-projects.yml`; the CI artifact `codegraph-real-project-results` contains JSON result files. No capability-matrix entries were enabled.
+
+### 8.19 Verified source-cache staleness with real Rust and Python projects
+
+Follow-up success as a *diagnostic test harness*: https://github.com/vchs6/code2semantics/actions/runs/40444104829. After synchronizing CodeGraph's on-disk cache to the source snapshot, the harness added a new syntactically visible function to a disposable checked-out file and restored its original file mtime with `os.utime`. It then invoked the candidate's documented incremental update command and inspected the rebuilt graph for the new declaration.
+
+| Repository | Cache settling | Same-mtime content modification | Update result | Freshness conclusion |
+|---|---|---|---|---|
+| Dashu (`a0fc5358`) | Update exit 0 | Added function in `.github/workflows/drop_incompatible_deps_for_msrv.py`, preserved previous mtime | Exit 0, `0 file(s) (re)parsed`, new declaration absent | **Stale graph reproduced** |
+| Click (`2247b35`) | Update exit 0 | Added function in `docs/conf.py`, preserved previous mtime | Exit 0, `0 file(s) (re)parsed`, new declaration absent | **Stale graph reproduced** |
+
+This is a repeatable correctness problem for current-source semantics when the incremental graph cache relies on file mtime: successful `--update` status does not certify fresh structural evidence when file contents change with an unchanged timestamp. The harness restores source files in the disposable checkout and the only intended persistent checkout artifact is `.codegraph/`. No upstream repository content was modified or installed into the user's host.
+
+**Production decision:** CodeGraph incremental output must not be trusted as `current` based solely on its update exit code, mtime or graph existence. Until a source-content-digest-aware invalidation adapter and tests are implemented, either force a full graph rebuild for relevant authorized source roots or reject the cached graph as insufficient evidence. Do not enable the candidate Skill as a production semantic-fact producer. A graph can be useful as an untrusted structural index even when not suitable to establish valid facts.
+
+The first real-repository timing run and its follow-up confirmed fast graph builds but also very high INFERRED call-edge counts. The next engineering task must separate (a) candidate source content freshness, (b) source-level verification of each claimed relation, and (c) direct-tool comparison; speed and queryable JSON alone do not satisfy those gates.
