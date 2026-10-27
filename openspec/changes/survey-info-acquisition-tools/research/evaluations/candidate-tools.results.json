@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0",
+  "archive_date": "2026-10-27",
+  "observation_date": "2026-10-26",
+  "source_run": "https://github.com/vchs6/code2semantics/actions/runs/40319334019",
+  "script": "scripts/research/probe_candidate_tools.py",
+  "environment": {
+    "platform": "GitHub Actions Ubuntu 24.04",
+    "python": "3.12.15",
+    "scope": "Historical CI observation; not current host state"
+  },
+  "candidates": [
+    {
+      "id": "python",
+      "kind": "built-in tool",
+      "version": "3.12.15",
+      "version_probe": "success",
+      "validation": "version only"
+    },
+    {
+      "id": "python.compileall",
+      "kind": "tool",
+      "sample": "temporary Python class",
+      "sample_exit_code": 0,
+      "validation": "syntax/bytecode diagnostics only"
+    },
+    {
+      "id": "cargo.metadata",
+      "kind": "tool",
+      "version": "1.99.0",
+      "sample": "temporary minimal Rust Cargo project",
+      "sample_exit_code": 0,
+      "structured_json": true,
+      "fields_observed": [
+        "package",
+        "target",
+        "workspace_member",
+        "manifest_path"
+      ],
+      "validation": "declaration metadata only; not runtime semantics"
+    },
+    {
+      "id": "rustc",
+      "kind": "tool",
+      "version": "1.99.0",
+      "version_probe": "success",
+      "compile_sample_run": false
+    },
+    {
+      "id": "rust-analyzer",
+      "kind": "tool",
+      "version_probe": "failed",
+      "version_exit_code": 1,
+      "status": "unavailable_in_observed_runner"
+    },
+    {
+      "id": "universal-ctags",
+      "kind": "tool",
+      "status": "not_found_in_observed_runner",
+      "output_sample_verified": false
+    },
+    {
+      "id": "ast-grep",
+      "kind": "tool",
+      "status": "not_found_in_observed_runner",
+      "output_sample_verified": false
+    },
+    {
+      "id": "tree-sitter CLI",
+      "kind": "tool",
+      "status": "not_found_in_observed_runner",
+      "output_sample_verified": false
+    }
+  ],
+  "production_claims": {
+    "currently_installed_on_user_host": "not measured",
+    "acceptance_for_semantic_fact_construction": "not established",
+    "direct_tools_vs_skills_quality_and_total_cost_comparison": "not performed"
+  },
+  "reuse": {
+    "historical_observation_reusable": true,
+    "current_environment_must_be_probed_when_needed": true,
+    "retest_only_on_material_change": true
+  }
+}
