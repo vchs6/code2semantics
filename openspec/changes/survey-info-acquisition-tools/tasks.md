@@ -96,3 +96,9 @@ Report tokens per successful need group and per query, not only a single aggrega
 - [ ] 7.4 Classify each candidate as tool workflow wrapper, adaptive tool orchestrator, semantic analysis augmenter, or presentation-only summarizer. Reject/defer candidates with no measurable increment over direct tool use.
 - [ ] 7.5 For candidates with verified increment, compare token cost, wall-clock latency, mixed-language coverage, security, failure behavior and maintenance burden. Token minimization is optimized only after equivalent-quality/increment requirements pass.
 - [ ] 7.6 Update the candidate ranking and research conclusions. Do not integrate or enable a Skill merely because it returns JSON/graph output or claims zero-token extraction; preserve the direct-tool baseline and measured delta as acceptance evidence.
+## 8. Candidate Skill installation readiness
+
+- [ ] 8.1 For each candidate, record canonical repository/source, license, pinned revision strategy, official installation mechanism, dependencies/build steps, callable entrypoint and verification command.
+- [ ] 8.2 Record required permissions, filesystem mutations, network/data egress, project-code execution, hooks/background behavior, upgrade/uninstall effects and rollback method.
+- [ ] 8.3 Prefer candidates that support reproducible, isolated, verifiable installation; distinguish host installation capability from Skill analysis quality and token cost.
+- [ ] 8.4 Specify the fallback when automatic installation is unsupported: exact user-facing install steps and permission requirements, a structured unavailable gap, and continued execution of independent accepted-tool tasks. Do not mark Skill-dependent needs as satisfied.
