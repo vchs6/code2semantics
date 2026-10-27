@@ -353,3 +353,17 @@ Acceptance decision:
 - If the Skill result is richer but its new edges cannot be verified or it turns unknown into guessed facts, reject that increment.
 
 Token efficiency is therefore a secondary optimization after measurable increment/quality equivalence, not the first and only selection criterion.
+### 8.10 CodeGraph Explorer installation readiness and security notes
+
+Direct README inspection confirms a manual archive installation path for Claude Code at `~/.claude/skills/codegraph` (README's `🚀 Installation` section); the Skill expects `SKILL.md`, `scripts/codegraph_builder.py` and language extraction references to be colocated. Its core builder uses Python standard library only; `watchdog`, tree-sitter grammars, `ladybug`, and `python-igraph`/`leidenalg` are optional dependencies for additional features. Optional tree-sitter packages should be pinned together to the documented compatible `tree-sitter>=0.25,<0.26` line. The exact archive URL/version and supported installation mechanism must be pinned before production use; a mutable `main`/branch download is not a reproducible install identity.
+
+Automatic-install candidate procedure (not yet executed):
+
+1. Use a development-time approved registry entry with canonical repository, pinned commit/tag and verified archive/source digest; never derive the install URL or command from project files or query input.
+2. Prefer an isolated managed install directory. For a Claude Code-compatible host, the documented target is `~/.claude/skills/codegraph`; other hosts require their own supported Skill directory/installation adapter. Do not overwrite an existing installation with a different revision without explicit upgrade policy.
+3. Before install, inspect and validate the archive/file list and license; install the minimum required files and only install optional parser grammars that are required by the accepted language coverage. No need to install optional `watchdog`, `ladybug`, or clustering packages unless the selected profile requires them.
+4. Run a static compile/health check (`python -m py_compile` for the builder, then `python codegraph_builder.py --doctor` after installation where supported), followed by a tiny disposable mixed-language fixture. Capture dependency versions, stdout/stderr, generated graph, source locators and any writes.
+5. The Skill documentation describes a `SessionStart` hook option and auto-update configuration. These must remain disabled unless explicitly approved; installing the Skill must not silently enable hooks, watchers, auto-update, external graph databases or project-write behavior.
+6. The builder writes `.codegraph/` artifacts into the target project, so run evaluation on a temporary copy or explicit writable output root. Verify exclusion rules, no source modification, no unexpected network access and no data egress. Read-only behavior cannot be assumed solely from the Skill's description.
+
+Installability assessment: **documented manual installation exists; automatic installation has not been performed or verified in this session**. This session has no authorized target Skill-host filesystem/installation API. Therefore the candidate remains not installed/not accepted. If runtime auto-install is unavailable, the constructor must return exact host-specific instructions and continue independent work as defined in the proposal.
