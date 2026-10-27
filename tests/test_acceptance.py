@@ -815,10 +815,7 @@ def test_root_acceptance_enumerates_all_direct_children_but_projects_only_reques
 def test_multiple_rust_workspaces_keep_membership_and_dependencies_scoped(tmp_path, capsys):
     """Real CLI acceptance: two authorized Cargo workspaces must not cross-contaminate facts."""
     roots = [tmp_path / "workspace-one", tmp_path / "workspace-two"]
-    names = [
-        ("alpha-app", "alpha-core"),
-        ("beta-app", "beta-core"),
-    ]
+    names = [("alpha-app", "alpha-core"), ("beta-app", "beta-core")]
     for root, (app_name, core_name) in zip(roots, names):
         (root / "crates" / "app" / "src").mkdir(parents=True)
         (root / "crates" / "core" / "src").mkdir(parents=True)
@@ -880,7 +877,7 @@ def test_multiple_rust_workspaces_keep_membership_and_dependencies_scoped(tmp_pa
         assert any(f"workspace member: {app_name}" in value for value in values), values
         assert any(f"workspace member: {core_name}" in value for value in values), values
         assert any(f"{app_name} -> {core_name}" in value for value in values), values
-        other_names = set(sum(([a, c] for a, c in names if (a, c) != (app_name, core_name)), []))
+        other_names = {name for pair in names if pair != (app_name, core_name) for name in pair}
         assert all(not any(other in value for other in other_names) for value in values), values
 
     repository = Repository(database, ROOT / "skills" / "layered-semantic-facts" / "assets")
