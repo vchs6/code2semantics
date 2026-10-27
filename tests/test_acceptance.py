@@ -862,7 +862,7 @@ def test_multiple_rust_workspaces_keep_membership_and_dependencies_scoped(tmp_pa
 
     assert main(["query", "--db", str(database), "--query-file", str(query_path)]) == 0
     response = json.loads(capsys.readouterr().out)
-    assert response["termination"] == "satisfied", response
+    assert response["termination"] == "satisfied", json.dumps(response, ensure_ascii=False, indent=2)
     assert {source["root"] for source in response["sources"]} == {str(root.resolve()) for root in roots}
 
     values_by_root = {str(root.resolve()): [] for root in roots}
