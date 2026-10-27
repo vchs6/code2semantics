@@ -83,3 +83,23 @@ Initial priority order for experiments:
 4. **codebase-summary** and **codebase-analysis**: retain as lower-priority comparison candidates because their principal outputs are prose-oriented or their machine-readable evidence contract is less explicit.
 
 These ranks are experiment order only. Do not enable or integrate a candidate until mixed-language fixtures, source evidence, security and token measurements pass.
+
+## Tool overlap and incremental Skill value
+
+Tool/Skill overlap is assessed before token ranking. For each candidate, compare it against a direct baseline that invokes the same accepted tools without the Skill.
+
+Classify a Skill into one of these evidence-based categories:
+- **Tool workflow wrapper:** invokes existing tools in a fixed sequence and returns substantially the same information/evidence. Prefer direct tool reuse; do not add a second runtime producer solely for this wrapper. Record its workflow as possible orchestration guidance.
+- **Adaptive tool orchestrator:** selects and combines tools based on intermediate results, detects coverage gaps, or follows cross-file/cross-language relations that a static tool plan misses. Evaluate whether the adaptation improves completeness/precision over the fixed direct baseline.
+- **Semantic analysis augmenter:** produces additional project responsibility, interaction, behavior, or algorithm claims beyond tool-native output. Accept the increment only when claims are linked to source evidence and correctly marked as inference/unknown.
+- **Presentation-only summarizer:** reformats tool output into prose/HTML without new verified coverage. Do not count formatting as semantic coverage or prefer it as a producer.
+
+Every candidate experiment must record: underlying tool invocations and versions; raw native outputs; Skill-added nodes/edges/claims; source locators; coverage deltas; false-positive/missed-edge deltas; token and wall-clock costs; fallback source reads; and unresolved gaps. A tool result and the same result repeated in the Skill graph count once, not twice.
+
+Selection gate:
+1. Prove an incremental benefit over direct tool use (new validated need coverage, higher relation precision/completeness, better source evidence, or lower total cost at equivalent quality).
+2. Reject or defer candidates with no measurable increment.
+3. For candidates with increment, compare token cost, latency, security, language coverage and maintenance burden.
+4. Only then decide whether to integrate the Skill as a runtime producer. Research alone never enables the capability matrix.
+
+Low-token structured output remains a priority, but only after the increment gate. A Skill that uses the same tools and returns the same graph does not become a preferred producer merely because its graph is easier to read. Conversely, a Skill that adaptively combines tools or supplies validated semantic edges may justify integration even when some token overhead remains.
