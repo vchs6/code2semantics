@@ -942,3 +942,52 @@ def test_overlapping_nested_python_roots_keep_distinct_source_identities(tmp_pat
         assert all(fact["fields"]["names"]["basis"]["evidence"] for fact in persisted["facts"])
     finally:
         repository.close()
+
+
+def test_unavailable_semantic_need_does_not_fabricate_roles_without_provider(tmp_path, capsys, monkeypatch):
+    """Negative root acceptance: unsupported semantic roles remain an explicit gap."""
+    project = tmp_path / "semantic-roles-project"
+    project.mkdir()
+    (project / "service.py").write_text(
+        "class Service:\n    def run(self):\n        return True\n",
+        encoding="utf-8",
+    )
+    monkeypatch.delenv("SEMANTIC_FACTS_INDUCTION_PROVIDER_ID", raising=False)
+    monkeypatch.delenv("SEMANTIC_FACTS_INDUCTION_PROVIDER_ARGV_JSON", raising=False)
+    database = tmp_path / "semantic-roles.sqlite"
+    query = {
+        "contract_version": "1.0.0",
+        "catalog_id": "semantic-facts-20261025",
+        "request_id": "roles-require-provider",
+        "scope": {
+            "scope_id": "roles-require-provider-scope",
+            "directories": [str(project.resolve())],
+            "excludes": [],
+            "defaulted": False,
+        },
+        "target": {"kind": "scope"},
+        "granularity": "L3",
+        "selections": [{"fact_type": "F2", "fields": ["roles"]}],
+        "budget": {"max_rounds": 2, "max_new_assertions": 20},
+    }
+    query_path = tmp_path / "roles-query.json"
+    query_path.write_text(json.dumps(query, ensure_ascii=False), encoding="utf-8")
+
+    assert main(["query", "--db", str(database), "--query-file", str(query_path)]) == 0
+    response = json.loads(capsys.readouterr().out)
+    assert response["termination"] != "satisfied", json.dumps(response, ensure_ascii=False, indent=2)
+    assert response["results"] == []
+    assert response["gaps"]
+    assert any(
+        gap["fact_type"] == "F2"
+        and "roles" in gap["fields"]
+        and gap["reason"] in {"unavailable_tool", "constructor_unavailable", "uncovered_need"}
+        for gap in response["gaps"]
+    ), json.dumps(response, ensure_ascii=False, indent=2)
+    assert all("roles" not in fact["fields"] for fact in response["results"])
+
+    repository = Repository(database, ROOT / "skills" / "layered-semantic-facts" / "assets")
+    try:
+        assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == 0
+    finally:
+        repository.close()
