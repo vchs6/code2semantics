@@ -168,6 +168,34 @@ def main() -> int:
             "seconds": update["seconds"],
             "output": update["stdout"][-1300:],
         }
+    # Adversarial current-source validity check: change content without changing mtime.
+    # A cache keyed only on mtime may incorrectly keep the old graph.
+    if target_file:
+        original = target_file.read_bytes()
+        stat_before = target_file.stat()
+        marker = "__codegraph_same_mtime_source_change_probe"
+        declaration = (
+            b"\npub fn __codegraph_same_mtime_source_change_probe() {}\n"
+            if target_file.suffix == ".rs"
+            else b"\ndef __codegraph_same_mtime_source_change_probe():\n    return None\n"
+        )
+        try:
+            target_file.write_bytes(original + declaration)
+            os.utime(target_file, ns=(stat_before.st_atime_ns, stat_before.st_mtime_ns))
+            same_mtime = run([sys.executable, str(builder), "--update", str(root)], root, timeout=240)
+            updated_graph = json.loads(graph_path.read_text(encoding="utf-8"))
+            marker_found = any(n.get("name") == marker for n in updated_graph.get("nodes", []))
+        finally:
+            target_file.write_bytes(original)
+        result["unchanged_mtime_content_change"] = {
+            "file": str(target_file.relative_to(root)),
+            "returncode": same_mtime["returncode"],
+            "seconds": same_mtime["seconds"],
+            "new_declaration_detected": marker_found,
+            "cache_staleness_observed": not marker_found,
+            "output": same_mtime["stdout"][-1100:],
+            "note": "Adversarial test of graph validity, not a project semantic analysis claim.",
+        }
     # Worktree status may show only the managed .codegraph artifacts.
     after = run(["git", "status", "--porcelain"], root)
     result["source_checkout_status_after"] = after["stdout"][-900:]
