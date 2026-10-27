@@ -221,3 +221,53 @@ The first probe run exposed invalid newline escaping in the temporary fixtures; 
 ### 7.6 Matrix hand-off
 
 The capability matrix now contains the two previously accepted syntax profiles plus six disabled candidate profiles. No candidate was enabled by research. The matrix unit test was updated to assert the distinction between enabled/accepted profiles and disabled/research-only candidates. CI: https://github.com/vchs6/code2semantics/actions/runs/40319334019 — component tests and strict OpenSpec passed; overall CI remains blocked only by the expected product delivery gate.
+
+## 8. 独立项目分析类 Skill 调研（2026-10-27）
+
+### 8.1 调研边界
+
+本节只研究具有独立项目分析任务与可调用入口的 Skill。通用 AI 代理、模型、代理宿主/运行平台不属于候选对象；当工具与所选项目分析 Skill 都无法满足剩余需求时，AI 兜底使用该 Skill 的既定宿主，宿主只作为运行前提记录。
+
+Python/Rust 是当前解析器与生产链的第一阶段实现范围，不是 Skill 候选的语言准入限制，也不是最终产品语言边界。最终目标是分析语言无关的项目模型，尤其是混合语言项目中的边界、依赖、接口、交互和证据关系。分别通过单语言样例不等于混合语言验收通过。
+
+### 8.2 候选发现与文档证据
+
+本轮通过公开 Skill 仓库定位候选，并直接检查其 `SKILL.md`。以下结论仅为文档审查结果，不代表已在目标宿主安装、授权或执行；可执行性、真实输出和混合语言能力仍待实测。
+
+| 候选 Skill | 文档可确认的分析范围 | 与本项目需求的潜在对应 | 主要缺口/风险 | 初步结论 |
+|---|---|---|---|---|
+| [codebase-analysis](https://github.com/JakubMikolajek/codex-skills-collection/blob/main/skills/codebase-analysis/SKILL.md) | 按步骤检查仓库结构、依赖、脚本、架构、后端/前端、基础设施、第三方集成、测试、安全、重复代码与死代码 | F1/F2/F3/F4/F5/F6；可作为项目级初始盘点与模块/依赖分析候选 | 文档没有规定统一机器可读 FactBatch、逐字段源码定位、当前来源指纹或混合语言交互验收；文档未证明实际执行覆盖 | **优先试验候选**：项目级覆盖面较广，仍需核实证据精度与跨语言能力 |
+| [codebase-summary](https://github.com/smyrick/skills/blob/main/skills/codebase-summary/SKILL.md) | 基于仓库证据解释架构；检查边界、语言、manifest/build systems、入口、接口、主要执行路径、测试与部署；支持小/中/大分析深度 | F1/F2/F3/F4/F5/F6/F7/F8/F18；对架构摘要、入口与代表性请求路径较相关 | 默认产出面向人的说明；需验证每项断言能否保留机器可消费的源码证据，是否能处理多语言构建生态与跨语言调用；真实运行未验证 | **优先试验候选**：证据导向的分析流程与需求相关，尚未证明可直接转换成语义事实 |
+| [explaining-codebases](https://github.com/analyticalmonk/explain-this/blob/main/skills/explaining-codebases/SKILL.md) | 对真实仓库进行架构概览、数据流/执行路径说明和单机制深挖；要求按路径与行号校验声明 | F5/F7/F8/F11/F12/F15/F16/F18；对执行路径解释与引用校验可能有补充价值 | 明确依赖 `creating-explainers` 的产物流程，不能视为完全独立的单 Skill；主要目标是生成解释器产物，不是机器事实采集；未验证混合语言分析 | **条件候选**：只有在依赖 Skill 的可用性与其独立分析增量明确后再试验 |
+| [improve-codebase-architecture](https://github.com/jae-labs/skills/blob/main/skills/improve-codebase-architecture/SKILL.md) | 识别架构摩擦、模块耦合、测试性和 AI 可导航性问题，并给出架构改进候选 | F5/F18 的职责/架构关系可能有帮助 | 主要优化目标是重构建议，不是完整语义库存；依赖项目词汇/ADR和探索子代理流程；不应把重构建议当作已观察的软件事实 | **低优先级/特定需求候选**：仅在职责/架构解释需求明确且能提供源码证据时纳入 |
+
+### 8.3 需求覆盖初评（仅文档映射，未验证）
+
+| 信息需求类别 | 独立 Skill 可能补充的能力 | 必须实测的判定条件 |
+|---|---|---|
+| 项目边界、入口、构建生态（F1/F2/F3/F4） | 识别仓库/子项目、入口、manifest、构建与运行单元 | 混合语言仓库中是否识别多个构建系统、嵌套/重叠项目与独立 Library，且不按目录推断身份 |
+| 模块职责与架构映射（F5/F18） | 根据模块实现、公开接口和调用关系归纳职责 | 每个职责结论是否引用具体源码；是否区分观察事实与解释；共享实现是否保留多对多关系 |
+| 依赖、调用、接口与数据交互（F6/F7/F8/F10/F11/F12） | 汇总静态引用、接口与代表性执行路径 | 是否区分声明依赖、调用点、实际执行；能否追踪跨语言接口与调用，并保留未解析目标 |
+| 状态、错误与内部算法（F13/F14/F15/F16） | 对控制路径、异常、资源生命周期和算法步骤进行解释 | 是否有具体源码位置与反例；是否将推断的意图、终止性或复杂度错误标成已证实 |
+| 证据、知识状态和限定否定（F17） | 在解释中引用来源和标注不确定性 | 能否保留源文件/行区间/内容状态、支持与反证、检查覆盖；缺失证据不能被写成不存在 |
+
+本表是候选能力映射，不是覆盖通过声明。任何需求只有在实际运行输出通过逐项核验后，才可标记为已验证覆盖。Skill 的自然语言总结若缺少可追溯证据，不能直接作为受支持语义事实持久化。
+
+### 8.4 混合语言实测设计
+
+候选的核心试验使用同一临时授权根下的混合语言项目，而非分别运行两份独立单语言样例。建议夹具包含：
+
+1. 一个语言 A 的应用入口与声明依赖；
+2. 一个语言 B 的库/模块，通过 FFI、生成绑定、RPC/HTTP、共享 schema 或明确接口与语言 A 交互；
+3. 两种语言各自的构建/依赖清单，以及一处嵌套或独立子项目；
+4. 至少一条有源码依据的跨语言调用/数据契约，和一条只有声明依赖、并未证明实际调用的关系；
+5. 一个无法从现有材料确定的行为，检验 Skill 是否保留 unknown，而非补写假事实。
+
+验收记录需保存候选版本/提交、安装和调用前提、精确输入根与排除项、执行命令/宿主入口、原始输出、源码位置、失败情况和逐字段评审结果。至少验证：两种语言均被识别；项目身份与工作空间/目录包含分离；跨语言实体映射可追踪；声明依赖不冒充运行时调用；事实各自绑定到正确语言的源码证据；未知与范围外内容不被编造。若没有可安全运行的宿主或候选无法执行，记录为“未验证/阻塞”，不推断为通过。
+
+### 8.5 本轮结论与后续工作
+
+- 已完成候选发现与公开 `SKILL.md` 文档初审；候选均尚未在本项目的获准环境中实际执行。
+- 当前优先实测 `codebase-analysis` 与 `codebase-summary`；`explaining-codebases` 因依赖 `creating-explainers` 暂列条件候选；`improve-codebase-architecture` 仅适用于特定架构职责需求。
+- 当前没有证据证明上述任一候选能完整覆盖 S1–S12，或已验证混合语言项目分析。不能将文档描述计入生产覆盖率。
+- 下一步按任务 4.4/4.5 执行安全可复现的混合语言夹具试验，并更新本表。研究完成本身不安装/授权 Skill，不修改能力矩阵，也不表示运行时构造器已经能调用 Skill。
