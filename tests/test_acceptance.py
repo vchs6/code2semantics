@@ -991,3 +991,47 @@ def test_unavailable_semantic_need_does_not_fabricate_roles_without_provider(tmp
         assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] == 0
     finally:
         repository.close()
+
+
+def test_root_cli_preserves_partial_facts_and_budget_termination(tmp_path, capsys):
+    """Real CLI construction must retain valid progress while reporting exhausted budget."""
+    project = tmp_path / "budgeted-partial-project"
+    project.mkdir()
+    (project / "good.py").write_text("class Good:\n    def run(self):\n        return True\n", encoding="utf-8")
+    (project / "broken.py").write_text("def broken(:\n    pass\n", encoding="utf-8")
+    database = tmp_path / "budgeted-partial.sqlite"
+    query = {
+        "contract_version": "1.0.0",
+        "catalog_id": "semantic-facts-20261025",
+        "request_id": "root-budget-partial-progress",
+        "scope": {
+            "scope_id": "root-budget-scope",
+            "directories": [str(project.resolve())],
+            "excludes": [],
+            "defaulted": False,
+        },
+        "target": {"kind": "scope"},
+        "granularity": "L3",
+        "selections": [{"fact_type": "F2", "fields": ["identity", "names"]}],
+        "budget": {"max_rounds": 1, "max_new_assertions": 20},
+    }
+    query_path = tmp_path / "budgeted-query.json"
+    query_path.write_text(json.dumps(query, ensure_ascii=False), encoding="utf-8")
+
+    assert main(["query", "--db", str(database), "--query-file", str(query_path)]) == 0
+    response = json.loads(capsys.readouterr().out)
+    assert response["termination"] == "budget_exhausted", json.dumps(response, ensure_ascii=False, indent=2)
+    assert any("class Good" in fact["fields"]["names"]["value"]["text"] for fact in response["results"])
+    assert response["gaps"]
+    assert any(gap["reason"] in {"parse_error", "construction_failed", "insufficient_evidence", "coverage_incomplete"} for gap in response["gaps"])
+    assert all(set(fact["fields"]) <= {"identity", "names"} for fact in response["results"])
+    assert all(fact["fields"]["names"]["basis"]["evidence"] for fact in response["results"])
+
+    repository = Repository(database, ROOT / "skills" / "layered-semantic-facts" / "assets")
+    try:
+        assert repository.connection.execute("SELECT COUNT(*) FROM facts").fetchone()[0] > 0
+        persisted = repository.read(query)
+        assert persisted["facts"]
+        assert any("class Good" in fact["fields"]["names"]["value"]["text"] for fact in persisted["facts"])
+    finally:
+        repository.close()
