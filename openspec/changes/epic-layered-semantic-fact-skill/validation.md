@@ -52,3 +52,21 @@ python openspec/changes/epic-layered-semantic-fact-skill/validation/validate_con
 | 同源运行时接口一致性（主8.4）、真实 S1–S12/补充场景集成（主8.1–8.3） | pending；不能用本次样例和校验器代替 |
 
 主设计资产验证只验证提供的数据形状、离线引用和代表性跨字段一致性。实际授权边界、当前源码内容真实性、工具执行纯度/受控权限、覆盖充分性、前提失效传播及预算/无进展循环，必须由各子组件及主集成用真实入口验证。机器数据中的声明和证据定位本身不构成软件语义正确性的证明。
+
+## 主集成增量验收（2026-10-27）
+
+本节只记录真实运行时的增量证据，不把组件通过或单个根场景通过视为 S1–S12 完成。
+
+- 多工作空间隔离与成员/依赖区分：真实 CLI + 两个独立 Cargo 工作空间，验收各工作空间成员、app→core 依赖、source root 归属、请求字段投影、证据和仓库重读。CI: https://github.com/vchs6/code2semantics/actions/runs/40426615823，root/runtime acceptance 24 passed。
+- 嵌套/重叠授权根：真实 CLI 同时接收外层与显式嵌套 Python 根，验收同名实体的 source/node 身份独立、证据及重读。CI: https://github.com/vchs6/code2semantics/actions/runs/40426833999，root/runtime acceptance 25 passed。
+- 未配置归纳提供器时的语义字段 fail-closed：真实 CLI 请求 F2.roles，确认不生成或持久化推断事实并保留 gap。CI: https://github.com/vchs6/code2semantics/actions/runs/40427111850，root/runtime acceptance 26 passed。
+- 有效进展与预算终止：真实 CLI 在一轮预算内处理一个有效 Python 文件和一个语法错误文件，确认有效事实仍返回并持久化、错误/未满足项保留 gap、终止原因是 `budget_exhausted`。CI: https://github.com/vchs6/code2semantics/actions/runs/40429146212，root/runtime acceptance 27 passed。
+- 上述各次 CI 的 repository 63、transaction 6、transfer 8、repository acceptance 5、capability matrix 15、parser 14、scanner 9、packaging 2、tool executor 3、producer dispatch 3、constructor/induction/provider/query 86、quality gate unit 2 通过，严格 OpenSpec 通过。Product delivery gate 仍按设计因完整 S1–S12 标记缺失而 BLOCKED。
+
+### 尚未满足的主集成义务
+
+- 8.1 仍 pending：有效循环与互斥候选环的真实语义、内部算法和语言行为保真、限定否定、origin/knowledge 正交等完整 S1–S12 场景未被统一根验收入口证明。
+- 8.2 仍 pending：本轮补充了来源隔离、直接子节点完整性和预算终止场景，但还未证明全部依赖失效、必要上级进展、多父/循环边界、工具组合和无进展语义的跨组件覆盖。
+- 8.3 仍 pending：尚无已配置的真实认知推理提供器；协议测试和 fail-closed 测试不能代替真实 provider→非空 evidence-bound FactBatch→SQLite reopen→minimal query 的验收。
+- 8.4 仍 pending：当前契约脚本仍是设计资产校验，尚未完成与所有最新运行时接口及其正反样例的系统化一致性验收。
+- 8.5 仍 pending：逐条 traceability 接收及全 S1–S12 通过证据未齐全。不得添加 `FULL_END_TO_END_ACCEPTANCE: PASS`，不得解除产品交付门禁。
