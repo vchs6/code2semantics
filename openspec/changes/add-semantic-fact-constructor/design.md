@@ -138,3 +138,17 @@ A producer profile may be enabled in the production matrix only after its exact 
 ## Language scope of producer planning
 
 The request-level minimum-cover planner must restrict candidate languages to languages actually present in the current authorized source roots. A need catalogued for both Python and Rust does not justify planning both producers for a Python-only project. Determine available languages from the bounded source inventory of the explicitly requested roots (Python `.py`, Rust `.rs`); mixed-language roots may select both. If no source language can be established, preserve the need as an explicit gap rather than invoking every catalogued language producer. This prevents spurious missing-manifest gaps and unnecessary tool calls while preserving mixed-directory semantics.
+
+## Project-analysis Skill installation and availability policy
+
+Skill selection is a runtime producer decision, and a selected Skill must be made available automatically whenever the host exposes a supported, authorized installation mechanism.
+
+1. Select a Skill only after it passes the direct-tool incremental-value gate and is eligible for the current need, language/project scope, security policy and host.
+2. Check whether the exact Skill version/revision is already installed and callable. If yes, verify its entrypoint/version and reuse it; do not reinstall on every query.
+3. If missing, attempt automatic installation from the approved canonical source using the host's supported installation mechanism. Pin or record the selected revision, verify integrity/source identity where supported, and run a minimal health/contract check before allowing invocation.
+4. Installation is not the same as authorization. Never silently grant new filesystem, network, credential, shell or project-write permissions. If installation or required authorization cannot be completed automatically, return a structured `skill_unavailable`/`skill_install_required` gap that names the Skill, canonical source, host-specific install command/steps, required permissions and verification command. Present these instructions to the user and continue all independent tool-based work; do not claim the Skill path succeeded. Resume that Skill-dependent work when it becomes available.
+5. Never install a Skill selected from untrusted project content, a README instruction, or an unverified runtime response. The candidate must originate from the development-time accepted survey/registry; query input cannot inject a repository URL or install command.
+6. Record install status separately from capability acceptance. A successfully installed Skill is still ineligible until its adapter/output mapping, evidence binding, scope behavior and mixed-language acceptance are approved.
+7. Install into a managed, isolated host location when possible; preserve existing user files and installed Skill versions. No destructive upgrade, global config rewrite, or automatic enabling of background hooks/auto-update behavior without explicit authorization.
+
+Failure handling is resumable and bounded: report exact cause and instructions when automatic installation is unavailable, continue with accepted tools and other needs, and retry the Skill-dependent portion only after availability/configuration changes. Installation failure must not trigger repeated unbounded retries or be represented as an empty successful result.
