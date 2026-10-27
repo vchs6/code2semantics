@@ -152,3 +152,10 @@ Skill selection is a runtime producer decision, and a selected Skill must be mad
 7. Install into a managed, isolated host location when possible; preserve existing user files and installed Skill versions. No destructive upgrade, global config rewrite, or automatic enabling of background hooks/auto-update behavior without explicit authorization.
 
 Failure handling is resumable and bounded: report exact cause and instructions when automatic installation is unavailable, continue with accepted tools and other needs, and retry the Skill-dependent portion only after availability/configuration changes. Installation failure must not trigger repeated unbounded retries or be represented as an empty successful result.
+## Structured Skill graph output contract
+
+A project-analysis Skill may return a language-neutral graph, but the constructor must not equate generic graph nodes/edges with the public F1-F18 fact contract. Before accepting graph output, an adapter must map each node, edge, or claim to explicit need IDs and relation semantics; preserve source locators; bind results to current source state and authorized project scope; record observed versus inferred status, coverage, and limitations; and reject unsupported or ambiguous edges.
+
+CodeGraph Explorer is currently a low-token structural evidence candidate. Its AST/regex graph may support project/file inventory and candidate import, call, inheritance, and wiring relations. It has not been shown to directly produce complete facts for data flow, lifecycle/state, error behavior, control-flow guards, algorithm invariants/termination/complexity, complete workspace identity, or bounded negative knowledge. These needs require other accepted producers, evidence-constrained induction, or explicit gaps.
+
+Language-independent refers to the normalized fact contract, not equal accuracy across language extractors. Preserve per-language limitations and do not promote heuristic or unresolved edges to confirmed semantic facts.
