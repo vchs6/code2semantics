@@ -33,15 +33,25 @@ jobs:
           git -C "$RUNNER_TEMP/codegraph-candidate" fetch --depth 1 origin "$CANDIDATE_REVISION"
           git -C "$RUNNER_TEMP/codegraph-candidate" checkout --detach FETCH_HEAD
           test "$(git -C "$RUNNER_TEMP/codegraph-candidate" rev-parse HEAD)" = "$CANDIDATE_REVISION"
-      - name: Run isolated mixed-language graph build benchmark
+      - name: Run 100-file-scale benchmark and repeated queries
         run: |
           set -euo pipefail
           python scripts/research/evaluate_codegraph_skill.py \
             --builder "$RUNNER_TEMP/codegraph-candidate/scripts/codegraph_builder.py" \
-            | tee "$RUNNER_TEMP/codegraph-evaluation.json"
-      - name: Upload benchmark result
+            --modules-per-language 50 --query-repeats 10 \
+            > "$RUNNER_TEMP/codegraph-evaluation-100.json"
+          cat "$RUNNER_TEMP/codegraph-evaluation-100.json"
+      - name: Run 1000-file-scale benchmark and repeated queries
+        run: |
+          set -euo pipefail
+          python scripts/research/evaluate_codegraph_skill.py \
+            --builder "$RUNNER_TEMP/codegraph-candidate/scripts/codegraph_builder.py" \
+            --modules-per-language 500 --query-repeats 50 \
+            > "$RUNNER_TEMP/codegraph-evaluation-1000.json"
+          cat "$RUNNER_TEMP/codegraph-evaluation-1000.json"
+      - name: Upload benchmark results
         uses: actions/upload-artifact@v4
         with:
           name: codegraph-mixed-language-evaluation
-          path: ${{ runner.temp }}/codegraph-evaluation.json
+          path: ${{ runner.temp }}/codegraph-evaluation-*.json
           if-no-files-found: error
