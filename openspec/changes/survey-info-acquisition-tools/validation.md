@@ -39,3 +39,11 @@ No capability-matrix entry was enabled. Research is not runtime integration. The
 - The product-delivery job remains intentionally blocked: the full S1–S12 acceptance success marker is absent. This is not a Skill survey failure and must not be bypassed by adding a marker.
 - Component regressions in this run passed: repository 63, transaction 6, transfer 8, repository acceptance 5, capability matrix 15, parser 14, scanner 9, runtime acceptance 27, packaging 2, tool executor 3, producer dispatch 3, constructor/induction/provider/query 86, quality-gate unit tests 2.
 - This CI validates repository contracts and regression suites; it does not install or execute an independent project-analysis Skill. Candidate runtime/mixed-language tests remain pending.
+## Token-efficiency priority update (2026-10-27)
+
+- User direction: prefer tool-driven independent project-analysis Skills with structured/queryable output to minimize token use.
+- Experiment order is now CodeGraph Explorer → Understand Anything → Graphify → prose-oriented comparison candidates. This is an evaluation order, not an approved production selection.
+- Measurement protocol records one-time build cost, per-query cost, amortized build + 1/10/50 queries, source fallback overhead and output quality. Public zero-token claims remain unverified until measured in an approved host.
+- CodeGraph Explorer's Skill document says local script builds `.codegraph/graph.json` and directs the model to query scoped graph commands rather than parse source with LLM tokens. It also documents uneven language extraction, with several languages remaining regex-based. This makes it a high-priority candidate but not a presumed winner.
+- Understand Anything and Graphify also provide structured graph artifacts; Graphify's code-only local AST path should be measured separately from optional semantic extraction over docs/media. Graph structure/token economy never overrides source evidence and false-edge validation.
+- No candidate has been executed in an approved host in this session. Runtime token/quality results remain pending.
